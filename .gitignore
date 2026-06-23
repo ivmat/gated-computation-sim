@@ -4,5 +4,18 @@ __pycache__/
 .venv/
 venv/
 
-# Generated figures (regenerate with `python simulate.py`)
+# Generated figures (regenerate with `python simulate.py`).
+# The two canonical paper figures are tracked so the README renders on GitHub;
+# any other stray PNG stays ignored.
 *.png
+!gated_computation_validation_FULL.png
+!gate_cost_overhead.png
+
+# LaTeX build artifacts (paper.tex -> paper.pdf is committed; intermediates are not)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk

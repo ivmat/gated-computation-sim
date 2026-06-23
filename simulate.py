@@ -39,7 +39,11 @@ G_PER_GATE = 0.05
 
 
 # ----------------------------------------------------------------------
-# ORIGINAL slow model (verbatim) -- kept only for the validation check
+# ORIGINAL slow model (verbatim) -- kept ONLY to validate the slip/success
+# statistics (eseg and end-to-end success) against the fast closed form.
+# It still carries the old timing undercount (time_spent is reassigned each
+# round, so it omits the 1/Padv recomputation factor); it is therefore NOT a
+# valid source of overhead/timing numbers -- those come from overhead_for_m().
 # ----------------------------------------------------------------------
 def run_segment_recomputation(s, lam, m, alpha, beta, lst):
     g = G_PER_GATE
@@ -206,7 +210,7 @@ def experiment2():
 # g does NOT change the required gate counts m (those are set by alpha/beta/lst),
 # so we reuse experiment1's m and rescale: overhead(T,g) = 1 + (g/s)*m at fixed
 # s=0.25 (the Fig 1a protocol). We also report the cost-optimal overhead
-# 1 + 2*sqrt(m*g*lam) reachable if the checkpoint interval is retuned (Thm 4).
+# 1 + 2*sqrt(m*g*lam) reachable if the checkpoint interval is retuned (Thm 3).
 def gate_cost_sweep(solved_T, req_m, s=0.25, lam=1.0, alpha=0.3, beta=0.1,
                     g_values=(0.01, 0.05, 0.2, 0.5)):
     labels = {0.01: "fast", 0.05: "baseline", 0.2: "slow", 0.5: "very slow"}
@@ -256,7 +260,7 @@ def experiment_slip(m=5, trials=20000, seed=2024):
 
 
 # ----------------------------------------------------------------------
-# OPTIMAL CHECKPOINT INTERVAL (Theorem 4)
+# OPTIMAL CHECKPOINT INTERVAL (Theorem 3)
 # C(s) = (1+G/s) e^{lam s} / (1-bm); compare numerical argmin to s*=sqrt(G/lam).
 # ----------------------------------------------------------------------
 def experiment_interval(m=5):
@@ -270,7 +274,7 @@ def experiment_interval(m=5):
     foc = (-G + np.sqrt(G * G + 4.0 * G / lam)) / 2.0   # exact root of s(s+G)=G/lam
     ov_num = float(np.min(cost))
     ov_pred = 1.0 + 2.0 * np.sqrt(G * lam)
-    print(f"Optimal interval (Thm 4, m={m}, G={G:.3f}): s*=sqrt(G/lam)={s_pred:.3f}, "
+    print(f"Optimal interval (Thm 3, m={m}, G={G:.3f}): s*=sqrt(G/lam)={s_pred:.3f}, "
           f"exact-FOC root={foc:.3f}, numerical argmin={s_num:.3f}; "
           f"min overhead={ov_num:.3f} (approx 1+2sqrt(G lam)={ov_pred:.3f})")
     return s_pred, s_num
