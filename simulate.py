@@ -229,12 +229,88 @@ def gate_cost_sweep(solved_T, req_m, s=0.25, lam=1.0,
     return fixed, optimal
 
 
+# ----------------------------------------------------------------------
+# PER-SEGMENT SLIP (Lemma 1): closed-form eseg vs discrete-event Monte Carlo
+# ----------------------------------------------------------------------
+def experiment_slip(m=5, trials=20000, seed=2024):
+    s, lam, alpha, beta = 0.25, 1.0, 0.3, 0.1
+    predicted = segment_slip_prob(s, lam, m, alpha, beta, 0.0)
+    np.random.seed(seed)
+    slips = [run_segment_recomputation(s, lam, m, alpha, beta, 0.0)[1] for _ in range(trials)]
+    mc = float(np.mean(slips))
+    print(f"Per-segment slip (Lemma 1, m={m}): predicted eseg={predicted:.4f}  "
+          f"Monte-Carlo={mc:.4f}  ({trials} trials)")
+    return predicted, mc
+
+
+# ----------------------------------------------------------------------
+# OPTIMAL CHECKPOINT INTERVAL (Theorem 4)
+# C(s) = (1+G/s) e^{lam s} / (1-bm); compare numerical argmin to s*=sqrt(G/lam).
+# ----------------------------------------------------------------------
+def experiment_interval(m=5):
+    s_dummy, lam, alpha, beta = 0.25, 1.0, 0.3, 0.1
+    G = m * G_PER_GATE
+    bm = majority_tail(m, beta)
+    grid = np.linspace(0.02, 2.0, 4000)
+    cost = (1.0 + G / grid) * np.exp(lam * grid) / (1.0 - bm)
+    s_num = float(grid[np.argmin(cost)])
+    s_pred = float(np.sqrt(G / lam))
+    foc = (-G + np.sqrt(G * G + 4.0 * G / lam)) / 2.0   # exact root of s(s+G)=G/lam
+    ov_num = float(np.min(cost))
+    ov_pred = 1.0 + 2.0 * np.sqrt(G * lam)
+    print(f"Optimal interval (Thm 4, m={m}, G={G:.3f}): s*=sqrt(G/lam)={s_pred:.3f}, "
+          f"exact-FOC root={foc:.3f}, numerical argmin={s_num:.3f}; "
+          f"min overhead={ov_num:.3f} (approx 1+2sqrt(G lam)={ov_pred:.3f})")
+    return s_pred, s_num
+
+
+# ----------------------------------------------------------------------
+# THREE-ARM DIVERSITY COMPARISON (Cor. 1 / Prop. 1)
+# raw vs same-family depth vs independent diverse families, equal gate budget.
+# ----------------------------------------------------------------------
+def stack_slip_prob(s, lam, families, alpha, beta):
+    """eseg for a stack of INDEPENDENT gate families.
+    families: list of (stealth_mass, depth) -- a segment must pass every family."""
+    p = 1.0 - np.exp(-lam * s)
+    pass_bad, pass_good = 1.0, 1.0
+    for (lst_i, m_i) in families:
+        pass_bad *= lst_i + (1.0 - lst_i) * majority_tail(m_i, alpha)
+        pass_good *= 1.0 - majority_tail(m_i, beta)
+    padv = (1.0 - p) * pass_good + p * pass_bad
+    return p * pass_bad / padv
+
+
+def experiment_threearm(budget=21, n_families=3, lst_fam=0.15):
+    s, lam, alpha, beta = 0.25, 1.0, 0.3, 0.1
+    H_raw = np.log(2) / lam
+
+    def mult(families):
+        eseg = stack_slip_prob(s, lam, families, alpha, beta)
+        return s * np.log(0.5) / np.log(1.0 - eseg) / H_raw
+
+    same = mult([(lst_fam, budget)])                              # one family, full depth
+    depth = budget // n_families
+    diverse = mult([(lst_fam, depth)] * n_families)               # k independent families
+    # stealth mass recovered from the same-family arm's effective floor
+    eseg_same = stack_slip_prob(s, lam, [(lst_fam, budget)], alpha, beta)
+    am_bar_recovered = lst_fam + (1.0 - lst_fam) * majority_tail(budget, alpha)
+    print(f"Three-arm (budget={budget} gates, lst_fam={lst_fam}): "
+          f"raw=1.0x  same-family({budget})={same:.1f}x  "
+          f"diverse({n_families}x{depth})={diverse:.1f}x  separation={diverse/same:.0f}x")
+    print(f"  recovered same-family floor am_bar={am_bar_recovered:.3f} "
+          f"(predicts ceiling ~{1.0/am_bar_recovered:.1f}x; realized {same:.1f}x)")
+    return same, diverse
+
+
 def main():
     if not validate_against_original():
         raise SystemExit("Fast model failed validation -- not plotting.")
 
+    experiment_slip()
     solved_T, req_m, overheads = experiment1()
     stealth_masses, bounds, realized = experiment2()
+    experiment_interval()
+    experiment_threearm()
     gate_cost_sweep(solved_T, req_m)
 
     plt.figure(figsize=(10, 4))
