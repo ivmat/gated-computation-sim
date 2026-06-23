@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use this software or the accompanying paper, please cite the paper below."
+title: "A Fault-Tolerance Threshold for Gated Agentic Computation: Reliable Long-Horizon Work from Unreliable Executors"
+authors:
+  - family-names: "Matijašević"
+    given-names: "Ivo"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # add your ORCID here if you have one
+type: software
+repository-code: "https://github.com/ivmat/gated-computation-sim"
+url: "https://github.com/ivmat/gated-computation-sim"
+license: MIT
+version: "1.0.0"
+date-released: "2026-06-24"
+keywords:
+  - "fault tolerance"
+  - "AI agents"
+  - "verification"
+  - "threshold theorem"
+  - "N-version programming"
+  - "long-horizon autonomy"
+  - "checkpointing"
+  - "software reliability"
+preferred-citation:
+  type: article
+  title: "A Fault-Tolerance Threshold for Gated Agentic Computation: Reliable Long-Horizon Work from Unreliable Executors"
+  authors:
+    - family-names: "Matijašević"
+      given-names: "Ivo"
+  year: 2026
+  doi: "10.5281/zenodo.20820968"
+  url: "https://doi.org/10.5281/zenodo.20820968"
+  notes: "Preprint; archived on Zenodo. CC-BY-4.0."

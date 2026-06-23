@@ -1,0 +1,31 @@
+{
+  "title": "A Fault-Tolerance Threshold for Gated Agentic Computation: Reliable Long-Horizon Work from Unreliable Executors",
+  "description": "A theoretical model and self-contained simulation showing that, above a threshold, the reliable horizon of an agentic system is governed not by the agent's raw error rate but by the shared blind-spot ('stealth') mass of its verification stack. The paper proves: a fault-tolerance threshold giving logarithmic verification overhead below the threshold; a horizon ceiling of 1/stealth-mass imposed by correlated gate blind spots; a decomposition of the stealth mass into a diversity-reducible part and a specification-bound irreducible floor; and a Young-Daly-style cost-optimal checkpoint interval. Includes a validated, seed-independent Python script (simulate.py) reproducing every numerical result and both figures.",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "creators": [
+    {
+      "name": "Matijašević, Ivo",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "fault tolerance",
+    "AI agents",
+    "verification",
+    "threshold theorem",
+    "N-version programming",
+    "long-horizon autonomy",
+    "checkpointing",
+    "software reliability"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/ivmat/gated-computation-sim",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
