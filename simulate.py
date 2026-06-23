@@ -141,16 +141,21 @@ def validate_against_original():
 # ----------------------------------------------------------------------
 # EXPERIMENT 1: threshold & logarithmic overhead (to T = 1e5)
 # ----------------------------------------------------------------------
-def experiment1(rng):
+def experiment1():
     print("Running Experiment 1 (Logarithmic Overhead vs Log T)  [to T=1e5]...")
     s, lam, alpha, beta = 0.25, 1.0, 0.3, 0.1
     horizons = [10, 100, 1000, 10000, 100000]
-    trials = 500
     m_ceiling = 301                       # raised from 51 -> reaches 1e5
+    # Smallest odd m whose EXACT end-to-end success (1-eseg)^n >= 0.90. The
+    # discrete-event Monte Carlo behind eseg is checked in
+    # validate_against_original(); evaluating the validated model directly makes
+    # the reported gate counts seed-independent (a 500-trial search was noisy at
+    # small T, returning m off by one step).
     req_m, overheads, solved_T = [], [], []
     for T in horizons:
+        n = int(np.ceil(T / s))
         for m in range(1, m_ceiling, 2):
-            if success_rate_fast(T, s, lam, m, alpha, beta, 0.0, trials, rng) >= 0.90:
+            if (1.0 - segment_slip_prob(s, lam, m, alpha, beta, 0.0)) ** n >= 0.90:
                 req_m.append(m)
                 overheads.append(overhead_for_m(T, s, m))
                 solved_T.append(T)
@@ -166,21 +171,19 @@ def experiment1(rng):
 # ----------------------------------------------------------------------
 # EXPERIMENT 2: horizon ceiling vs stealth mass
 # ----------------------------------------------------------------------
-def experiment2(rng):
+def experiment2():
     print("Running Experiment 2 (Horizon Ceiling vs Stealth Mass)...")
     s, lam, alpha, beta, m = 0.25, 1.0, 0.3, 0.1, 21
     stealth_masses = [0.20, 0.05, 0.0125]
     bounds = [1.0 / x for x in stealth_masses]
     H_raw = np.log(2) / lam
+    # Exact 50% horizon of the validated model: success(T)=(1-eseg)^(T/s)=0.5,
+    # so T50 = s*ln(0.5)/ln(1-eseg). Avoids the grid quantization of a search.
     realized = []
     for lst in stealth_masses:
-        grid = np.linspace(H_raw, H_raw * (1.0 / lst + 5), 40)
-        h50 = grid[-1]
-        for T_test in grid:
-            if success_rate_fast(T_test, s, lam, m, alpha, beta, lst, 600, rng) <= 0.50:
-                h50 = T_test
-                break
-        realized.append(h50 / H_raw)
+        eseg = segment_slip_prob(s, lam, m, alpha, beta, lst)
+        T50 = s * np.log(0.5) / np.log(1.0 - eseg)
+        realized.append(T50 / H_raw)
     print("  stealth mass   :", stealth_masses)
     print("  bound 1/lst    :", [round(b, 1) for b in bounds])
     print("  realized mult. :", [round(r, 1) for r in realized])
@@ -230,9 +233,8 @@ def main():
     if not validate_against_original():
         raise SystemExit("Fast model failed validation -- not plotting.")
 
-    rng = np.random.default_rng(42)
-    solved_T, req_m, overheads = experiment1(rng)
-    stealth_masses, bounds, realized = experiment2(rng)
+    solved_T, req_m, overheads = experiment1()
+    stealth_masses, bounds, realized = experiment2()
     gate_cost_sweep(solved_T, req_m)
 
     plt.figure(figsize=(10, 4))
