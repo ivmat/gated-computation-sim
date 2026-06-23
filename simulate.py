@@ -9,9 +9,11 @@ evaluations (~16 h) AND it crashes, because for T>=100 no m<=49 ever reaches
 90% success so the `overheads` list ends up shorter than `horizons`.
 
 This file keeps the EXACT model but exploits two facts:
-  (1) The recomputation loop does not accumulate time in the original
-      (`time_spent = s + G` is reassigned each round), so Experiment-1 overhead
-      is deterministic: overhead = n_segments*(s+G)/T = 1 + G/s.
+  (1) Experiment-1 overhead is deterministic given m. The original loop reassigned
+      `time_spent = s + G` each round, undercounting recomputation; we use the
+      correct expected time per accepted segment, (s+G)/Padv, so
+      overhead = (1 + (g/s)m)/Padv -- the 1/Padv counts recomputation of rejected
+      segments (Lemma 1).
   (2) Per segment, P(slip) = eseg = p*am_bar/Padv (Lemma 1), and segments are
       independent, so end-to-end success is exactly (1-eseg)^n. am_bar, bm are
       EXACT binomial majority-tails, so no approximation enters.
@@ -29,7 +31,7 @@ from math import comb
 # Per-gate evaluation time g.
 # NOTE: g is an ARBITRARY illustrative constant -- we have no empirical value
 # for it. It enters the results ONLY through the ratio g/s, which sets the
-# VERTICAL SCALE of Fig 1a via  overhead = 1 + (g/s)*m. It changes neither the
+# VERTICAL SCALE of Fig 1a via  overhead = (1 + (g/s)*m)/Padv. It changes neither the
 # required gate counts m (Fig 1a x-shape), nor the horizon ceiling (Fig 1b),
 # nor any theorem; the log-linear growth and its ~ln10/(2*(1/2-alpha)^2) slope
 # (Remark 1) are invariant to g. We fix g = 0.05, giving g/s = 0.2 at s = 0.25.
@@ -82,14 +84,19 @@ def majority_tail(m, q):
     return float(sum(comb(m, k) * q**k * (1.0 - q) ** (m - k) for k in range(kmin, m + 1)))
 
 
+def advance_prob(s, lam, m, alpha, beta, lst):
+    """Padv: probability the recomputation loop advances in a given round (Lemma 1)."""
+    p = 1.0 - np.exp(-lam * s)
+    am_bar = lst + (1.0 - lst) * majority_tail(m, alpha)   # P(pass | bad), stealth mixture
+    bm = majority_tail(m, beta)                            # P(fail | good)
+    return (1.0 - p) * (1.0 - bm) + p * am_bar
+
+
 def segment_slip_prob(s, lam, m, alpha, beta, lst):
     """eseg = p*am_bar/Padv  (Lemma 1), with am_bar, bm exact binomial tails."""
     p = 1.0 - np.exp(-lam * s)
-    am_indep = majority_tail(m, alpha)
-    am_bar = lst + (1.0 - lst) * am_indep        # P(pass | bad) under stealth mixture
-    bm = majority_tail(m, beta)                  # P(fail | good)
-    padv = (1.0 - p) * (1.0 - bm) + p * am_bar
-    return p * am_bar / padv
+    am_bar = lst + (1.0 - lst) * majority_tail(m, alpha)
+    return p * am_bar / advance_prob(s, lam, m, alpha, beta, lst)
 
 
 def success_rate_fast(T, s, lam, m, alpha, beta, lst, trials, rng):
@@ -100,10 +107,14 @@ def success_rate_fast(T, s, lam, m, alpha, beta, lst, trials, rng):
     return float(np.mean(slips == 0))
 
 
-def overhead_for_m(T, s, m):
-    """Deterministic Experiment-1 overhead = n_segments*(s+G)/T (matches original)."""
+def overhead_for_m(T, s, m, padv):
+    """Expected time per accepted segment / useful work, INCLUDING recomputation of
+    rejected segments: (1 + (g/s)*m) / Padv. The 1/Padv factor is the expected number
+    of recomputation rounds per accepted segment (Lemma 1 / Thm 1); the original loop
+    omitted it by reassigning time_spent each round, undercounting overhead by
+    ~1/Padv ~ e^{lam*s}."""
     n = int(np.ceil(T / s))
-    return n * (s + m * G_PER_GATE) / T
+    return n * (s + m * G_PER_GATE) / T / padv
 
 
 # ----------------------------------------------------------------------
@@ -157,7 +168,7 @@ def experiment1():
         for m in range(1, m_ceiling, 2):
             if (1.0 - segment_slip_prob(s, lam, m, alpha, beta, 0.0)) ** n >= 0.90:
                 req_m.append(m)
-                overheads.append(overhead_for_m(T, s, m))
+                overheads.append(overhead_for_m(T, s, m, advance_prob(s, lam, m, alpha, beta, 0.0)))
                 solved_T.append(T)
                 break
         else:
@@ -196,13 +207,14 @@ def experiment2():
 # so we reuse experiment1's m and rescale: overhead(T,g) = 1 + (g/s)*m at fixed
 # s=0.25 (the Fig 1a protocol). We also report the cost-optimal overhead
 # 1 + 2*sqrt(m*g*lam) reachable if the checkpoint interval is retuned (Thm 4).
-def gate_cost_sweep(solved_T, req_m, s=0.25, lam=1.0,
+def gate_cost_sweep(solved_T, req_m, s=0.25, lam=1.0, alpha=0.3, beta=0.1,
                     g_values=(0.01, 0.05, 0.2, 0.5)):
     labels = {0.01: "fast", 0.05: "baseline", 0.2: "slow", 0.5: "very slow"}
     print("\nGate-cost sweep (overhead at fixed s=0.25):")
     header = "  log10T  " + "".join(f"g={g:<5}({labels.get(g,''):<9})" for g in g_values)
     print(header)
-    fixed = {g: [1.0 + (g / s) * m for m in req_m] for g in g_values}
+    padv = [advance_prob(s, lam, m, alpha, beta, 0.0) for m in req_m]
+    fixed = {g: [(1.0 + (g / s) * m) / pv for m, pv in zip(req_m, padv)] for g in g_values}
     optimal = {g: [1.0 + 2.0 * np.sqrt(m * g * lam) for m in req_m] for g in g_values}
     for i, T in enumerate(solved_T):
         row = f"  {np.log10(T):>5.0f}   "
