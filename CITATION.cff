@@ -4,7 +4,7 @@ title: "A Fault-Tolerance Threshold for Gated Agentic Computation: Reliable Long
 authors:
   - family-names: "Matijašević"
     given-names: "Ivo"
-    # orcid: "https://orcid.org/0000-0000-0000-0000"  # add your ORCID here if you have one
+    orcid: "https://orcid.org/0009-0008-0326-6425"
 type: software
 repository-code: "https://github.com/ivmat/gated-computation-sim"
 url: "https://github.com/ivmat/gated-computation-sim"
@@ -26,6 +26,7 @@ preferred-citation:
   authors:
     - family-names: "Matijašević"
       given-names: "Ivo"
+      orcid: "https://orcid.org/0009-0008-0326-6425"
   year: 2026
   doi: "10.5281/zenodo.20820968"
   url: "https://doi.org/10.5281/zenodo.20820968"
