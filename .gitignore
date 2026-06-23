@@ -1,0 +1,8 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Generated figures (regenerate with `python simulate.py`)
+*.png
