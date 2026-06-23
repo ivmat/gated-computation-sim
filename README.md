@@ -23,13 +23,14 @@ whole gate family passes (the stealth mass). The script validates three results:
 
 ## How it works
 
-The original per-segment recomputation loop is collapsed to its exact marginal
-slip probability `ε_seg = p·ᾱ_m/P_adv` (Lemma 1 in the paper), so a trial's slip
-count is `Binomial(n, ε_seg)`; `ᾱ_m, β̄_m` are computed as exact binomial
-majority-tail probabilities. This is a vectorized but *statistically identical*
-form of the literal discrete-event simulation. `validate_against_original()`
-checks the fast path against the verbatim slow simulation within Monte-Carlo
-noise before any figure is produced.
+Each segment's geometric recomputation loop collapses to its exact marginal slip
+probability `ε_seg = p·ᾱ_m/P_adv` (Lemma 1 in the paper). With independent
+segments, end-to-end success is exactly `(1 - ε_seg)^n`, and `ᾱ_m, β̄_m` are exact
+binomial majority-tails — so the experiments evaluate these closed forms directly
+and the reported numbers are seed-independent. `validate_against_original()` runs
+the literal slow discrete-event simulation (success over `Binomial(n, ε_seg)`
+trials) and checks it matches the closed form within sampling noise before any
+figure is produced.
 
 The per-gate cost `g` (`G_PER_GATE`) is an **arbitrary** illustrative constant:
 it enters only through the ratio `g/s`, which sets the vertical scale of the

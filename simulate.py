@@ -11,16 +11,16 @@ evaluations (~16 h) AND it crashes, because for T>=100 no m<=49 ever reaches
 This file keeps the EXACT model but exploits two facts:
   (1) The recomputation loop does not accumulate time in the original
       (`time_spent = s + G` is reassigned each round), so Experiment-1 overhead
-      is deterministic: overhead = n_segments*(s+G)/T = 1 + G/s. The Monte Carlo
-      only serves to find the smallest m reaching 90% end-to-end success.
-  (2) Per segment, P(slip) = eseg = p*am_bar/Padv (Lemma 1). Segments are
-      independent, so a trial's #slips ~ Binomial(n, eseg). One RNG draw of
-      size `trials` replaces n*trials Python-level segment loops.
+      is deterministic: overhead = n_segments*(s+G)/T = 1 + G/s.
+  (2) Per segment, P(slip) = eseg = p*am_bar/Padv (Lemma 1), and segments are
+      independent, so end-to-end success is exactly (1-eseg)^n. am_bar, bm are
+      EXACT binomial majority-tails, so no approximation enters.
 
-am_bar / bm are computed as EXACT binomial majority-tail probabilities, so no
-approximation enters. The block at the bottom (`validate_against_original`)
-proves the fast success-rate matches the original slow simulate_horizon within
-Monte-Carlo noise before any results are trusted.
+The experiments evaluate these closed forms directly, so the reported numbers
+are seed-independent. validate_against_original() runs the literal slow
+discrete-event Monte Carlo -- success over Binomial(n, eseg) trials -- and
+checks it matches the closed form within sampling noise before any results are
+trusted.
 """
 import numpy as np
 import matplotlib.pyplot as plt
