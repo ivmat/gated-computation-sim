@@ -78,7 +78,7 @@ The paper defines every symbol inline; this is a quick reference for the ones us
 
 | Symbol | Meaning |
 |---|---|
-| `T` | horizon (task length, human-equivalent time) |
+| `T` | task length to complete, in human-equivalent time (the length verified over; the `T` in `O(log T)`) |
 | `λ` | fault arrival rate (Poisson, per unit work) |
 | `s` | segment length = checkpoint interval |
 | `n = T/s` | number of segments |
@@ -93,7 +93,7 @@ The paper defines every symbol inline; this is a quick reference for the ones us
 | `ρ`, `k` | per-family reducible-stealth probability / number of independent families |
 | `P_adv` | per-round advance probability of the recomputation loop |
 | `ε_seg = p·ᾱ_m / P_adv` | per-segment slip probability |
-| `H_raw`, `H_gated` | ungated (`= ln 2 / λ`) / gated reliable horizon |
+| `H_raw`, `H_gated` | the **horizon** metric — task length at which success = ½; ungated (`H_raw = ln 2 / λ`) vs gated |
 | `s* = √(G/λ)` | cost-optimal checkpoint interval |
 
 </details>
