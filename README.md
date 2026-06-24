@@ -69,6 +69,35 @@ that reproduces all of its numerical claims and both figures.
 stack, not raw model capability — and a large share of that is verification engineering available
 today.
 
+## Notation
+
+The paper defines every symbol inline; this is a quick reference for the ones used above.
+
+<details>
+<summary>Click to expand the symbol table</summary>
+
+| Symbol | Meaning |
+|---|---|
+| `T` | horizon (task length, human-equivalent time) |
+| `λ` | fault arrival rate (Poisson, per unit work) |
+| `s` | segment length = checkpoint interval |
+| `n = T/s` | number of segments |
+| `p = 1 − e^(−λs)` | probability a segment is bad (≥ 1 fault) |
+| `m` | gates per checkpoint (combined by majority vote) |
+| `g` | per-gate evaluation time / cost |
+| `G = m·g` | per-checkpoint verification time |
+| `α`, `β` | per-gate false-accept / false-reject rate |
+| `ᾱ_m`, `β̄_m` | effective majority-vote rates for a stack of `m` gates |
+| `λ_st` | stealth mass — bad segments the whole gate family passes |
+| `λ_irr`, `λ_red` | irreducible (spec/intent) floor / reducible (lineage-correlated) part |
+| `ρ`, `k` | per-family reducible-stealth probability / number of independent families |
+| `P_adv` | per-round advance probability of the recomputation loop |
+| `ε_seg = p·ᾱ_m / P_adv` | per-segment slip probability |
+| `H_raw`, `H_gated` | ungated (`= ln 2 / λ`) / gated reliable horizon |
+| `s* = √(G/λ)` | cost-optimal checkpoint interval |
+
+</details>
+
 ## Reproduced results
 
 Running `python simulate.py` regenerates these (all numbers are seed-independent — see *How it
