@@ -11,6 +11,13 @@
 This repository is the companion to the paper: a self-contained, validated simulation
 that reproduces all of its numerical claims and both figures.
 
+> **Part II (draft, not yet released):** [`paper_part2.tex`](paper_part2.tex) is a synthesis that applies four
+> classical tools to the Part I model — series-system reliability, epistemic/diagnosability semantics, a
+> reliability-amplification cost comparison, and the association (Harris/FKG/Esary–Proschan–Walkup)
+> inequality — showing they converge on the verification floor. The mathematics is classical and
+> attributed as such; the contribution is the synthesis and one closed-form cost comparison. Its numbers
+> reproduce via [`simulate_part2.py`](simulate_part2.py). Draft PDF: [`paper_part2.pdf`](paper_part2.pdf) (locally regenerated). Working draft pending review — no DOI yet.
+
 ---
 
 ## Abstract
