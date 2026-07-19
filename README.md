@@ -11,12 +11,20 @@
 This repository is the companion to the paper: a self-contained, validated simulation
 that reproduces all of its numerical claims and both figures.
 
-> **Part II (draft, not yet released):** [`paper_part2.tex`](paper_part2.tex) is a synthesis that applies four
-> classical tools to the Part I model — series-system reliability, epistemic/diagnosability semantics, a
-> reliability-amplification cost comparison, and the association (Harris/FKG/Esary–Proschan–Walkup)
-> inequality — showing they converge on the verification floor. The mathematics is classical and
-> attributed as such; the contribution is the synthesis and one closed-form cost comparison. Its numbers
-> reproduce via [`simulate_part2.py`](simulate_part2.py). Draft PDF: [`paper_part2.pdf`](paper_part2.pdf) (locally regenerated). Working draft pending review — no DOI yet.
+### Companion papers in this repo
+
+- **Generated Gates Inherit Their Generator's Blind Spots: A Diversity Floor for Self-Generated
+  Verification** — [`paper_gg.pdf`](paper_gg.pdf) · [`paper_gg.tex`](paper_gg.tex). Published:
+  [10.5281/zenodo.20837102](https://doi.org/10.5281/zenodo.20837102). Establishes the stealth-set floor:
+  gates a model family generates inherit its blind spots, so a self-generating system's escape floor is
+  fixed until an *exogenous* family or *reality-grounded* gate is imported.
+
+- **Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** (draft, not
+  yet released) — [`paper_floor.tex`](paper_floor.tex) · draft PDF [`paper_floor.pdf`](paper_floor.pdf).
+  Takes the floor above as given and develops three consequences — a size-axis escape identity, a
+  gating-vs-scaling cost comparison, and a correlated-escape bound — plus an assurance framing. Numbers
+  reproduce via [`simulate_floor.py`](simulate_floor.py). The mathematics is classical and attributed as
+  such; the contribution is the synthesis and one closed-form cost comparison. No DOI yet.
 
 ---
 

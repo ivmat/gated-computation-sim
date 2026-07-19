@@ -39,9 +39,8 @@
 \newcommand{\image}{\mathrm{im}}
 \newcommand\blfootnote[1]{\begingroup\renewcommand\thefootnote{}\footnote{#1}\addtocounter{footnote}{-1}\endgroup}
 
-\title{\vspace{-2em}Gated Agentic Computation, Part II:\\
-\large Four Classical Lenses on the Verification Floor---Series-System Escape,\\
-Epistemic/Diagnosability Semantics, a Cost Comparison, and Correlated Escape}
+\title{\vspace{-2em}Escape, Cost, and Correlation at the Verification Floor\\
+\large of Gated Agentic Computation}
 
 \author{Ivo Matija\v{s}evi\'c\\ \small Independent Researcher \\ \small ivomatijasevic@gmail.com}
 \date{July 2026}
@@ -52,42 +51,33 @@ Epistemic/Diagnosability Semantics, a Cost Comparison, and Correlated Escape}
 Attribution 4.0 International (CC BY 4.0) license, \url{https://creativecommons.org/licenses/by/4.0/}.}
 
 \begin{abstract}
-This is a companion to \emph{A Fault-Tolerance Threshold for Gated Agentic
-Computation}~\cite{matijasevic2026n1} (``Part~I''), which showed that when unreliable work is divided
-into checkpointed segments verified by majority-vote gate stacks, reliable long-horizon work is
-achievable at overhead logarithmic in horizon above a gate-error threshold, that a shared blind
-spot---a stealth mass $\lst$---caps the reliable horizon at $\Hgated \approx \Hraw/\lst$ regardless
-of gate count, and that the cost-optimal checkpoint interval follows a Young--Daly law.
-Part~I is assumed and cited, not restated.
-This paper is deliberately a \emph{synthesis}: it applies four classical tools to the gated model of
-Part~I, and its contribution is the specialization and packaging, not the underlying identities and
-inequalities, which we attribute to their sources.
+Two companion papers establish a \emph{verification floor} for gated agentic systems: \emph{A
+Fault-Tolerance Threshold for Gated Agentic Computation}~\cite{matijasevic2026n1} shows that a gate
+family's shared blind spot---a stealth mass $\lst$, decomposing as $\lst=\lred+\lirr$---caps the
+reliable horizon at $\Hgated\approx\Hraw/\lst$ regardless of gate count; and \emph{Generated Gates
+Inherit Their Generator's Blind Spots}~\cite{matijasevic2026gg} shows that a system generating its own
+gates cannot fall below that floor, which lowers only as \emph{exogenous} model families or
+\emph{reality-grounded} gates are imported. Taking that floor as given, this paper develops three
+consequences at the floor and draws one practical framing; the underlying identities and inequalities
+are classical and attributed to their sources.
 \textbf{(i)~A series-system escape identity.} Modelling an output as $n$ units each carrying an
-undetected fault with (fixed) probability $\fesc$, the probability the output contains at least one
-escaped fault is the standard series-system expression $\Esc(n)=1-(1-\fesc)^n$; hence $\Esc(n)\to 0$
-as $n\to\infty$ \emph{iff} $\fesc=0$, where $\fesc$ is the accept-conditioned per-unit escape
-probability. At a fixed executor, verification \emph{volume} cannot push $\fesc$ below a positive floor
-set by the gate family's stealth mass; the levers that can are grounding, diversity, better
-specifications, or a stronger executor. The new content is the reading of this
-identity as the size-axis form of Part~I's horizon ceiling.
-\textbf{(ii)~An epistemic/diagnosability specialization.} Casting gates as epistemic agents with
-indistinguishability relations, the stealth mass is the measure of the bad worlds every gate confuses
-with some good world; a gate whose information is no finer than one already present cannot shrink that
-set, while genuinely finer gates can. This is a specialization of standard epistemic logic and of
-decentralized fault-diagnosis (codiagnosability); we make the model's stealth mass the referent.
-\textbf{(iii)~A conditional cost comparison.} Under an assumed power-law error--compute relation with
-exponent $p$ and an assumed per-family stealth multiplier, reaching a target escape rate a distance
-$\delta$ above the shared floor costs $O(\log(1/\delta))$ by gating versus $O((1/\delta)^{1/p})$ by
-scaling the executor's own error down---a model calculation that formalizes the currently empirical
-``verify rather than scale'' claim.
-\textbf{(iv)~A correlated-escape bound.} When output units are monotone functions of shared independent
+undetected fault with (fixed) probability $\fesc$---the accept-conditioned per-unit escape
+probability---the chance the output contains at least one escaped fault is
+$\Esc(n)=1-(1-\fesc)^n\to1$ for any fixed $\fesc>0$; the size-axis reading of Part~I's horizon ceiling,
+with the same stealth-mass floor on $\fesc$.
+\textbf{(ii)~A conditional cost comparison.} Under an assumed power-law error--compute relation with
+exponent $p$ and a per-family stealth multiplier, reaching a target escape rate a distance $\delta$
+above the shared floor costs $O(\log(1/\delta))$ by gating versus $O((1/\delta)^{1/p})$ by scaling the
+executor's own error down---a model calculation that formalizes the currently empirical ``verify rather
+than scale'' claim.
+\textbf{(iii)~A correlated-escape bound.} When output units are monotone functions of shared independent
 upstream faults, escape events are positively associated, so $\Esc_{\mathrm{corr}}(n)\le 1-(1-\fesc)^n$
 for any number of shared parents---an instance of the classical association / series-system bound, with
-a packaged strictness characterization.
-Finally we draw the practical payoff: the floor explains a proposed ordinal assurance ladder (why
-internal rigor cannot substitute for independent validation) and a typed-evidence non-collapse rule
-(why proofs, tests, and model opinions must not be folded into one scalar).
-We state the assumptions and honest caveats of each, attribute the prior art, and flag open questions.
+a mutual-independence equality characterization.
+Finally, the floor explains a proposed ordinal assurance ladder (why internal rigor cannot substitute
+for independent validation) and a typed-evidence non-collapse rule. We give the epistemic/diagnosability
+reading of the floor that ties these to established theory, state each result's assumptions and honest
+caveats, and flag open questions.
 \end{abstract}
 
 \section{Introduction}
@@ -98,34 +88,34 @@ shared blind spot, and a Young--Daly cost-optimal checkpoint interval.
 The headline of that work is that the binding constraint on autonomous horizon is not raw model
 capability but the \emph{diversity} of the verification stack.
 
-This paper collects four applications that sharpen and unify that picture. Each specializes a
-classical tool to the gated model; none is claimed as new mathematics, and we attribute the prior art
-in place and in \S\ref{sec:related}. What is genuinely ours is the synthesis---the way the four
-lenses converge on a single object, the verification floor---and, in \S\ref{sec:cost}, one closed-form
-cost comparison we did not find stated elsewhere. Our contributions:
+This paper takes that verification floor---established statistically in~\cite{matijasevic2026n1} and
+mechanistically in the companion~\cite{matijasevic2026gg}---as given, and develops three of its
+consequences plus a practical framing. None is claimed as new mathematics; the identities and
+inequalities are classical, attributed in place and in \S\ref{sec:related}. What is ours is the
+synthesis and, in \S\ref{sec:cost}, one closed-form cost comparison we did not find stated elsewhere.
+Our contributions:
 \begin{itemize}[leftmargin=1.4em,itemsep=2pt]
 \item \textbf{A size-axis reading of the horizon ceiling (\S\ref{sec:escape}).} The standard
 series-system escape identity $\Esc(n)=1-(1-\fesc)^n$, read as the output-size analogue of Part~I's
 time-axis ceiling, making precise that ``zero faults at scale'' requires driving the per-unit floor to
 zero, not adding verification.
-\item \textbf{An epistemic/diagnosability model of the floor (\S\ref{sec:epistemic}).} A specialization
-of possible-worlds epistemic logic and decentralized fault-diagnosis to gate blind spots, giving the
-stealth mass of Part~I a semantic referent and an exact condition for a zero floor.
 \item \textbf{A conditional cost comparison (\S\ref{sec:cost}).} A model calculation comparing the cost
 of reaching a target escape rate by gating versus by scaling the executor's own error, with the shared
 floor made explicit; it formalizes a currently empirical folk claim.
 \item \textbf{A correlated-escape bound (\S\ref{sec:corr}).} The classical association / series-system
 bound applied to output provenance: shared provenance, at fixed unit marginals, can only lower the
 probability of at least one escape relative to independence, for any number of shared parents, with a
-packaged strictness characterization.
+mutual-independence equality characterization.
 \item \textbf{An assurance framing the floor grounds (\S\ref{sec:assurance}).} A proposed ordinal
 evidence ladder and a typed-evidence non-collapse rule---both light repackagings of assurance-case
-practice---which the escape floor and the epistemic model explain: internal rigor is bounded by the
-floor, and heterogeneous evidence carries structure a scalar destroys.
+practice---which the floor explains: internal rigor is bounded by it, and heterogeneous evidence
+carries structure a scalar destroys.
 \end{itemize}
-We recap the model of Part~I only enough to fix notation (\S\ref{sec:recap}), develop the four lenses
-(\S\S\ref{sec:escape}--\ref{sec:corr}), draw the assurance framing they ground (\S\ref{sec:assurance}),
-and close with open problems (\S\ref{sec:open}) and related work (\S\ref{sec:related}).
+Along the way, \S\ref{sec:epistemic} records an epistemic/diagnosability reading of the floor that
+connects it to established theory (epistemic logic, rough sets, discrete-event diagnosability). We
+recap Part~I's notation (\S\ref{sec:recap}), develop the three results
+(\S\S\ref{sec:escape}--\ref{sec:corr}), draw the assurance framing (\S\ref{sec:assurance}), and close
+with open problems (\S\ref{sec:open}) and related work (\S\ref{sec:related}).
 
 \section{The model, recapped}\label{sec:recap}
 We adopt the model and notation of Part~I~\cite{matijasevic2026n1} and restate it only to fix terms;
@@ -221,8 +211,8 @@ same-family gates keep $a_B\ge\lst$, once $a_B$ has saturated at the shared blin
 gates of the \emph{same family} cannot lower $\fesc$ past the floor~\eqref{eq:ffloor}
 (Part~I~\cite{matijasevic2026n1}). Diversity lowers the floor only through the \emph{reducible} part of
 the stealth mass: $k$ independent families drive the stealth-limited floor down along
-$\lst^{(1{:}k)}=\lirr+(1-\lirr)\rho^{\,k}\to\lirr$ (Part~I; the latent-mixture product law of
-Theorem~\ref{thm:epistemic}\eqref{it:product} below), so the floor on $a_B$---and hence on
+$\lst^{(1{:}k)}=\lirr+(1-\lirr)\rho^{\,k}\to\lirr$ (Part~I; the exogenous-family product
+of~\cite{matijasevic2026gg}), so the floor on $a_B$---and hence on
 $\fesc$---approaches its $\lirr$-level value, \emph{not} zero. (Whether the operational $a_B$ itself
 attains that floor depends on the aggregator; for the unanimous model $a_B=\lst$.) The irreducible floor $\lirr$ yields only to better specifications
 or reality-grounding; the prevalence $\pi$ yields only to a better executor. Below saturation,
@@ -239,7 +229,7 @@ provenance is the subject of \S\ref{sec:corr}; a generalization to arbitrary pro
 is left open (\S\ref{sec:open}).
 
 \paragraph{Evidence and caveats.}
-The identity is illustrated in the Part~II companion script \texttt{simulate\_part2.py} at $\fesc=0.05$:
+The identity is illustrated in the companion script \texttt{simulate\_floor.py} at $\fesc=0.05$:
 at $n=20$ the predicted escape $0.6415$ matches the Monte-Carlo value $0.6407$ (seed $20260718$) within
 sampling error, and the fit holds across $n\in\{1,5,10,20,50\}$. Two modelling assumptions are worth
 naming. First, \eqref{eq:escape} assumes the $n$ units are \emph{independent}; units passing a common
@@ -250,162 +240,40 @@ unit'' has a clean meaning for structured
 outputs (fields, claims, functions), but its right definition for continuous or unstructured outputs is
 open, and $\Esc(n)$ should be read with that caveat where units are not crisply individuated.
 
-\section{An epistemic/diagnosability model of the floor}\label{sec:epistemic}
-Part~I establishes the stealth-mass floor as a statistical fact: majority accuracy on bad segments is
-bounded because a fixed fraction of them is invisible to the whole family.
-This section gives that fact a semantic referent, specializing two established bodies of theory to
-gate blind spots. Neither the apparatus nor the structural facts are new. The idea that a fault is
-undetectable exactly when it is observationally indistinguishable from normal behaviour, that
-duplicating an observation channel without adding information cannot restore detection, and that
-diverse observers can jointly detect what none can detect alone, is the substance of the decades-old
-diagnosability and decentralized fault-diagnosis theory for discrete-event
-systems~\cite{sampath1995,debouk2000}, now also cast in epistemic-temporal logic~\cite{descodiag2024}; the accept-set construction below is exactly a rough-set
-upper approximation~\cite{pawlak1982}; and the possible-worlds machinery (partitional knowledge,
-distributed knowledge as the intersection of relations) is textbook multi-agent epistemic
-logic~\cite{fagin1995,halpernmoses1990}. A closely related impossibility has just appeared on the
-language-model side: Mason and Anand~\cite{masonanand2026} prove that a text-only supervisor cannot
-distinguish grounded from fabricated outputs and that no amount of same-channel supervision resolves
-it---the depth-inertness of Theorem~\ref{thm:epistemic}\eqref{it:depth} in a different formalism. What
-we contribute is only the specialization: identifying the stealth mass of Part~I with the measure of a
-joint-indistinguishability set, and reading its two levers off the model.
+\section{The stealth-mass floor and its epistemic reading}\label{sec:epistemic}
+The floor these results rest on is not established here; it is the subject of two companion papers.
+Part~I~\cite{matijasevic2026n1} gives the statistical floor: a gate family's \emph{stealth mass}
+$\lst$---the fraction of bad artifacts every gate in the family accepts---bounds majority accuracy, and
+decomposes as $\lst=\lred+\lirr$ into a diversity-reducible part and a specification-bound irreducible
+floor. The companion paper~\cite{matijasevic2026gg} gives the mechanism: modelling a family $F$ by its
+representation relation $\sim_F$ (indistinguishability under every prompt), the stealth set
+$\Sigma_F=\{\text{bad }c:\ c\sim_F c'\text{ for some good }c'\}$ is inherited by every gate built within
+$F$ (its GG1), so a system generating its own gates has an escape floor fixed at $\lambda_F=\mu(\Sigma_F)$,
+invariant to generation depth, gates-checking-gates, and prompt diversity (its GG2). Two moves lower it:
+importing an \emph{exogenous} family multiplies independent blind spots
+($\mu(\Sigma_F\cap\Sigma_N)=\lambda_F\lambda_N$, driving $\lred$ down), and a \emph{reality-grounded}
+gate---one deciding by ground truth rather than any family's representation---removes the grounded part
+of $\lirr$. We take this floor, and its two levers, as given, and use them below.
 
-\subsection{The epistemic gate model}
-\begin{definition}[Epistemic gate model]\label{def:epistemic}
-Let $(W,\mathcal{F},\mu)$ be a probability space of \emph{artifacts} (possible worlds), partitioned
-into good and bad worlds $W=G\sqcup B$ with $\mu(B)>0$. Each gate $i$ is equipped with an
-\emph{indistinguishability relation} $\sim_i$, an equivalence relation on $W$ (partitional
-information, as in the standard $S5$ knowledge model~\cite{fagin1995}); write $[w]_i$ for the
-$\sim_i$-class of $w$ and assume each class, and each accept set $A_i$ below, is measurable, and that
-the family $F$ is finite. A gate's verdict is $\sim_i$-measurable (constant on classes), and we take the
-canonical \emph{complete} gate (no false rejects): gate $i$ accepts $w$ iff it cannot rule out that $w$
-is good, i.e.\ iff its class meets $G$. Its \emph{accept set} is
-\begin{equation}\label{eq:acceptset}
-A_i\;=\;\{\,w\in W:\ [w]_i\cap G\neq\emptyset\,\}\qquad(\text{the worlds $\sim_i$-linked to some good world}),
-\end{equation}
-so that $G\subseteq A_i$: the gate never rejects a good world, and its only errors are
-false-accepts of bad worlds. A \emph{gate family} accepts an artifact iff every member accepts it;
-its \emph{stealth set} is the set of bad worlds it nonetheless passes,
-\begin{equation}\label{eq:stealthset}
-\Stealth(F)\;=\;B\cap\bigcap_{i\in F}A_i,
-\end{equation}
-and its \emph{stealth mass} is $\lst(F)=\mu\!\big(\Stealth(F)\big)/\mu(B)=\Pr[\,w\in\bigcap_{i\in F}A_i\mid w\in B\,]$.
-\end{definition}
-
-Two scope points. First, Definition~\ref{def:epistemic} isolates the false-accept structure that
-produces the floor; false-\emph{rejects} (the rate $\beta$, hence $a_G<1$ and the retry cost of
-\S\ref{sec:escape}--\S\ref{sec:cost}) are orthogonal to the stealth set, being errors on good worlds
-excluded here by $G\subseteq A_i$, and are not modelled by it. Second, the family here accepts
-\emph{unanimously}, whereas Part~I combines gates by \emph{majority} vote; these are different
-aggregators, and for majority voting adding a coarse gate can change a verdict. But the unanimous
-stealth set $\Stealth(F)=B\cap\bigcap_i A_i$ is exactly the \emph{shared blind spot}---a bad world every
-gate individually accepts is accepted by \emph{any} non-trivial monotone aggregator, majority included---so
-$\lst(F)$ is a lower bound on the false-accept rate of the majority stack, i.e.\ the floor, not the
-operational majority error. Everything below is about that floor. The identity
-$\lst(F)=\Pr[w\in\bigcap_i A_i\mid B]$ is immediate from~\eqref{eq:stealthset}; the content is in how it
-responds to depth and to diversity.
-
-\begin{theorem}[Depth is inert; diversity is the lever]\label{thm:epistemic}
-In the epistemic gate model of Definition~\ref{def:epistemic}:
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item\label{it:depth} \emph{(Information no finer is inert.)} If a new gate $j$ resolves no more
-finely than some gate $i\in F$ already present---formally $\sim_j\supseteq\sim_i$, i.e.\
-$[w]_i\subseteq[w]_j$ for all $w$---then $\Stealth(F\cup\{j\})=\Stealth(F)$, hence
-$\lst(F\cup\{j\})=\lst(F)$. In particular a stack of gates sharing one relation (or successively
-coarser ones) never lowers the floor.
-\item\label{it:covers} \emph{(Diversity is the lever, set form.)} $\lst$ is non-increasing under
-adding any gate, and $\lst(F)=0$ iff the family \emph{covers} $\mu$-almost every bad world: for
-$\mu$-a.e.\ $w\in B$ there is a gate $i\in F$ with $[w]_i\cap G=\emptyset$ (some gate distinguishes $w$
-from every good world).
-\item\label{it:product} \emph{(Diversity is the lever, latent-mixture product form.)} Fix a countably
-infinite class of \emph{admissible} gate families (the spec-bound families under consideration), and let
-$R\subseteq B$ be the \emph{irreducible} class of bad worlds accepted by every admissible family---the
-common blind spot, $R=B\cap\bigcap_{\text{admissible }i}A_i$ (measurable, being a countable
-intersection)---with $\Pr[R\mid B]=\lirr\in(0,1)$ (so $\lirr$ is a property of that class, not of all
-conceivable gates; if $\lirr=1$ the floor is trivially $1$). Suppose the reducible stealth events $\{w\in A_i\}$ are mutually
-independent conditional on $w\in B\setminus R$, each with conditional acceptance $c_i\le\bar c<1$. Then
-for $k$ such families
-\[
-\lst(\{1,\dots,k\})\;=\;\lirr+(1-\lirr)\prod_{i=1}^{k}c_i\;\le\;\lirr+(1-\lirr)\bar c^{\,k}
-\;\xrightarrow[\,k\to\infty\,]{}\;\lirr .
-\]
-Diversity multiplies the \emph{reducible} factors toward zero but never touches $\lirr$; this is the
-product law of Part~I, and it is \emph{not} an unconditional product of the total stealth events (which
-would drive the floor to $0$).
-\end{enumerate}
-\end{theorem}
-\begin{proof}
-\eqref{it:depth} If $\sim_j\supseteq\sim_i$ then $[w]_i\subseteq[w]_j$ for every $w$, so
-$[w]_i\cap G\neq\emptyset\Rightarrow[w]_j\cap G\neq\emptyset$; thus $A_i\subseteq A_j$
-by~\eqref{eq:acceptset}. Since $i\in F$, $\bigcap_{l\in F}A_l\subseteq A_i\subseteq A_j$, whence
-$\bigcap_{l\in F\cup\{j\}}A_l=\big(\bigcap_{l\in F}A_l\big)\cap A_j=\bigcap_{l\in F}A_l$. Intersecting
-with $B$ gives $\Stealth(F\cup\{j\})=\Stealth(F)$, and the stealth masses are equal.
-
-\eqref{it:covers} Adding any gate replaces $\bigcap_{i\in F}A_i$ by
-$\big(\bigcap_{i\in F}A_i\big)\cap A_{\mathrm{new}}$, a subset, so $\Stealth$ can only shrink and
-$\lst$ is non-increasing. For the characterisation, $\lst(F)=0$ iff $\mu(\Stealth(F))=0$; and
-$w\in B$ lies in $\Stealth(F)$ iff $w\in A_i$ for every $i$, i.e.\ iff $[w]_i\cap G\neq\emptyset$ for
-every $i$. Hence $w\notin\Stealth(F)$ iff some gate $i$ has $[w]_i\cap G=\emptyset$. So
-$\Stealth(F)$ is exactly the set of uncovered bad worlds, and it is $\mu$-null iff $\mu$-almost every
-bad world is covered.\footnote{With a purely set-theoretic (rather than measure-theoretic) reading,
-$\Stealth(F)=\emptyset$ iff \emph{every} bad world is covered; the measure statement is the
-$\mu$-almost-everywhere version.}
-
-\eqref{it:product} Condition on membership in $R$. Every admissible gate accepts $R$, so
-$\bigcap_{i\le k}A_i\supseteq R$ and $\Pr[\bigcap_i A_i\mid R]=1$. On the reducible class $B\setminus R$,
-conditional independence gives $\Pr[\bigcap_{i\le k}A_i\mid B\setminus R]=\prod_{i\le k}c_i$. Mixing over
-$\Pr[R\mid B]=\lirr$,
-$\lst=\lirr\cdot1+(1-\lirr)\prod_{i\le k}c_i$, which decreases to $\lirr$ as $\prod c_i\to0$. The
-unconditional-product claim $\lst=\prod\lst^{(i)}$ would instead require the total stealth events to be
-independent given $B$, which the common class $R$ precludes for $\lirr>0$.
-\end{proof}
-
-\begin{remark}[Scope of ``depth is inert'']\label{rem:incomparable}
-Property~\eqref{it:depth} is exactly a statement about \emph{comparable} information: a gate no finer
-than one already present adds nothing. It does \emph{not} say that any two gates of a common lineage
-are interchangeable. Two same-family gates may induce \emph{incomparable} partitions (different
-prompts, samples, or residual errors), and such a pair \emph{can} shrink the stealth set below either
-one alone---this is the diversity of property~\eqref{it:covers} arising even within a family. The
-Part~I floor is the statistical statement that same-family gates are highly \emph{correlated}, so this
-within-family shrinkage is small; the epistemic model captures the exact-same-information extreme, not
-a claim that lineage alone forbids all diversity.
-\end{remark}
-
-\begin{remark}[Voting versus pooled knowledge]\label{rem:pooled}
-Part~I's diversity mechanism is purely statistical (the latent-mixture product law above); it can be
-\emph{recast} here through the \emph{distributed knowledge} relation $\sim_D=\bigcap_{i\in F}\sim_i$,
-whose class is $[w]_D=\bigcap_i[w]_i$. (Part~I itself uses no epistemic apparatus.) Its
-accept set $A_D=\{w:[w]_D\cap G\neq\emptyset\}$ satisfies $A_D\subseteq\bigcap_{i\in F}A_i$: since
-$[w]_D\subseteq[w]_i$, a good world in $[w]_D$ lies in every $[w]_i$, but not conversely. Thus the
-idealised pooled gate that knows $\sim_D$ is \emph{at least as strong} as the unanimous vote of the
-same gates. The inclusion \emph{can} be strict---unanimous voting only requires that each gate
-\emph{separately} confuse $w$ with \emph{some} good world, whereas $\sim_D$ requires \emph{one} good
-world confusable with $w$ under \emph{all} gates at once. A minimal witness: $G=\{g_1,g_2\}$,
-$B=\{b\}$, $[b]_1=\{b,g_1\}$, $[b]_2=\{b,g_2\}$; then $b\in A_1\cap A_2$ but $b\notin A_D$. (It is an
-equality when the relations are identical or nested.) Consequently property~\eqref{it:product} is the
-honest form of the product law: it holds for the voting floor under a stated conditional-independence
-hypothesis, not automatically from set-diversity---and information diversity, different relations, or
-distributed knowledge do \emph{not} by themselves imply that conditional independence. Distributed
-knowledge names the theoretical limit $B\cap A_D$ that voting attains only when the gates' confusions
-share a common witness.
-\end{remark}
-
-\begin{remark}[What this does and does not add]\label{rem:epi-scope}
-Theorem~\ref{thm:epistemic} adds explanation, not a new number: it recovers the floor of Part~I from
-the model and gives the diversity principle a semantic referent---representation divergence, a
-measurable proxy in Part~I, is divergence in the $\sim_i$ relations, and covering $B$
-(property~\eqref{it:covers}) is the exact condition for a zero floor. It does not, on its own,
-produce a new computable quantity; the bridge from measurable representation divergence to the
-relation distance that would make $\lst$ predictable rather than observable is left open
-(\S\ref{sec:open}). The apparatus (partitional knowledge, distributed knowledge as intersection of
-relations) is standard multi-agent epistemic logic~\cite{fagin1995}, the accept set is a rough-set
-upper approximation~\cite{pawlak1982}, and the depth/diversity facts are closely related to
-diagnosability and decentralized/epistemic diagnosis of discrete-event
-systems~\cite{sampath1995,debouk2000,descodiag2024}; the machinery is not ours, and the specialization to
-gate correlation is close to the language-model impossibility of~\cite{masonanand2026} and to the
-empirical ``models think alike'' correlation-floor findings of~\cite{goel2025,kim2025}. What we
-contribute is the identification of the stealth mass of Part~I with $\mu(\Stealth(F))/\mu(B)$ and the
-two levers read off it.
-\end{remark}
+\paragraph{An epistemic/diagnosability reading.} The one observation we add is that this floor is a
+familiar object across several established literatures---worth recording because it locates the
+phenomenon and supplies external tools. The relation $\sim_F$ is an indistinguishability relation in the
+possible-worlds sense; the accept set $\{w:[w]_F\cap G\neq\emptyset\}$ (the bad worlds $\sim_F$-linked to
+some good one, whose $B$-mass is $\lambda_F$) is exactly the rough-set upper approximation of the good
+set~\cite{pawlak1982}; ``a fault is undetectable iff observationally indistinguishable from acceptable
+behaviour, and duplicating an observation channel without new information cannot restore detection'' is
+the substance of diagnosability and decentralized fault-diagnosis for discrete-event
+systems~\cite{sampath1995,debouk2000,descodiag2024}; and the pooled vision of diverse families is the
+\emph{distributed knowledge} of multi-agent epistemic logic~\cite{fagin1995,halpernmoses1990} (the
+intersection $\bigcap_i\sim_i$ of the family relations, strictly finer than any one). On the
+language-model side the same impossibility has just appeared: Mason and Anand~\cite{masonanand2026} prove
+that a text-only supervisor cannot distinguish grounded from fabricated outputs and that no amount of
+same-channel supervision resolves it---GG2's within-family invariance in a different formalism---%
+consistent with the empirical ``models think alike'' correlation-floor findings
+of~\cite{goel2025,kim2025}. Every one of these readings names the same lever: a distinction must be
+\emph{imported}---an exogenous family, or reality-grounding---never bred within a family. This is the
+semantic content behind the assurance framing of \S\ref{sec:assurance} (``who ran the check, on whose
+object'' is the informal name for ``which family's $\sim_F$ was applied'').
 
 \section{A conditional cost comparison: gating versus scaling}\label{sec:cost}
 Why gate an unreliable executor rather than wait for, or pay for, a more reliable one? This section
@@ -442,7 +310,7 @@ the loss-to-error map is an extra unstated step.
 \begin{assumption}[Gating cost, floor-aware]\label{ass:gate}
 Diverse gate families reduce the \emph{reducible} conditional false-accept rate geometrically:
 $a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ for a per-family multiplier $c\in(0,1)$
-(Theorem~\ref{thm:epistemic}\eqref{it:product}). The posterior map $a_B\mapsto\fesc$~\eqref{eq:fdef} is a
+(Part~I; the exogenous-family product of~\cite{matijasevic2026gg}). The posterior map $a_B\mapsto\fesc$~\eqref{eq:fdef} is a
 M\"obius (fractional-linear) transform, so it does \emph{not} preserve this geometric form exactly; but
 it is smooth and increasing, so the induced excess escape decays at the \emph{same rate},
 \[
@@ -651,7 +519,7 @@ bound is a statement about the OR-event under fixed marginals, nothing more.
 \end{remark}
 
 \paragraph{Evidence and scope.}
-The bound is illustrated in \texttt{simulate\_part2.py} on a one-shared-parent event model (a shared
+The bound is illustrated in \texttt{simulate\_floor.py} on a one-shared-parent event model (a shared
 upstream fault present with $q_{\mathrm{up}}=0.3$, surviving the upstream gate with $a_{\mathrm{up}}=0.247$
 and each output's sink with $a_{\mathrm{sink}}=0.247$; independent local faults with $q_{\mathrm{loc}}=0.05$,
 per-unit marginal $\fesc_{\mathrm{marg}}=0.0304$). At $n=20$ the correlated escape is $0.2777$ (exact;
@@ -662,8 +530,8 @@ public~\cite{ro2025sherlock}; we stop at the bound and leave any allocation poli
 (\S\ref{sec:open}).
 
 \section{Grading assurance: a framing the floor explains}\label{sec:assurance}
-The four lenses converge on one object---an escape floor that internal effort cannot cross---and that
-convergence has a practical corollary for how one should \emph{talk} about whether a gated system
+The results here rest on one object---an escape floor that internal effort cannot cross---and that
+floor has a practical corollary for how one should \emph{talk} about whether a gated system
 ``works.'' We propose, not prove, an organizing frame with two parts, both deliberately modest and both
 already anticipated in the assurance literature; what this paper adds is the observation that the floor
 results explain \emph{why} each holds.
@@ -692,7 +560,7 @@ as external assurance.
 The floor results say why the rungs cannot collapse into internal rigor, though the link is a heuristic
 proxy, not a theorem. A system whose internal checks all share one blind structure can have arbitrarily
 many of them and still sit at R1: same-family depth cannot lower the escape floor
-(\S\ref{sec:escape}, Cor.~\ref{cor:zero}; Thm.~\ref{thm:epistemic}\eqref{it:depth}). Moving outward is
+(\S\ref{sec:escape}, Cor.~\ref{cor:zero}; the self-generation floor of~\cite{matijasevic2026gg}). Moving outward is
 an \emph{opportunity} to add a genuinely new indistinguishability relation---an external validator
 (R3) or paying user (R4) exercises the system under assumptions and workloads the builder's gates never
 saw---but organizational independence does not \emph{guarantee} epistemic non-redundancy: an R2
@@ -718,8 +586,8 @@ and assumptions it came from; a bare scalar that hides evidence type is what mus
 The epistemic model of \S\ref{sec:epistemic} offers a useful interpretation. Different evidence types
 are different indistinguishability relations with different blind spots; a \emph{bare} scalar fold is a
 projection that does not ordinarily expose which part of the confidence is load-bearing under which
-conditions---the structure the distributed-knowledge relation $\sim_D$ retains
-(Remark~\ref{rem:pooled}). A conditional theorem and a measured reviewer rate are sound under different
+conditions---the structure the distributed-knowledge reading of \S\ref{sec:epistemic} retains.
+A conditional theorem and a measured reviewer rate are sound under different
 envelopes; averaging them into an unlabelled number reports neither honestly. Non-collapse is the reporting-side image of the
 paper's recurring fact that diversity lives in the \emph{structure} of what different gates can and
 cannot see, not in a scalar. Neither the ladder nor this rule is new---each is a light repackaging of
@@ -748,7 +616,7 @@ diverse reviewer helps, when it does not) is open.
 mass is partly estimable from a system's own logs and targeted audits; a principled estimator for
 $\lst$ from telemetry, with an identifiability analysis in the latent-class tradition of Hui and
 Walter~\cite{huiwalter1980} (estimating error rates without a gold standard), is left to future work.
-This is the quantity that would upgrade Theorem~\ref{thm:epistemic} from explanation to prediction.
+This is the quantity that would make the stealth mass predictable rather than only observable.
 \item \textbf{Checker strength.} The framing of \S\ref{sec:assurance} treats gates as given. A separate
 question is how the \emph{strength of the checking procedure}---whether the property it checks is
 decidable now, corroborable soon, or gradeable only later---bounds what ``verified'' can honestly mean
@@ -764,18 +632,19 @@ checkpoint interval~\cite{young1974,daly2006}, and the $N$-version-programming t
 failure~\cite{eckhardt1985,littlewood1989,knight1986}, whose contemporary agentic echo is the
 large-scale $N$-version coding-agent study of Ron, Baudry and Monperrus~\cite{ron2026}.
 
-For the specific lenses here, we attribute the prior art plainly, since the mathematics in each is
+For the specific results here, we attribute the prior art plainly, since the mathematics in each is
 classical. \S\ref{sec:escape}: the escape identity~\eqref{eq:escape} is series-system
 reliability~\cite{barlowproschan1965}, the \v{S}id\'ak independent-error form~\cite{sidak1967}, and the
-complement of $\mathrm{pass}@k$~\cite{chen2021,brown2024}; token-wise it is the autoregressive-%
+at-least-one form of $\mathrm{pass}@k$~\cite{chen2021,brown2024}; token-wise it is the autoregressive-%
 divergence argument whose independence premise~\cite{arbuzov2025} disputes. The correlation floor it
 feeds is actively studied---Turkmen, Buyukates and Bastopcu~\cite{turkmen2026} derive an
 information-theoretic ensemble error floor under a Gaussian-copula model, and ``models think alike''
-correlation is measured by~\cite{goel2025,kim2025}. \S\ref{sec:epistemic}: the model is possible-worlds
-epistemic logic~\cite{fagin1995,halpernmoses1990}, rough-set upper approximation~\cite{pawlak1982}, and
-decentralized diagnosability of discrete-event systems~\cite{sampath1995,debouk2000,descodiag2024}; the
-same impossibility in a language-model guise is Mason--Anand~\cite{masonanand2026}; only the
-specialization to Part~I's stealth mass is ours. \S\ref{sec:cost}: the comparison formalizes a claim
+correlation is measured by~\cite{goel2025,kim2025}. \S\ref{sec:epistemic}: the stealth-set floor, its
+inheritance and self-generation invariance, and its two levers are established in the
+companion~\cite{matijasevic2026gg} (statistically in Part~I); we only record its reading in
+possible-worlds epistemic logic~\cite{fagin1995,halpernmoses1990}, rough-set upper
+approximation~\cite{pawlak1982}, and discrete-event diagnosability~\cite{sampath1995,debouk2000,descodiag2024},
+noting the language-model impossibility of Mason--Anand~\cite{masonanand2026}. \S\ref{sec:cost}: the comparison formalizes a claim
 argued empirically across the test-time-compute literature~\cite{snell2024,lifshitz2025,scalingverif2026},
 resting on loss scaling~\cite{kaplan2020,hoffmann2022}; the automaton-determinization
 blow-up~\cite{rabinscott1959,meyerfischer1971} is a metaphor, not evidence. \S\ref{sec:corr}: the
@@ -784,11 +653,12 @@ the provenance-placement \emph{problem} is treated by Sherlock~\cite{ro2025sherl
 application to output provenance and the packaged strictness characterization.
 
 \section{Conclusion}
-The four classical lenses here converge on one object, the verification floor. At fixed prevalence,
+The classical tools here converge on one object, the verification floor of Part~I
+and~\cite{matijasevic2026gg}. At fixed prevalence,
 same-family verification cannot lower a gate family's escape floor (\S\ref{sec:escape}; the floor is
 \emph{set by} Part~I's stealth mass, and is not a consequence of the series identity itself, which
-merely propagates it across output size); information no finer than a gate already present cannot lower the shared blind spot
-(Thm.~\ref{thm:epistemic}); above that floor, under stated and admittedly strong cost models, gating
+merely propagates it across output size); a system's own self-generated gates cannot lower the shared
+blind spot (the self-generation floor of~\cite{matijasevic2026gg}); above that floor, under stated and admittedly strong cost models, gating
 reaches a target more cheaply than scaling the executor's own error does (Prop.~\ref{prop:cost}); and
 at fixed marginals, positive provenance dependence only clusters escapes, never raising the chance of
 at least one relative to independence (Prop.~\ref{prop:corr}). None of these is new mathematics; the
@@ -807,6 +677,9 @@ extends the results archived under DOI
 
 \begin{thebibliography}{99}
 \small
+\bibitem{matijasevic2026gg} I.~Matija\v{s}evi\'c. Generated gates inherit their generator's blind
+spots: a diversity floor for self-generated verification. Zenodo, 2026.
+DOI:~10.5281/zenodo.20837102.
 \bibitem{matijasevic2026n1} I.~Matija\v{s}evi\'c. A Fault-Tolerance Threshold for Gated Agentic
 Computation: Reliable Long-Horizon Work from Unreliable Executors. 2026.
 Archived on Zenodo, DOI:~10.5281/zenodo.20820968.
