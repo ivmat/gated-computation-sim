@@ -167,15 +167,17 @@ probability is conditioned on acceptance: the relevant per-unit quantity is the 
 \end{equation}
 This is exactly Part~I's per-segment slip probability $\eseg$ (accept-conditioned), read per output unit
 rather than per checkpoint. Since $\fesc$ is non-decreasing in $a_B$ and a bad artifact in the stealth set
-is accepted by every gate---hence by any monotone aggregator---the family's false-accept rate satisfies
-$a_B\ge\lst$, so $\fesc$ is floored: with $\pi>0$ and $a_G\le1$,
+is accepted by every gate---hence by any monotone aggregator that accepts on unanimous acceptance
+($A(1,\dots,1)=1$), majority included---the family's false-accept rate satisfies $a_B\ge\lst$, so for a
+\emph{fixed} stack $\fesc$ is floored: with $0<\pi<1$ and $a_G\le1$,
 \begin{equation}\label{eq:ffloor}
-\fesc\;\ge\;\frac{\pi\lst}{\pi\lst+(1-\pi)a_G}\;>\;0\quad\text{whenever }\lst>0,
+\fesc\;\ge\;\frac{\pi\lst}{\pi\lst+(1-\pi)a_G}\;\ge\;\frac{\pi\lst}{\pi\lst+(1-\pi)}\;>\;0\quad\text{whenever }\lst>0.
 \end{equation}
-and no amount of same-family verification lowers $a_B$ below $\lst$, hence none lowers $\fesc$ below
-this floor. The levers that \emph{do} lower it act on $\lst$ (grounding, diversity, and specifications,
-\S\ref{sec:epistemic}), on the prevalence $\pi$ (a better executor), or on $a_G$ (fewer false rejects,
-which dilute the accepted pool).
+The $a_G$-dependent middle bound is the sharp floor for a fixed stack; the right-hand ($a_G=1$) bound is
+the stack-independent family floor. No amount of same-family verification lowers $a_B$ below $\lst$, so
+none lowers $\fesc$ below the stack-independent floor. The levers that \emph{do} lower it act on $\lst$
+(grounding, diversity, and specifications, \S\ref{sec:epistemic}), on the prevalence $\pi$ (a better
+executor), or on $a_G$ (fewer false rejects, which dilute the accepted pool).
 
 \begin{proposition}[Series-system escape identity]\label{thm:escape}
 Model an output as $n$ emitted units, each independently carrying an undetected fault with fixed
@@ -211,8 +213,10 @@ same-family gates keep $a_B\ge\lst$, once $a_B$ has saturated at the shared blin
 gates of the \emph{same family} cannot lower $\fesc$ past the floor~\eqref{eq:ffloor}
 (Part~I~\cite{matijasevic2026n1}). Diversity lowers the floor only through the \emph{reducible} part of
 the stealth mass: $k$ independent families drive the stealth-limited floor down along
-$\lst^{(1{:}k)}=\lirr+(1-\lirr)\rho^{\,k}\to\lirr$ (Part~I; the exogenous-family product
-of~\cite{matijasevic2026gg}), so the floor on $a_B$---and hence on
+$\lst^{(1{:}k)}=\lirr+(1-\lirr)\rho^{\,k}\to\lirr$ (Part~I's decomposition, with the reducible residuals
+independent across families conditional on the common irreducible set---distinct from the unconditional
+exogenous-family product $\mu(\Sigma_F\cap\Sigma_N)=\lambda_F\lambda_N$ of~\cite{matijasevic2026gg}), so
+the floor on $a_B$---and hence on
 $\fesc$---approaches its $\lirr$-level value, \emph{not} zero. (Whether the operational $a_B$ itself
 attains that floor depends on the aggregator; for the unanimous model $a_B=\lst$.) The irreducible floor $\lirr$ yields only to better specifications
 or reality-grounding; the prevalence $\pi$ yields only to a better executor. Below saturation,
@@ -247,13 +251,17 @@ $\lst$---the fraction of bad artifacts every gate in the family accepts---bounds
 decomposes as $\lst=\lred+\lirr$ into a diversity-reducible part and a specification-bound irreducible
 floor. The companion paper~\cite{matijasevic2026gg} gives the mechanism: modelling a family $F$ by its
 representation relation $\sim_F$ (indistinguishability under every prompt), the stealth set
-$\Sigma_F=\{\text{bad }c:\ c\sim_F c'\text{ for some good }c'\}$ is inherited by every gate built within
-$F$ (its GG1), so a system generating its own gates has an escape floor fixed at $\lambda_F=\mu(\Sigma_F)$,
-invariant to generation depth, gates-checking-gates, and prompt diversity (its GG2). Two moves lower it:
-importing an \emph{exogenous} family multiplies independent blind spots
-($\mu(\Sigma_F\cap\Sigma_N)=\lambda_F\lambda_N$, driving $\lred$ down), and a \emph{reality-grounded}
-gate---one deciding by ground truth rather than any family's representation---removes the grounded part
-of $\lirr$. We take this floor, and its two levers, as given, and use them below.
+$\Sigma_F=\{\text{bad }c:\ c\sim_F c'\text{ for some good }c'\}$---with $\mu$ the fault-generating
+distribution and $\lambda_F=\mu(\Sigma_F)$---is accepted by every \emph{sound} gate built within $F$, and
+with nonzero false rejects up to a vanishing margin (its GG1). Consequently within-family generation
+cannot drive the escape floor below $\lambda_F$---however deep the generation, however many gates check
+gates, however diverse the prompts (its GG2; we use only this lower-bound direction, which is what our
+conclusions need, and not GG2's achievability, which requires sufficient within-family coverage). Only
+two moves lower the floor: importing an \emph{exogenous} family, whose blind spot, when independent,
+multiplies it ($\mu(\Sigma_F\cap\Sigma_N)=\lambda_F\lambda_N$, driving $\lred$ down), and a
+\emph{reality-grounded} gate---one deciding by ground truth rather than any family's
+representation---which removes the grounded part of $\lirr$. We take this floor and its two levers as
+given.
 
 \paragraph{An epistemic/diagnosability reading.} The one observation we add is that this floor is a
 familiar object across several established literatures---worth recording because it locates the
@@ -309,17 +317,21 @@ the loss-to-error map is an extra unstated step.
 
 \begin{assumption}[Gating cost, floor-aware]\label{ass:gate}
 Diverse gate families reduce the \emph{reducible} conditional false-accept rate geometrically:
-$a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ for a per-family multiplier $c\in(0,1)$
-(Part~I; the exogenous-family product of~\cite{matijasevic2026gg}). The posterior map $a_B\mapsto\fesc$~\eqref{eq:fdef} is a
-M\"obius (fractional-linear) transform, so it does \emph{not} preserve this geometric form exactly; but
-it is smooth and increasing, so the induced excess escape decays at the \emph{same rate},
+$a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ for a per-family multiplier $c\in(0,1)$ (Part~I's decomposition
+with conditional independence across families; \S\ref{sec:escape}). We further assume the good-acceptance
+rate is bounded away from zero, $a_G(n)\ge a_G^{\min}>0$, and $0<\pi<1$, $\fesc_0>q_{\mathrm{irr}}$. Under
+these, the posterior map $a_B\mapsto\fesc$~\eqref{eq:fdef}---a M\"obius transform, smooth and increasing
+with derivative bounded away from $0$ and $\infty$ on the range---carries the geometric decay to the
+induced escape at the \emph{same rate},
 \[
 f_{\mathrm{gate}}(n)-q_{\mathrm{irr}}\;=\;\Theta(c^{\,n}),
 \]
 which is all Proposition~\ref{prop:cost} uses. We write $f_{\mathrm{gate}}(n)=q_{\mathrm{irr}}+(\fesc_0-q_{\mathrm{irr}})c^{\,n}$
-below only as a representative closed form with this decay rate (not an exact identity), $\fesc_0>q_{\mathrm{irr}}$
-the ungated escape; each family costs a fixed $g_F$. (With $a_G<1$, conjoining families also decays
-good-acceptance, which the retry-cost caveat below addresses.)
+below only as a representative closed form with this rate, not an exact identity; each family costs a
+fixed $g_F$. The $a_G(n)\ge a_G^{\min}$ hypothesis is load-bearing: if instead conjoining families drives
+$a_G(n)=\prod_i a_{G,i}\to0$ (pure unanimous stacking), then for $\lirr>0$ the posterior $\fesc\to1$, not
+$q_{\mathrm{irr}}$---the comparison then fails, and holding $a_G$ up requires a calibrated aggregator, not
+raw conjunction (see ``where the argument stops'').
 \end{assumption}
 
 \emph{Scale.} Solving $e(C)=q_{\mathrm{irr}}+\delta$ under Assumption~\ref{ass:det} gives the compute to make the
@@ -410,8 +422,7 @@ classical theory of \emph{association} of random variables~\cite{esary1967} and 
 reliability~\cite{barlowproschan1965}: monotone functions of independent variables are associated, and
 associated components satisfy exactly the series-system inequality below. We do not claim the
 inequality; our contribution is only its application to output provenance and the packaged strictness
-characterization, and we record it because Part~I and the released record left the multi-parent case
-unstated.
+characterization, which the companion papers state only for the independent-unit case.
 
 \begin{assumption}[Monotone provenance model]\label{ass:prov}
 The escape of unit $j$ is an indicator $I_j=\phi_j(X)\in\{0,1\}$, where
@@ -448,8 +459,9 @@ coordinatewise-monotone maps and the series-system bound of~\cite{esary1967}.
 Under Assumption~\ref{ass:prov}, for \emph{any} number of shared parents,
 \begin{equation}\label{eq:corr}
 \Esc_{\mathrm{corr}}(n)\;=\;1-\Pr\!\Big[\textstyle\bigcap_{j=1}^{n}\{I_j=0\}\Big]
-\;\le\;1-\prod_{j=1}^{n}(1-\fesc_j)\;=\;1-(1-\fesc)^n.
+\;\le\;1-\prod_{j=1}^{n}(1-\fesc_j),
 \end{equation}
+which equals $1-(1-\fesc)^n$ when the units share a common marginal $\fesc$.
 Assume in addition every unit has $\fesc_j<1$. Then the bound is strict as soon as some shared parent
 $X_s$ is \emph{jointly pivotal} for two distinct units $j,k$---i.e.\ $X_s$ is non-degenerate and, on a
 positive-probability set of the other coordinates $X_{-s}$, both $\phi_j$ and $\phi_k$ are non-constant
@@ -500,13 +512,12 @@ Lemma~\ref{lem:harris} delivers mutual independence directly.)
 \end{proof}
 
 \begin{remark}[The multi-parent case]
-A concern in the source analysis was whether ``strictly below independent'' survives when a unit has
-$k\ge3$ shared parents, where multi-parent dependence might turn an escape correlation negative.
-It cannot: the escape indicators are monotone functions of \emph{independent} primitives, so
-association holds for \emph{any} $k$~\cite{esary1967}, and strictness is governed only by joint
-pivotality (with $\fesc_l<1$), not by parent count. This was never open in the classical association
-literature---EPW places no restriction on the number of shared inputs; it was simply unstated in
-Part~I's record, and we state it.
+One might ask whether ``strictly below independent'' survives when a unit has $k\ge3$ shared parents,
+where multi-parent dependence might turn an escape correlation negative. It cannot: the escape
+indicators are monotone functions of \emph{independent} primitives, so association holds for \emph{any}
+$k$~\cite{esary1967}, and strictness is governed only by joint pivotality (with $\fesc_l<1$), not by
+parent count. This was never open in the classical association literature---EPW places no restriction on
+the number of shared inputs; we simply make it explicit here for the provenance setting.
 \end{remark}
 
 \begin{remark}[Interpretation]\label{rem:interp}
@@ -566,9 +577,9 @@ an \emph{opportunity} to add a genuinely new indistinguishability relation---an 
 saw---but organizational independence does not \emph{guarantee} epistemic non-redundancy: an R2
 reproducer re-running the builder's own check largely re-applies the builder's relation and mainly
 hardens the \emph{evidence} (against fraud or setup error), and an external party can share the
-builder's assumptions and add nothing. Actual floor reduction requires a genuinely new relation
-$A_{\mathrm{new}}$ with $\mu(\Stealth(F)\setminus A_{\mathrm{new}})>0$; the ladder is a proxy for
-seeking one, not a proof that a higher rung supplies it.
+builder's assumptions and add nothing. Actual floor reduction requires an imported family $N$ whose
+stealth set $\Sigma_N$ genuinely excludes part of the existing blind spot, $\mu(\Sigma_F\setminus\Sigma_N)>0$
+(\S\ref{sec:epistemic}); the ladder is a proxy for seeking one, not a proof that a higher rung supplies it.
 
 \subsection{Typed evidence should not collapse to a scalar}
 A pipeline that mixes a conditional formal proof, a deterministic test or compile result, a
@@ -625,8 +636,9 @@ regard this as a single idea deserving its own careful treatment and do not deve
 \end{enumerate}
 
 \section{Related work}\label{sec:related}
-This paper extends Part~I~\cite{matijasevic2026n1}, and inherits its lineage: reliable computation
-from unreliable components~\cite{vonneumann1956,moore1956}, the quantum threshold
+This paper builds on Part~I~\cite{matijasevic2026n1} and its companion~\cite{matijasevic2026gg} (the
+statistical and mechanistic accounts of the floor, respectively), and inherits their lineage: reliable
+computation from unreliable components~\cite{vonneumann1956,moore1956}, the quantum threshold
 theorem~\cite{aharonov1997}, Condorcet's jury theorem~\cite{condorcet1785}, the Young--Daly
 checkpoint interval~\cite{young1974,daly2006}, and the $N$-version-programming tradition on coincident
 failure~\cite{eckhardt1985,littlewood1989,knight1986}, whose contemporary agentic echo is the
@@ -662,18 +674,21 @@ blind spot (the self-generation floor of~\cite{matijasevic2026gg}); above that f
 reaches a target more cheaply than scaling the executor's own error does (Prop.~\ref{prop:cost}); and
 at fixed marginals, positive provenance dependence only clusters escapes, never raising the chance of
 at least one relative to independence (Prop.~\ref{prop:corr}). None of these is new mathematics; the
-contribution is the synthesis---four independent tools trained on Part~I's floor---plus the one
-conditional cost calculation. The floor has several levers: diversity lowers the lineage-\emph{reducible}
-stealth mass, better specifications or reality-grounding lower the irreducible part $\lirr$, and a
-stronger executor lowers the prevalence $\pi$; ``irreducible'' is always relative to a fixed executor
+contribution is the synthesis---three classical tools trained on the floor of Part~I
+and~\cite{matijasevic2026gg}---plus the one conditional cost calculation. The floor has several levers:
+diversity lowers the lineage-\emph{reducible} stealth mass, better specifications or reality-grounding
+lower the irreducible part $\lirr$, and a stronger executor lowers the prevalence $\pi$; ``irreducible''
+is always relative to a fixed executor
 and specification. Much of this is verification engineering available today, alongside gains in raw
 model capability.
 
 \section*{Code and data availability}
-The numerical claims of \S\S\ref{sec:escape}--\ref{sec:corr} are reproduced by the companion
-simulation at \url{https://github.com/ivmat/gated-computation-sim}. This paper is a companion to and
-extends the results archived under DOI
-\href{https://doi.org/10.5281/zenodo.20820968}{10.5281/zenodo.20820968}.
+The numerical claims of \S\S\ref{sec:escape}--\ref{sec:corr} are reproduced by
+\texttt{simulate\_floor.py} at \url{https://github.com/ivmat/gated-computation-sim}. This paper builds
+on two companion papers archived on Zenodo: Part~I,
+DOI~\href{https://doi.org/10.5281/zenodo.20820968}{10.5281/zenodo.20820968}, and the self-generation
+floor paper~\cite{matijasevic2026gg},
+DOI~\href{https://doi.org/10.5281/zenodo.20837102}{10.5281/zenodo.20837102}.
 
 \begin{thebibliography}{99}
 \small

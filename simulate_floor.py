@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Part II companion simulation: reproduces the numerical illustrations of
+Companion simulation: reproduces the numerical illustrations of
 `paper_floor.tex` (the escape identity of Sec. 3 and the correlated-escape bound of
 Sec. 6). Self-contained; standard library only. Numbers are printed and are
 seed-reported where Monte-Carlo is used.
