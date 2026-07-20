@@ -297,10 +297,10 @@ empirical power law.
 
 We work throughout in the per-emitted-unit escape probability $\fesc$ of \S\ref{sec:escape}, and compare
 the two routes \emph{for a fixed baseline executor}---so the prevalence $\pi$ is held fixed and the
-irreducible floor is a constant. In the epistemic model that floor is the posterior value
-$q_{\mathrm{irr}}=\pi\lirr/(\pi\lirr+(1-\pi)a_G)>0$, but we take $q_{\mathrm{irr}}$ as an exogenous
-constant of a fixed specification and executor (on the scaling route, a genuinely better executor lowers
-$\pi$ and hence $\fesc$ separately---a different lever, out of scope here). We compare the cost of
+irreducible floor is a constant $q_{\mathrm{irr}}>0$, which we take as exogenous to a fixed specification
+and executor (its epistemic value is fixed in Assumption~\ref{ass:gate}; on the scaling route, a
+genuinely better executor lowers $\pi$ and hence $\fesc$ separately---a different lever, out of scope
+here). We compare the cost of
 reaching a target a distance
 \[
 \delta\;:=\;q-q_{\mathrm{irr}}\;>\;0
@@ -319,8 +319,8 @@ the loss-to-error map is an extra unstated step.
 
 \begin{assumption}[Gating cost, floor-aware]\label{ass:gate}
 Diverse gate families reduce the \emph{reducible} conditional false-accept rate geometrically:
-$a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ for a per-family multiplier $c\in(0,1)$ (Part~I's decomposition
-with conditional independence across families; \S\ref{sec:escape}). We assume the good-acceptance rate is
+$a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ with $a_{B,0}>\lirr$ and per-family multiplier $c\in(0,1)$
+(Part~I's decomposition with conditional independence across families; \S\ref{sec:escape}). We assume the good-acceptance rate is
 held \emph{constant}, $a_G(n)\equiv a_G>0$ (a calibrated aggregator, not raw conjunction), with
 $0<\pi<1$, and set the irreducible floor in the escape metric to
 $q_{\mathrm{irr}}=\pi\lirr/(\pi\lirr+(1-\pi)a_G)$. Then $a_B\mapsto\fesc$~\eqref{eq:fdef} is a
@@ -363,9 +363,9 @@ ratio vanishes:
 \]
 \end{proposition}
 \begin{proof}
-Put $x=1/\delta\to\infty$. Then $C=\kappa^{1/p}x^{1/p}$ and
-$g_F\,n_{\mathrm{gate}}\le g_F\big(1+\ln((\fesc_0-q_{\mathrm{irr}})x)/\ln(1/c)\big)$, so the ratio is
-$O(\log x)/x^{1/p}\to0$, since $\ln x=o(x^{1/p})$ for every $p>0$.
+Put $x=1/\delta\to\infty$. Then $C=\kappa^{1/p}x^{1/p}$ and, by~\eqref{eq:gate},
+$g_F\,n_{\mathrm{gate}}\le g_F\big(1+\ln(Bx)/\ln(1/c)\big)$ with $B$ the upper $\Theta$-constant
+of~\eqref{eq:gaterate}, so the ratio is $O(\log x)/x^{1/p}\to0$, since $\ln x=o(x^{1/p})$ for every $p>0$.
 \end{proof}
 
 The separation is meaningful for $\delta\in(0,\ \fesc_0-q_{\mathrm{irr}}]$; it says nothing at or below
