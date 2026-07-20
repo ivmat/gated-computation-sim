@@ -1,32 +1,46 @@
-# A Fault-Tolerance Threshold for Gated Agentic Computation
+# Gated Agentic Computation — verification-floor papers
 
-**Reliable Long-Horizon Work from Unreliable Executors** — Ivo Matijašević
+**Ivo Matijašević** · three linked papers on the reliability *floor* of gated (verified) agentic
+systems, with self-contained simulations that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
-📄 **Read the paper:** [**paper.pdf**](paper.pdf) (pre-compiled) · source: [`paper.tex`](paper.tex)
-🧪 **Reproduce every number and figure:** [`simulate.py`](simulate.py) — runs in a few seconds.
+## The three papers
 
-This repository is the companion to the paper: a self-contained, validated simulation
-that reproduces all of its numerical claims and both figures.
+**1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
+Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
+· [`paper.pdf`](paper.pdf) · [`paper.tex`](paper.tex) · reproduce with [`simulate.py`](simulate.py).
+The **statistical floor**: verifying checkpointed segments with majority-vote gate stacks gives
+`O(log T)`-overhead reliable work above a threshold, but a shared blind spot — a **stealth mass** `λ_st`
+of faults the whole gate family passes — caps the reliable horizon at `H_raw/λ_st` regardless of gate
+count. The binding constraint is verification **diversity**, not model capability. *(Documented in
+detail below.)*
 
-### Companion papers in this repo
+**2 — Generated Gates Inherit Their Generator's Blind Spots** *(A Diversity Floor for Self-Generated
+Verification)* · **published** (2026-06-25), DOI [10.5281/zenodo.20837102](https://doi.org/10.5281/zenodo.20837102)
+· [`paper_gg.pdf`](paper_gg.pdf) · [`paper_gg.tex`](paper_gg.tex) (simulation in its appendix). The
+**mechanism**: gates a model family generates *inherit that family's blind spots* (Σ_F), so a system
+generating its own verifiers has an escape floor `λ_F` it cannot beat from the inside — it falls only
+when an *exogenous* model family or a *reality-grounded* gate (one deciding by ground truth) is imported.
 
-- **Generated Gates Inherit Their Generator's Blind Spots: A Diversity Floor for Self-Generated
-  Verification** — [`paper_gg.pdf`](paper_gg.pdf) · [`paper_gg.tex`](paper_gg.tex). Published:
-  [10.5281/zenodo.20837102](https://doi.org/10.5281/zenodo.20837102). Establishes the stealth-set floor:
-  gates a model family generates inherit its blind spots, so a self-generating system's escape floor is
-  fixed until an *exogenous* family or *reality-grounded* gate is imported.
+**3 — Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** · **draft**
+(review-complete, no DOI yet) · [`paper_floor.pdf`](paper_floor.pdf) · [`paper_floor.tex`](paper_floor.tex)
+· reproduce with [`simulate_floor.py`](simulate_floor.py). Takes the floor of (1) and (2) as given and
+draws three **consequences** — a size-axis escape identity, a gating-vs-scaling cost comparison
+(`O(log 1/δ)` vs `O((1/δ)^{1/p})`), and a correlated-escape bound under shared provenance — plus an
+**assurance framing** (an ordinal evidence ladder and a typed-evidence non-collapse rule). The
+mathematics is classical and attributed to its sources; the contribution is the synthesis.
 
-- **Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** (draft, not
-  yet released) — [`paper_floor.tex`](paper_floor.tex) · draft PDF [`paper_floor.pdf`](paper_floor.pdf).
-  Takes the floor above as given and develops three consequences — a size-axis escape identity, a
-  gating-vs-scaling cost comparison, and a correlated-escape bound — plus an assurance framing. Numbers
-  reproduce via [`simulate_floor.py`](simulate_floor.py). The mathematics is classical and attributed as
-  such; the contribution is the synthesis and one closed-form cost comparison. No DOI yet.
+**How they fit.** (1) proves the floor exists and is set by the verification stack's shared blind spot;
+(2) explains *why* it is unbeatable from inside a single model family, and what lowers it (imported
+diversity, reality-grounding); (3) works out what the floor costs, how it propagates across output size
+and shared provenance, and how to grade assurance honestly against it.
 
 ---
+
+The remainder of this README documents **paper 1** in detail — the repository's primary reproduction
+target (`simulate.py`).
 
 ## Abstract
 
@@ -165,7 +179,7 @@ and changes neither the gate counts nor any theorem.
 
 ## Citation
 
-If you use this work, please cite it via its Zenodo DOI:
+Cite whichever paper you use, via its Zenodo DOI:
 
 ```bibtex
 @misc{matijasevic2026gated,
@@ -173,16 +187,35 @@ If you use this work, please cite it via its Zenodo DOI:
   title        = {A Fault-Tolerance Threshold for Gated Agentic Computation:
                   Reliable Long-Horizon Work from Unreliable Executors},
   year         = {2026},
-  howpublished = {\url{https://github.com/ivmat/gated-computation-sim}},
   doi          = {10.5281/zenodo.20820968},
   url          = {https://doi.org/10.5281/zenodo.20820968},
   note         = {Preprint; archived on Zenodo.}
 }
+
+@misc{matijasevic2026gg,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Generated Gates Inherit Their Generator's Blind Spots:
+                  A Diversity Floor for Self-Generated Verification},
+  year         = {2026},
+  doi          = {10.5281/zenodo.20837102},
+  url          = {https://doi.org/10.5281/zenodo.20837102},
+  note         = {Preprint; archived on Zenodo.}
+}
+
+@misc{matijasevic2026floor,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Escape, Cost, and Correlation at the Verification Floor
+                  of Gated Agentic Computation},
+  year         = {2026},
+  howpublished = {\url{https://github.com/ivmat/gated-computation-sim}},
+  note         = {Draft; DOI pending.}
+}
 ```
 
-> `10.5281/zenodo.20820968` is the reserved DOI for this work. Each GitHub Release Zenodo archives
-> gets its own version DOI; if Zenodo also assigns a *concept* DOI (one that always resolves to the
-> latest version), prefer that one in the citation above for early "cite my work" use.
+> `10.5281/zenodo.20820968` (paper 1) and `10.5281/zenodo.20837102` (paper 2) are the reserved DOIs.
+> Each GitHub Release that Zenodo archives gets its own version DOI; if Zenodo assigns a *concept* DOI
+> (one that always resolves to the latest version), prefer that for early "cite my work" use. Paper 3's
+> DOI will be added once it is deposited.
 
 ## License
 
