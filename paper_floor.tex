@@ -252,10 +252,12 @@ decomposes as $\lst=\lred+\lirr$ into a diversity-reducible part and a specifica
 floor. The companion paper~\cite{matijasevic2026gg} gives the mechanism: modelling a family $F$ by its
 representation relation $\sim_F$ (indistinguishability under every prompt), the stealth set
 $\Sigma_F=\{\text{bad }c:\ c\sim_F c'\text{ for some good }c'\}$---with $\mu$ the fault-generating
-distribution and $\lambda_F=\mu(\Sigma_F)$---is accepted by every \emph{sound} gate built within $F$, and
-with nonzero false rejects up to a vanishing margin (its GG1). Consequently within-family generation
-cannot drive the escape floor below $\lambda_F$---however deep the generation, however many gates check
-gates, however diverse the prompts (its GG2; we use only this lower-bound direction, which is what our
+distribution and $\lambda_F=\mu(\Sigma_F)$---is accepted by every \emph{sound} gate built within $F$
+(its GG1; and, under GG's uniform likelihood-ratio bound, by any gate with false-reject mass $\rho_0$
+except on a stealth set of mass at most $\kappa\rho_0$, vanishing as $\rho_0\to0$---absent a finite
+$\kappa$, only the sound case). Consequently, on the sound-gate case, within-family generation cannot
+drive the escape floor below $\lambda_F$---however deep the generation, however many gates check gates,
+however diverse the prompts (its GG2; we use only this lower-bound direction, which is what our
 conclusions need, and not GG2's achievability, which requires sufficient within-family coverage). Only
 two moves lower the floor: importing an \emph{exogenous} family, whose blind spot, when independent,
 multiplies it ($\mu(\Sigma_F\cap\Sigma_N)=\lambda_F\lambda_N$, driving $\lred$ down), and a
@@ -318,20 +320,20 @@ the loss-to-error map is an extra unstated step.
 \begin{assumption}[Gating cost, floor-aware]\label{ass:gate}
 Diverse gate families reduce the \emph{reducible} conditional false-accept rate geometrically:
 $a_B(n)=\lirr+(a_{B,0}-\lirr)\,c^{\,n}$ for a per-family multiplier $c\in(0,1)$ (Part~I's decomposition
-with conditional independence across families; \S\ref{sec:escape}). We further assume the good-acceptance
-rate is bounded away from zero, $a_G(n)\ge a_G^{\min}>0$, and $0<\pi<1$, $\fesc_0>q_{\mathrm{irr}}$. Under
-these, the posterior map $a_B\mapsto\fesc$~\eqref{eq:fdef}---a M\"obius transform, smooth and increasing
-with derivative bounded away from $0$ and $\infty$ on the range---carries the geometric decay to the
-induced escape at the \emph{same rate},
-\[
+with conditional independence across families; \S\ref{sec:escape}). We assume the good-acceptance rate is
+held \emph{constant}, $a_G(n)\equiv a_G>0$ (a calibrated aggregator, not raw conjunction), with
+$0<\pi<1$, and set the irreducible floor in the escape metric to
+$q_{\mathrm{irr}}=\pi\lirr/(\pi\lirr+(1-\pi)a_G)$. Then $a_B\mapsto\fesc$~\eqref{eq:fdef} is a
+\emph{fixed} M\"obius transform, increasing with derivative bounded away from $0$ and $\infty$ on
+$[\lirr,a_{B,0}]$, so the geometric decay of $a_B(n)-\lirr$ carries to the induced escape at the same
+rate:
+\begin{equation}\label{eq:gaterate}
 f_{\mathrm{gate}}(n)-q_{\mathrm{irr}}\;=\;\Theta(c^{\,n}),
-\]
-which is all Proposition~\ref{prop:cost} uses. We write $f_{\mathrm{gate}}(n)=q_{\mathrm{irr}}+(\fesc_0-q_{\mathrm{irr}})c^{\,n}$
-below only as a representative closed form with this rate, not an exact identity; each family costs a
-fixed $g_F$. The $a_G(n)\ge a_G^{\min}$ hypothesis is load-bearing: if instead conjoining families drives
-$a_G(n)=\prod_i a_{G,i}\to0$ (pure unanimous stacking), then for $\lirr>0$ the posterior $\fesc\to1$, not
-$q_{\mathrm{irr}}$---the comparison then fails, and holding $a_G$ up requires a calibrated aggregator, not
-raw conjunction (see ``where the argument stops'').
+\end{equation}
+which is all Proposition~\ref{prop:cost} uses. Each family costs a fixed $g_F$. The constancy of $a_G$
+is load-bearing: a varying $a_G(n)$---in particular $a_G(n)=\prod_i a_{G,i}\to0$ under pure unanimous
+stacking---breaks the rate, and for $\lirr>0$ drives $\fesc\to1$ rather than $q_{\mathrm{irr}}$; holding
+$a_G$ fixed is exactly what a calibrated aggregator, not raw conjunction, buys.
 \end{assumption}
 
 \emph{Scale.} Solving $e(C)=q_{\mathrm{irr}}+\delta$ under Assumption~\ref{ass:det} gives the compute to make the
@@ -341,12 +343,15 @@ C(\delta)=\big(\kappa/\delta\big)^{1/p},
 \end{equation}
 polynomial in $1/\delta$ with a large exponent $1/p\approx2$--$20$.
 
-\emph{Gate.} Solving $f_{\mathrm{gate}}(n)\le q_{\mathrm{irr}}+\delta$ gives the number of families,
+\emph{Gate.} By~\eqref{eq:gaterate} there are constants $0<A\le B$ with
+$A c^n\le f_{\mathrm{gate}}(n)-q_{\mathrm{irr}}\le B c^n$, so $f_{\mathrm{gate}}(n)\le q_{\mathrm{irr}}+\delta$
+holds once $B c^n\le\delta$, giving a family count
 \begin{equation}\label{eq:gate}
-n_{\mathrm{gate}}(\delta)=\max\!\Big\{0,\ \Big\lceil\tfrac{\ln((\fesc_0-q_{\mathrm{irr}})/\delta)}{\ln(1/c)}\Big\rceil\Big\}
-=O\!\big(\log(1/\delta)\big),
+n_{\mathrm{gate}}(\delta)=\Big\lceil\tfrac{\ln(B/\delta)}{\ln(1/c)}\Big\rceil=O\!\big(\log(1/\delta)\big),
 \end{equation}
-logarithmic in $1/\delta$, at total cost $g_F\,n_{\mathrm{gate}}(\delta)$.
+logarithmic in $1/\delta$, at total cost $g_F\,n_{\mathrm{gate}}(\delta)$. (The representative closed
+form $f_{\mathrm{gate}}(n)=q_{\mathrm{irr}}+(\fesc_0-q_{\mathrm{irr}})c^{\,n}$, with the same rate, is used
+only for the illustration in Table~\ref{tab:sep}.)
 
 \begin{proposition}[Cost separation]\label{prop:cost}
 Under Assumptions~\ref{ass:det}--\ref{ass:gate}, as the target approaches the shared floor
@@ -368,7 +373,7 @@ the floor, where $\delta\le0$ and neither route helps. Table~\ref{tab:sep} makes
 one illustrative choice of constants ($p=0.1$; $\kappa=0.1$; $\fesc_0-q_{\mathrm{irr}}=0.1$;
 $c=\tfrac12$; $g_F=1$);
 the asymptotic separation, not the row values, is the result, and every entry is reproducible
-from~\eqref{eq:det}--\eqref{eq:gate}.
+from the closed forms in the caption.
 
 \begin{table}[h]
 \centering
