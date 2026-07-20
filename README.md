@@ -24,9 +24,10 @@ Verification)* · **published** (2026-06-25), DOI [10.5281/zenodo.20837102](http
 generating its own verifiers has an escape floor `λ_F` it cannot beat from the inside — it falls only
 when an *exogenous* model family or a *reality-grounded* gate (one deciding by ground truth) is imported.
 
-**3 — Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** · **draft**
-(review-complete, no DOI yet) · [`paper_floor.pdf`](paper_floor.pdf) · [`paper_floor.tex`](paper_floor.tex)
-· reproduce with [`simulate_floor.py`](simulate_floor.py). Takes the floor of (1) and (2) as given and
+**3 — Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** ·
+**published**, DOI [10.5281/zenodo.21456783](https://doi.org/10.5281/zenodo.21456783) ·
+[`paper_floor.pdf`](paper_floor.pdf) · [`paper_floor.tex`](paper_floor.tex) · reproduce with
+[`simulate_floor.py`](simulate_floor.py). Takes the floor of (1) and (2) as given and
 draws three **consequences** — a size-axis escape identity, a gating-vs-scaling cost comparison
 (`O(log 1/δ)` vs `O((1/δ)^{1/p})`), and a correlated-escape bound under shared provenance — plus an
 **assurance framing** (an ordinal evidence ladder and a typed-evidence non-collapse rule). The
@@ -207,15 +208,16 @@ Cite whichever paper you use, via its Zenodo DOI:
   title        = {Escape, Cost, and Correlation at the Verification Floor
                   of Gated Agentic Computation},
   year         = {2026},
-  howpublished = {\url{https://github.com/ivmat/gated-computation-sim}},
-  note         = {Draft; DOI pending.}
+  doi          = {10.5281/zenodo.21456783},
+  url          = {https://doi.org/10.5281/zenodo.21456783},
+  note         = {Preprint; archived on Zenodo.}
 }
 ```
 
-> `10.5281/zenodo.20820968` (paper 1) and `10.5281/zenodo.20837102` (paper 2) are the reserved DOIs.
-> Each GitHub Release that Zenodo archives gets its own version DOI; if Zenodo assigns a *concept* DOI
-> (one that always resolves to the latest version), prefer that for early "cite my work" use. Paper 3's
-> DOI will be added once it is deposited.
+> Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2), and
+> `10.5281/zenodo.21456783` (paper 3). Each GitHub Release that Zenodo archives gets its own version
+> DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
+> for early "cite my work" use.
 
 ## License
 
