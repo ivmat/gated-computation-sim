@@ -19,3 +19,4 @@ venv/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+.DS_Store
