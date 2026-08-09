@@ -1,7 +1,7 @@
 # Gated Agentic Computation — verification-floor papers
 
-**Ivo Matijašević** · three linked papers on the reliability *floor* of gated (verified) agentic
-systems, with self-contained simulations that reproduce every numerical claim.
+Three linked papers on the reliability *floor* of gated (verified) agentic systems, with
+self-contained simulations that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
