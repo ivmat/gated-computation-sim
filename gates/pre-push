@@ -1,0 +1,75 @@
+#!/bin/sh
+# Pre-push gate: run gates/check.sh against the tip of every ref being
+# pushed, in a throwaway detached worktree, and refuse the push on failure.
+#
+# Installed by gates/install_hooks.sh as .git/hooks/pre-push (this file is
+# also committed to the repo so it's auditable and can be reinstalled).
+#
+# git invokes pre-push with two args ($1 = remote name, $2 = remote URL) and
+# feeds it lines on stdin of the form:
+#   <local ref> <local sha1> <remote ref> <remote sha1>
+# one line per ref being pushed. A deleted ref has local sha1 =
+# 0000000000000000000000000000000000000000, and there is nothing to check
+# out in that case.
+
+# If install_hooks.sh preserved a pre-existing pre-push hook, it lives next
+# to this one as pre-push.pre-guard; chain to it after our checks pass so
+# both run.
+
+set -eu
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "$repo_root"
+
+hooks_dir=$(git rev-parse --git-path hooks)
+overall_fail=0
+
+check_sha() {
+  sha="$1"
+  wt_dir=$(mktemp -d "${TMPDIR:-/tmp}/gcs-prepush.XXXXXX")
+  if git worktree add --detach --quiet "$wt_dir" "$sha" >/dev/null 2>&1; then
+    if sh "$wt_dir/gates/check.sh" "$wt_dir"; then
+      echo "checks: GREEN @ $sha"
+      status=0
+    else
+      echo "checks: FAILED @ $sha" >&2
+      status=1
+    fi
+  else
+    echo "checks: FAILED to create worktree for $sha" >&2
+    status=1
+  fi
+  git worktree remove --force "$wt_dir" >/dev/null 2>&1 || rm -rf "$wt_dir"
+  git worktree prune >/dev/null 2>&1 || true
+  return $status
+}
+
+if [ "$#" -eq 0 ]; then
+  # Direct invocation without the remote-name/remote-url args git always
+  # passes (i.e. someone ran this hook by hand, not `git push`). Fail
+  # closed: check the current HEAD.
+  sha=$(git rev-parse HEAD)
+  check_sha "$sha" || overall_fail=1
+else
+  # Normal git invocation: $1=remote name, $2=remote url; ref-update lines
+  # on stdin, one per pushed ref. Save stdin to a temp file first, both so
+  # we can re-feed it to a chained pre-guard hook, and because reading it
+  # line-by-line with `read` inside the loop consumes it once.
+  stdin_copy=$(mktemp "${TMPDIR:-/tmp}/gcs-prepush-stdin.XXXXXX")
+  cat >"$stdin_copy"
+  while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+    [ -n "${local_ref:-}" ] || continue
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+      # Deleted ref: nothing pushed, nothing to check.
+      continue
+    fi
+    check_sha "$local_sha" || overall_fail=1
+  done <"$stdin_copy"
+
+  if [ "$overall_fail" -eq 0 ] && [ -x "$hooks_dir/pre-push.pre-guard" ]; then
+    "$hooks_dir/pre-push.pre-guard" "$@" <"$stdin_copy" || overall_fail=1
+  fi
+  rm -f "$stdin_copy"
+fi
+
+exit $overall_fail
