@@ -21,8 +21,9 @@ detail below.)*
 Verification)* · **published** (2026-06-25), DOI [10.5281/zenodo.20837102](https://doi.org/10.5281/zenodo.20837102)
 · [`paper_gg.pdf`](paper_gg.pdf) · [`paper_gg.tex`](paper_gg.tex) (simulation in its appendix). The
 **mechanism**: gates a model family generates *inherit that family's blind spots* (Σ_F), so a system
-generating its own verifiers has an escape floor `λ_F` it cannot beat from the inside — it falls only
-when an *exogenous* model family or a *reality-grounded* gate (one deciding by ground truth) is imported.
+generating its own verifiers has an escape floor `λ_F` that, under the paper's model, cannot be lowered
+from inside — it falls only when an *exogenous* model family or a *reality-grounded* gate (one deciding
+by ground truth) is imported.
 
 **3 — Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** ·
 **published**, DOI [10.5281/zenodo.21456783](https://doi.org/10.5281/zenodo.21456783) ·
@@ -33,10 +34,16 @@ draws three **consequences** — a size-axis escape identity, a gating-vs-scalin
 **assurance framing** (an ordinal evidence ladder and a typed-evidence non-collapse rule). The
 mathematics is classical and attributed to its sources; the contribution is the synthesis.
 
-**How they fit.** (1) proves the floor exists and is set by the verification stack's shared blind spot;
-(2) explains *why* it is unbeatable from inside a single model family, and what lowers it (imported
-diversity, reality-grounding); (3) works out what the floor costs, how it propagates across output size
-and shared provenance, and how to grade assurance honestly against it.
+**How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
+spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
+and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
+propagates across output size and shared provenance, and how to grade assurance honestly against it.
+
+**Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
+models, reproduced here by the included simulations; none has been validated on a deployed agent
+system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
+deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
+is the claim to rely on.
 
 ---
 
