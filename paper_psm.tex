@@ -1,0 +1,1359 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage[expansion=false]{microtype}
+\usepackage{enumitem}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+\setlength{\emergencystretch}{3em}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{hypothesis}{Hypothesis}%
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\lst}{\lambda_{\mathrm{st}}}
+\newcommand{\lred}{\lambda_{\mathrm{red}}}
+\newcommand{\lirr}{\lambda_{\mathrm{irr}}}
+\newcommand{\Hraw}{H_{\mathrm{raw}}}
+\newcommand{\Hgated}{H_{\mathrm{gated}}}
+\newcommand{\am}{\bar\alpha_m}
+\newcommand{\bm}{\bar\beta_m}
+\newcommand{\eseg}{\varepsilon_{\mathrm{seg}}}
+\newcommand{\Esc}{E}
+\newcommand{\fesc}{f}
+\newcommand{\Stealth}{\mathrm{Stealth}}
+\newcommand{\image}{\mathrm{im}}
+\newcommand\blfootnote[1]{\begingroup\renewcommand\thefootnote{}\footnote{#1}\addtocounter{footnote}{-1}\endgroup}
+\newcommand{\simF}{\sim_F}
+\newcommand{\SigF}{\Sigma_F}
+\newcommand{\SigN}{\Sigma_N}
+\newcommand{\lF}{\lambda_F}
+\newcommand{\lN}{\lambda_N}
+\newcommand{\lpc}{\lambda_{\mathrm{pc}}}
+\newcommand{\lmix}{\lambda_{\mathrm{mix}}}
+\newcommand{\eop}{\varepsilon_{\mathrm{o}}}
+\newcommand{\ecl}{\varepsilon_{\mathrm{c}}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Z}{\mathcal{Z}}
+\newcommand{\Zgood}{\mathcal{Z}_{\mathrm{good}}}
+\newcommand{\Zbad}{\mathcal{Z}_{\mathrm{bad}}}
+\newcommand{\Mclass}{\mathcal{M}}
+\newcommand{\Bld}{\mathsf{B}}
+\newcommand{\muB}{\mu_{\Bld}}
+\newcommand{\piB}{\pi_{\Bld}}
+\newcommand{\lFB}{\lambda_F^{\Bld}}
+\newcommand{\cstate}[1]{\textup{\textsc{#1}}}
+\newcommand{\postf}{\mathrm{post}^{\mathrm{f}}}
+\newcommand{\postr}{\mathrm{post}^{\mathrm{r}}}
+\newcommand{\lh}{\ell_h}
+\newcommand{\Hmono}{H_{\mathrm{mono}}}
+
+\title{\vspace{-2em}Progressive Semantic Mechanization:\\
+\large Compiling Intellectual Work into Deterministic Programs with Typed Semantic Holes}
+
+\author{Ivo Matija\v{s}evi\'c\\ \small Independent Researcher \\ \small ivomatijasevic@gmail.com}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+\blfootnote{\textcopyright~2026 Ivo Matija\v{s}evi\'c.\ This work is licensed under a Creative Commons
+Attribution 4.0 International (CC BY 4.0) license, \url{https://creativecommons.org/licenses/by/4.0/}.}
+
+\begin{abstract}
+Which intellectual work should be an executor call (a call to a model or a person)? We model work as a program with typed
+\emph{semantic holes}. Each site is open or closed separately for decision, production, and
+acceptance, and separately per input scope. \emph{Progressive semantic mechanization} moves work
+to deterministic mechanisms through an acceptance-controlled promotion.
+Under the stated independence assumptions, a share $c$ of production routed to mechanisms gives the first-order
+horizon ceiling $\Hraw/((1-c)\lst+c\,\lpc)$, where $\Hraw$ is the ungated horizon, $\lst$ the shared blind-spot mass of Part~I, and $\lpc$
+premature-closure escape.
+Closure raises this ceiling only where $\lpc<\lst$.
+Because pointwise evidence cannot separate twins (mechanisms with the same evidence record), a
+confidence bound valid over the mechanism class can fall below a twin's fault mass only with
+the allowed error probability. Same-family evidence inherits the family's indistinguishability,
+not a general lower bound on the mechanism's error. Copies of outputs accepted by sound
+same-family gates inherit the floor in expectation; the corresponding claim for generalizing
+builders is an untested hypothesis.
+Further results give a validation-inclusive break-even volume, a composition bound under
+completeness and provenance assumptions, and two separate scale gains: from fault-free,
+rejection-free closure, and from bounded load under an untested hazard hypothesis.
+The results are elementary statements in the model, not universal laws. No modeled quantity is
+estimated from data. The simulation uses chosen parameters, the plan is a design, and the instance
+reports counts only.
+\end{abstract}
+
+\section{Introduction}\label{sec:intro}
+Parts~I--III study open production under gates. Part~I~\cite{matijasevic2026n1} gives a
+constant-hazard horizon ceiling of about $\Hraw/\lst$ from a shared blind spot.
+Part~II~\cite{matijasevic2026gg} explains a family floor through a representation model:
+gates decided within one family inherit its stealth set. This holds for sound gates and, under a
+finite uniform likelihood-ratio bound, up to a tolerance for bounded false rejection.
+Part~III~\cite{matijasevic2026floor} studies escape, cost, and correlation at that floor.
+Here we ask which work should remain an executor call.
+
+An analogy motivates the question. In the common agent design, a language model does delegated work by
+fresh judgment at each step, as a clerk once did office work by hand. Yates traces how firms made
+office work systematic, with standard forms, records, and procedures~\cite{yates1989}. The analogy we propose is that systematic records and procedures are
+what make work mechanizable, and that judgment remains for the cases that no procedure covers.
+We ask whether model work admits the same path: formalize what can be formalized,
+mechanize it, and keep an executor for the residual. On this view an executor, model or person,
+stays necessary wherever semantics remain open, but it is an ingredient of such a system, not its
+target.
+
+We treat model inference as residual computation. A work program delegates unresolved work through
+typed holes and assigns explicit semantics to deterministic mechanisms. Promotion moves the
+boundary; regression can move it back. We call this \emph{progressive semantic mechanization}
+(PSM). We have not measured how much work can close.
+
+The ingredients are established: programs with holes, residual programs, compiled reasoning,
+trusted checking, and promotion of recurring model work into code, which has run in
+production~\cite{malik2026crystallization} (\S\ref{sec:related}). We claim no novelty for these.
+Our addition is the link to the verification floor. Closure needs evidence, and that evidence
+has limits distinct from the faults of the mechanism it judges.
+
+The model in \S\ref{sec:model} supports five results in \S\ref{sec:results}: a partial-closure
+horizon ceiling, limits on promotion evidence, a break-even calculation, a composition bound,
+and two scale comparisons. Propositions are proved under stated assumptions.
+Hypotheses~\ref{hyp:distill} and~\ref{hyp:load} are empirical claims used but not tested.
+Section~\ref{sec:open} keeps the remaining questions open.
+The simulation illustrates results; the plan specifies a design; the instance supplies counts.
+None validates the model against a real system.
+
+\section{Model}\label{sec:model}
+Work has constant fault hazard $\lambda$ and checkpointed segments of length $s$.
+An executor produces a bad segment with probability $p=1-e^{-\lambda s}$.
+The ungated horizon is $\Hraw=\ln2/\lambda$.
+The gate family's stealth mass $\lst=\lred+\lirr$ is the fraction of bad segments every gate
+accepts~\cite{matijasevic2026n1}.
+A model family $F$ has representation $r_F$, indistinguishability relation $\simF$, stealth set
+$\SigF$, and stealth mass $\lF=\mu(\SigF)$ under fault distribution
+$\mu$~\cite{matijasevic2026gg}.
+
+\subsection{Work programs and intent}\label{sec:workprogram}
+\begin{definition}[Work program]\label{def:wp}
+A \emph{work program} is a finite directed acyclic graph $W=(V,E)$. Each node $v\in V$ is a
+\emph{site}: a typed operation with an input space $X_v$ and an output space $Y_v$. An edge $(u,v)$
+means that $v$ consumes an output of $u$. A \emph{run} executes the sites in an order that is
+consistent with~$E$. A run of horizon $T$ consists of $n=T/s$ segments, and one site serves each
+segment. The \emph{volume share} $w_v$ of a site is the fraction of segments that it serves;
+$\sum_v w_v=1$.
+\end{definition}
+
+\begin{definition}[Intent predicate and operating distribution]\label{def:intent}
+Each site carries a ground-truth predicate $\varphi_v:X_v\times Y_v\to\{0,1\}$. The value
+$\varphi_v(x,y)=1$ means that $y$ is an acceptable result for the input~$x$. Inputs arrive from an
+\emph{operating distribution} $\D_v$ on $X_v$.
+\end{definition}
+We do not assume that $\varphi_v$ is computable or written down. We drop the index where unambiguous.
+
+\subsection{Three closure axes}\label{sec:axes}
+The axes are \emph{decision} (which transition or local intent), \emph{production} (the artifact),
+and \emph{acceptance} (the verdict on $(x,y)$).
+
+\begin{definition}[Mechanism and executor]\label{def:mech}
+A \emph{mechanism} is a deterministic, terminating procedure whose behaviour is fixed by its text and
+its explicit inputs. It consults no model and no person at run time. The criterion is explicit, accepted semantics, not
+determinism: a greedy-decoded model is deterministic, but its semantics are not explicit. An \emph{executor} is a model or
+a person that serves an axis at run time and whose result is not determined by explicit, accepted
+semantics.
+\end{definition}
+
+\begin{definition}[Closure state]\label{def:closure}
+Let $v$ be a site, $a\in\{\mathrm{dec},\mathrm{prod},\mathrm{acc}\}$ an axis, and $S\subseteq X_v$ an
+input scope. The \emph{closure state} $\kappa_a(v,S)$ takes one of three values.
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+\item \cstate{closed}: a mechanism is \emph{authoritative} for axis $a$ on $S$. For every input in $S$
+the result of the mechanism is used, and no executor serves that axis.
+\item \cstate{open}: an executor serves axis $a$ on $S$, and a reviewed determination states that the
+accepted explicit semantics do not determine the result.
+\item \cstate{unknown}: an executor serves axis $a$ on $S$, and no determination has been made.
+\end{itemize}
+The three states apply to an axis that is \emph{served}: an executor or a mechanism serves it. An
+axis that nothing serves on $S$ is \emph{blocked}. Blocked is not a closure state; it is recorded
+beside the closure states.
+\end{definition}
+
+Closure records authority, not correctness or computational simplicity.
+The state \cstate{unknown} marks unexamined work.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+production & acceptance & meaning \\
+\midrule
+closed & closed & mechanized production and acceptance \\
+open & closed & executor synthesis under a deterministic checker \\
+closed & open & mechanical production judged by an executor \\
+open & open & the largest residual uncertainty \\
+\bottomrule
+\end{tabular}
+\caption{Production and acceptance closure. Parts~I--III study open production under closed
+or open gates.}\label{tab:matrix}
+\end{table}
+
+\begin{remark}[Relation to checker strength]\label{rem:strength}
+The fifth open problem of Part~III grades a check by whether its property is decidable now,
+corroborable soon, or gradeable only later. One reading in the present model is that ``decidable
+now'' is closed acceptance, and that the other two grades are open acceptance with different delays
+before grounded evidence arrives. This is a reading, not a result. We do not develop the grading
+here, and the problem of Part~III stays open.
+\end{remark}
+
+\subsection{Semantic holes}\label{sec:holes}
+\begin{definition}[Semantic hole]\label{def:hole}
+A \emph{semantic hole} is a typed point of a work program at which an axis that is not closed is
+delegated to an executor. It specifies an input contract, an output contract, a scope, an authority,
+the permitted effects, an acceptance, and a provenance requirement.
+\end{definition}
+The containing program owns the contract and transitions. The executor proposes; it does not accept.
+Promotion preserves the contract while replacing the implementation.
+A hole's acceptance is a gate stack in the sense of Parts~I--III.
+\emph{Typed} means only that a hole carries declared contracts over $X_v$ and $Y_v$ and the fields
+above; we develop no type system. \emph{Compiling} names the build and promotion of a mechanism for a
+hole; no automatic translation is claimed.
+
+\subsection{Residual and frontier}\label{sec:residual}
+\begin{definition}[Closed share, residual, frontier]\label{def:residual}
+For an axis $a$, let $S_v^a\subseteq X_v$ be the union of the scopes on which $\kappa_a(v,\cdot)$ is
+\cstate{closed}. The \emph{closed share} of the axis is
+\[
+c_a\;=\;\sum_{v\in V} w_v\,\D_v\bigl(S_v^a\bigr).
+\]
+The \emph{semantic residual} of the axis is the set of pairs $(v,\,X_v\setminus S_v^a)$ with
+non-empty scope; its mass is $1-c_a$. The \emph{unknown share} $u_a\le 1-c_a$ is the mass of the
+residual in state \cstate{unknown}. The \emph{semantic frontier} is the boundary between the closed
+scopes and the residual.
+\end{definition}
+In the quantitative results (\S\S\ref{sec:ra}--\ref{sec:instance}), $c$ is the \emph{routing share}:
+the volume share of production segments that are first sent to a mechanism. When the retained
+acceptance rejects a mass $b$ of those outputs, the executor serves them, so
+$c_{\mathrm{prod}}=c\,(1-b)$; the two coincide when $b=0$. Volume weighting matches the horizon
+quantity.
+The objective is the smallest residual that correctness, adaptability, and total cost allow.
+We quantify correctness and cost, but not adaptability.
+
+\subsection{Premature closure}\label{sec:premature}
+\begin{definition}[Premature-closure fault and escape]\label{def:pc}
+Let the inputs of a scope~$S$ be routed to a mechanism $M:S\to Y$ for production. Its
+\emph{premature-closure fault set} and \emph{fault mass} are
+\[
+P(M)=\{x\in S:\ \varphi(x,M(x))=0\},\qquad \pi(M)=\D\bigl(P(M)\mid S\bigr).
+\]
+Let $G$ be the acceptance stack that stays in place behind the mechanism ($G$ can be empty). The
+stack returns one verdict per pair; for a stochastic gate we take its deterministic reduction, as in
+Part~II. The
+\emph{escape set} is $E(M,G)=\{x\in P(M): G\text{ accepts }(x,M(x))\}$, the \emph{escape mass} is
+$\ecl=\D(E(M,G)\mid S)$, and the \emph{detected mass} is $d=\pi(M)-\ecl$. The \emph{premature-closure
+escape} is the escape mass in units of the raw fault probability of the executor,
+\[
+\lpc\;=\;\ecl/p .
+\]
+\end{definition}
+
+All masses are conditional on the routing scope $S$. If the retained stack rejects nothing, $M$ is
+authoritative on $S$ in the sense of Definition~\ref{def:closure}.
+Both $p\lpc$ and $p\lst$ are segment escape probabilities.
+Unlike $\lst$, $\lpc$ can exceed $1$. It depends on $s$ through $p$, whereas $\ecl$ does not.
+A mechanism fails on a fixed set of inputs. Retrying it reproduces the fault.
+Rejected outputs therefore need a different implementation, the \emph{fallback}; below this is
+the open path. These are properties of the deployed mechanism, not averages over builds.
+
+Premature closure also affects acceptance and decision.
+A closed checker can accept conformance to a contract that misses the intent.
+Such Goodhart faults contribute to $\lst$ when every gate of the relevant family accepts them;
+they belong to $\lirr$ only if every available family is blind.
+False rejection costs a retry, not an escape. A wrong closed decision selects a wrong branch.
+Our quantitative results concern production.
+
+\subsection{Promotion and regression}\label{sec:transitions}
+\begin{definition}[Promotion]\label{def:promotion}
+A \emph{promotion} changes $\kappa_a(v,S)$ from \cstate{open} or \cstate{unknown} to \cstate{closed}
+for one mechanism $M$, one axis $a$, and one scope $S$. A \emph{promotion predicate} $\Pi$ decides it:
+$\Pi$ maps a body of \emph{promotion evidence} about the mechanism to a verdict in
+$\{\textsf{promote},\textsf{hold}\}$.
+\end{definition}
+Promotion is a gate whose candidates are mechanisms. Before promotion a candidate can run in
+\emph{shadow}: its outputs are recorded while the executor stays authoritative.
+Following Part~II, we classify evidence by its deciding substrate, not its author.
+
+\begin{definition}[Classes of promotion evidence]\label{def:evidence}
+Let $F$ be the family of the executor that the mechanism replaces.
+\begin{itemize}[leftmargin=1.4em,itemsep=1pt]
+\item \textbf{Same-family evidence.} The verdict on a pair $(x,M(x))$ is decided on the
+representation of $F$. Two kinds are in this class: \emph{agreement} of the result $M(x)$ with the
+output of the executor that the mechanism replaces, by a comparison that $F$ decides; and a
+\emph{check} of the pair by a judge of family $F$.
+\item \textbf{Exogenous-family evidence.} The verdict is decided on the representation of a family
+$N$ that separates part of what $F$ does not separate: $\SigF\setminus\SigN$ has positive mass under
+the fault distribution in use.
+\item \textbf{Reality-grounded evidence.} The verdict is determined by ground truth for $\varphi$ on a
+covered scope: acceptance by the downstream consumer, outcomes at run time, execution against the
+real environment, or a proof against a specification that realizes $\varphi$ on that scope.
+\end{itemize}
+\end{definition}
+This is not a rung-by-rung version of Part~III's ladder, which sorts evidence by who ran the check.
+A second vendor can share the blind spot. A proof can establish a specification that misses the intent.
+
+\begin{definition}[Regression]\label{def:regression}
+A \emph{regression} changes $\kappa_a(v,S)$ from \cstate{closed} to \cstate{open} or
+\cstate{unknown} when a reopening condition holds: an assumption of the mechanism is invalid, a
+counterexample is found, or the requirements, the environment, or the policy change. Every closed
+axis carries its reopening conditions. The \emph{withdrawal} of a mechanism ends its authority. A
+withdrawal is a regression if an executor then serves the axis. If another accepted mechanism becomes
+authoritative, the state stays \cstate{closed}; this is a \emph{replacement}, not a regression. If
+nothing serves the axis, the axis is blocked.
+\end{definition}
+When acceptance regresses, closure claims supported by it lose that support.
+The fallback needs a valid acceptance.
+
+\subsection{Intent projection: decision closure of decomposition}\label{sec:projection}
+\begin{definition}[Plan, local intent, projection]\label{def:projection}
+A \emph{global intent} $I_0$ is the want at the top layer; it can be informal. A \emph{plan} $\mathcal{P}$
+is a dependency graph whose nodes carry a \emph{role} from a fixed vocabulary and whose edges carry
+\emph{licenses}: the local costs that the edge authorizes. A \emph{local intent} $I_n$ is what the
+worker at node $n$ must want. It is \emph{complete} if the worker can act correctly from $I_n$ alone,
+and \emph{blind} if it contains no more of the parent intent than the plan licenses. It is a
+\emph{restriction} of its parent if its constraints and its authority do not exceed those of the
+parent. The \emph{projection} is the map $(I_{\mathrm{parent}},\mathcal{P},n)\mapsto I_n$. It is
+indexed by the plan.
+\end{definition}
+Projection is recursive; the tree can grow as work splits.
+We assume a permissions representation with a terminating containment check.
+Containment of arbitrary policies need not be decidable.
+Objective refinement can still require judgment, even when authority containment is checked.
+A check is closed only where a mechanism is authoritative.
+
+\begin{definition}[Law, catalog, residue]\label{def:law}
+A \emph{law} is a rule that maps a pair (shape of the parent intent, plan role) to a pair (local
+intent, local acceptance). A \emph{law catalog} is a versioned set of laws, read as a rewrite system
+on intent terms. When two laws match, the more specific law applies; then the law with the higher
+explicit priority; otherwise the step is escalated. A projection records the versions of the laws
+that produced it. The \emph{residue} is the set of projection steps whose result the catalog does not
+determine: the steps that no law covers, and the steps on which matching laws stay in conflict.
+\end{definition}
+We require compatible sibling acceptances, checked on the result, but not confluence.
+A terminating catalog mechanism closes the decision it determines.
+Residue steps are decision holes. Their acceptance combines decidable structural checks with
+judgment that each leaf serves its parent. Replacing a recurring residue step by a law is promotion.
+Regression can enlarge either the projection residue or the production residual.
+
+\begin{definition}[Two kinds of blindness; intent leakage]\label{def:blind}
+A worker is \emph{informationally blind} if its work surface gives it no access to the global intent
+or to global data. A worker is \emph{authority-blind} if it holds no license to act on the global
+intent: every local cost that it incurs cites a plan edge, and an action on an unlicensed rationale
+fails acceptance. \emph{Intent leakage} occurs when a worker holds enough of the global objective,
+without the plan, to make a decision that is locally rational and contradicts the plan.
+\end{definition}
+A work surface can restrict data and tools, but not training knowledge.
+Authority blindness proposes a contract check on unlicensed action.
+We have no worked example showing an additional fault it catches.
+
+For Proposition~\ref{prop:rd}, acceptance has a decidable \emph{formal} part $\postf$, served by
+closed acceptance, and a \emph{residual} part $\postr$, undecidable by any accepted mechanism and
+discharged by gated judgment with nonzero escape.
+
+\subsection{Context load and bounded holes}\label{sec:load}
+\begin{definition}[Context load, window, load-dependent hazard]\label{def:load}
+The \emph{context load} $\ell\ge0$ of a call is the amount of state that the call must use, in the
+unit of the window. The \emph{window} $K$ is the largest load that one call accepts. The \emph{load-dependent hazard} $\lambda(\ell)$, for $0\le\ell\le K$, is the fault hazard of the executor
+when its calls have the load $\ell$, for a fixed measure of the load and a fixed distribution of the
+work.
+\end{definition}
+Part~I holds the hazard at the load in use constant.
+
+\begin{definition}[Bounded hole, bounded projection]\label{def:bounded}
+A semantic hole is \emph{$\lh$-bounded} if every call through it has a load of at most $\lh$. A
+projection is \emph{$\lh$-bounded} if every local intent that it produces gives, with its work
+surface, an $\lh$-bounded hole.
+\end{definition}
+Completeness and blindness do not imply bounded load: a plan can license a large necessary input.
+A complete bounded projection need not exist.
+State outside holes remains in plans, mechanisms, and artifacts.
+Projection itself consumes work; its faults enter $f_\pi$ in Proposition~\ref{prop:rd}.
+
+External storage also exists in model-only systems.
+The distinction is authority on the axes.
+An agent is \emph{fully open} when all three axes are open on every step: the model decides,
+produces, and judges completion. Open production under closed acceptance is not fully open.
+
+\section{Results}\label{sec:results}
+
+\subsection{R-A: horizon under partial closure}\label{sec:ra}
+\begin{assumption}[Series assumptions on open segments]\label{ass:series}
+On segments that an executor produces, the assumptions of Part~I hold (checkpoint completeness,
+memoryless retries and segments, conditional gate independence), and the gate family has stealth mass
+$\lst>0$. The slip probability of an open segment is $\eop$; by Part~I, $\eop\ge p\,\lst$.
+\end{assumption}
+
+\begin{assumption}[Independent segments, stationary mixing]\label{ass:mixing}
+All segments have the length $s$. Each segment has a vector of random elements: its assignment to the
+open or the closed path, its input, the randomness of its gates, and its outcomes on the open path
+and on the fallback path. The vectors of different segments are mutually independent and have one
+law. In that law the segment is routed to a mechanism with probability $c$, and the input of a routed segment is a
+draw from $\D(\cdot\mid S)$. For regions, the segment belongs to region $i$ with probability $w_i$.
+A run succeeds if no segment slips.
+\end{assumption}
+
+\begin{assumption}[Fixed mechanisms, no drift]\label{ass:nodrift}
+The deployed mechanisms, the predicate $\varphi$, and the distribution $\D$ do not change over the
+horizon.
+\end{assumption}
+
+\begin{assumption}[Escapes are faults; rejected outputs fall back]\label{ass:fallback}
+A premature-closure fault that escapes makes its segment bad in the sense of Part~I. An output of a
+mechanism that the retained stack rejects sends the segment to the open path. The retained stack is
+deterministic.
+\end{assumption}
+
+Here $c$ is the routing share of \S\ref{sec:residual}: a segment is first sent to a mechanism with
+probability $c$.
+
+\begin{proposition}[R-A: horizon under partial closure]\label{prop:ra}
+Under Assumptions~\ref{ass:series}--\ref{ass:fallback}, let $\ecl=p\,\lpc$ be the probability that
+a routed segment has an escape (the mean over the routing scopes, weighted by volume, when several
+mechanisms serve the routed share), and let
+\[
+\lmix\;=\;(1-c)\,\lst+c\,\lpc\;>\;0 .
+\]
+Then for every gate count,
+\[
+\mathrm{success}(T)\;\le\;\bigl(1-p\,\lmix\bigr)^{T/s},
+\qquad\text{hence}\qquad
+H\;\le\;\frac{s\ln 2}{-\ln(1-p\,\lmix)}\;\le\;\frac{s\ln 2}{p\,\lmix}\;=\;\frac{\Hraw}{\lmix}\,\bigl(1+O(\lambda s)\bigr).
+\]
+For regions $i$ with volume shares $w_i$, where region $i$ is open with stealth mass $\lambda_i=\lst^{(i)}$
+or closed with escape $\lambda_i=\lpc^{(i)}$, the same bound holds with $\lmix=\sum_i w_i\lambda_i$.
+The form $\Hraw/\lmix$ holds to first order in $\lambda s$ only; for segments that are not short,
+use the first two forms.
+\end{proposition}
+\begin{proof}
+The mechanisms are fixed. An open segment slips with probability at least $p\lst$.
+A routed segment slips on its escape set, of probability $\ecl=p\lpc$ under
+$\D(\cdot\mid S)$. Mixing gives $q\ge p((1-c)\lst+c\lpc)=p\lmix$.
+Each slip is a function of its segment's vector, so Assumption~\ref{ass:mixing} gives independent,
+identically distributed slips. Hence $\mathrm{success}(T)=(1-q)^{T/s}\le(1-p\lmix)^{T/s}$.
+At half success,
+\[
+H\le\frac{s\ln2}{-\ln(1-p\lmix)}\le\frac{s\ln2}{p\lmix},
+\]
+using $-\ln(1-x)\ge x$. Since $p=\lambda s(1+O(\lambda s))$ and
+$\Hraw=\ln2/\lambda$, this gives the first-order form.
+For regions, average the lower slip bounds $p\lambda_i$ with weights $w_i$ and repeat.
+\end{proof}
+
+To first order, $c=0$ recovers Part~I; $\lpc=0$ raises the ceiling by $1/(1-c)$;
+and $c=1$ gives $\Hraw/\lpc$ when $\lpc>0$.
+Closing region $i$ raises the ceiling exactly when $\lpc^{(i)}<\lst^{(i)}$.
+
+The realized-slip criterion differs. Let $b$ be the retained stack's rejection mass, including
+detected faults and false rejections. Let $\varepsilon_{\mathrm{fb}}$ be the open-path slip
+conditional on fallback. Rejection selects inputs, so it need not equal $\eop$.
+The closed slip is $\ecl+b\varepsilon_{\mathrm{fb}}$.
+Closure improves it exactly when this is below $\eop$.
+If $\varepsilon_{\mathrm{fb}}=\eop$, the criterion is $\ecl<(1-b)\eop$;
+$\lpc<(1-b)\lst$ is sufficient.
+
+Independence is essential. Without fallback, associated escape indicators give a no-escape
+probability at least the product form, by Part~III. Positive dependence of inputs alone is
+insufficient. With one repeated input, success is $1-\ecl$ at every horizon and can exceed the
+bound. Random mixing and independent inputs also idealize a graph whose sites consume upstream
+outputs.
+
+\begin{remark}[The bound is conditional on the mechanism]\label{rem:jensen}
+Proposition~\ref{prop:ra} uses the realized $\lpc$ of the deployed mechanism. Suppose instead that
+only the expectation $\bar\lambda_{\mathrm{pc}}$ over a build process is known. The bound
+$(1-p((1-c)\lst+c\,\lpc))^{T/s}$ is convex in $\lpc$. By Jensen's inequality its expectation over
+mechanisms is at least its value at $\bar\lambda_{\mathrm{pc}}$. The value at the mean is therefore
+not an upper bound on the expected success in general: the mean does not justify the plug-in bound.
+Weaker bounds that use the mean only exist, and the distribution of $\lpc$ gives sharper ones. This limits the use of Proposition~\ref{prop:produced},
+which is a statement in expectation, as an input to Proposition~\ref{prop:ra}.
+\end{remark}
+
+\subsection{R-B: what promotion evidence can show}\label{sec:rb}
+A mechanism authored by $F$ decides through code, not through $F$.
+Part~II therefore constrains same-family promotion evidence, not the mechanism's error in general.
+
+Fix a site, production axis, and countable scope $S$ with the discrete $\sigma$-algebra.
+Let $\Z=S\times Y$, $\Zgood=\{z:\varphi(z)=1\}$, and $\Zbad=\{z:\varphi(z)=0\}$.
+The representation $r_F$ records everything $F$ computes about a pair across the admissible
+configurations of Part~II. Write $z\simF z'$ iff $r_F(z)=r_F(z')$ and
+$\SigF=\{z\in\Zbad:\exists z'\in\Zgood,\ z\simF z'\}$.
+Let $\Mclass$ be the mechanism class.
+
+\begin{definition}[Evidence]\label{def:evproc}
+An \emph{evidence procedure} is a map $e$ from $\Z$ to a finite set of verdicts. An \emph{evidence
+set} $\mathcal{E}$ is a finite set of evidence procedures. For a mechanism $M$ and sample inputs
+$x_1,\dots,x_n$, the \emph{evidence record} is the list of the inputs $x_j$ and of the verdicts
+$e(x_j,M(x_j))$ for $e\in\mathcal{E}$. A procedure is \emph{decided within $F$} if it is constant on
+the classes of $\simF$.
+\end{definition}
+This evidence is pointwise. A review that reads the mechanism's text is outside the definition.
+
+\begin{definition}[Twin mechanisms and twin mass]\label{def:twin}
+Two mechanisms $M,M'\in\Mclass$ are \emph{$\mathcal{E}$-twins} if $e(x,M(x))=e(x,M'(x))$ for every
+$x\in S$ and every $e\in\mathcal{E}$. They are \emph{$F$-twins} if $(x,M(x))\simF(x,M'(x))$ for every
+$x\in S$. The \emph{twin masses} of $M$ are
+\[
+\tau_{\mathcal{E}}(M)=\sup\{\pi(M'):\ M'\text{ is an $\mathcal{E}$-twin of }M\},\qquad
+\tau_F(M)=\sup\{\pi(M'):\ M'\text{ is an $F$-twin of }M\}.
+\]
+\end{definition}
+Both masses are at least $\pi(M)$, since $M$ is its own twin.
+
+\begin{assumption}[Evidence record]\label{ass:pred}
+The sample inputs are independent draws from $\D(\cdot\mid S)$. The promotion predicate, and every
+bound that is computed for a promotion, is a function of the evidence record and of auxiliary
+randomness. The joint law of the sample and the auxiliary randomness is the same for every mechanism
+in the class. It is not sufficient that the sample and the auxiliary randomness are each independent
+of the mechanism.
+\end{assumption}
+
+\begin{assumption}[Representation restriction]\label{ass:rep}
+(i)~\emph{On the evidence.} The map $r_F$ ranges over all admissible configurations of a fixed
+parameter set, as in Part~II; a change of configuration selects within this capacity and does not extend it.
+(ii)~\emph{On the mechanisms.} The class $\Mclass$ is closed under finite patches: if $M\in\Mclass$,
+and $M'$ is a map that differs from $M$ on finitely many inputs, then $M'\in\Mclass$. A finite
+patch is a table in front of the procedure, so $M'$ is a mechanism in the sense of
+Definition~\ref{def:mech}. We do not assume closure under arbitrary maps: a class of procedures is
+countable, and the maps can be uncountably many.
+\end{assumption}
+
+\begin{proposition}[Evidence does not separate twins]\label{prop:twin}
+Under Assumption~\ref{ass:pred}, let $\mathcal{E}$ be an evidence set.
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=2em,itemsep=3pt]
+\item \textbf{Indistinguishability.} If $M$ and $M'$ are $\mathcal{E}$-twins, they have the same
+evidence record on every sample. A promotion predicate therefore promotes $M$ and $M'$ with the same
+probability.
+\item \textbf{Non-certifiability.} Let $U$ be a bound that is valid over the class:
+$\Pr[\pi(M)\le U]\ge 1-\eta$ for every $M\in\Mclass$. Then for every $M\in\Mclass$ and every
+$t<\tau_{\mathcal{E}}(M)$, $\Pr[U\ge t]\ge 1-\eta$ when the mechanism is $M$. The bound can be below
+$t$ with a probability of at most $\eta$.
+\item \textbf{Monotonicity.} If $\mathcal{E}\subseteq\mathcal{E}'$, then
+$\tau_{\mathcal{E}'}(M)\le\tau_{\mathcal{E}}(M)$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~Twin verdicts agree on every sampled input. Assumption~\ref{ass:pred} gives the record and
+auxiliary randomness the same joint law, hence the same promotion probability.
+(b)~For $t<\tau_{\mathcal{E}}(M)$ choose a twin $M'$ with $\pi(M')>t$.
+By~(a), $U$ has the same law for both mechanisms. Validity for $M'$ gives
+$\Pr[U\ge\pi(M')]\ge1-\eta$, hence $\Pr[U\ge t]\ge1-\eta$.
+(c)~Adding procedures restricts the twin class over which the supremum is taken.
+\end{proof}
+
+\begin{corollary}[Same-family evidence]\label{cor:samefamily}
+Let every procedure in $\mathcal{E}$ be decided within $F$. Then every $F$-twin of $M$ is an
+$\mathcal{E}$-twin of $M$, so $\tau_{\mathcal{E}}(M)\ge\tau_F(M)$, and
+Proposition~\ref{prop:twin}(b) holds for every $t<\tau_F(M)$: a valid bound that rests on the
+evidence is below $t$ with a probability of at most $\eta$. This holds for every sample size and for
+every number of procedures that are decided within $F$. If in addition
+Assumption~\ref{ass:rep}(ii) holds, then
+\[
+\tau_F(M)\;=\;\D\bigl(\{x\in S:\ \exists\,y'\ \text{with}\ (x,y')\in\Zbad,\ (x,y')\simF(x,M(x))\}\;\big|\;S\bigr),
+\]
+as a supremum that need not be attained. When the retained acceptance is empty, $\ecl=\pi(M)$, and
+the same holds for $\lpc$ and $t<\tau_F(M)/p$.
+\end{corollary}
+\begin{proof}
+Procedures constant on $\simF$ give equal verdicts on $F$-twins, so
+Proposition~\ref{prop:twin}(b) applies.
+Let $T$ be the displayed set. Every fault of an $F$-twin lies in $T$, giving
+$\pi(M')\le\D(T\mid S)$.
+For $\epsilon>0$, countability gives finite $T_\epsilon\subseteq T$ with
+$\D(T_\epsilon\mid S)\ge\D(T\mid S)-\epsilon$.
+Patch $M$ on $T_\epsilon$ with the faulty $y'$ in the display.
+The patch is an $F$-twin in $\Mclass$ by Assumption~\ref{ass:rep}(ii), with fault mass at least
+$\D(T_\epsilon\mid S)$. All sets are measurable in the discrete $\sigma$-algebra.
+Taking the supremum proves equality. With empty acceptance, divide $\ecl=\pi(M)$ by $p$.
+\end{proof}
+
+Assumption~\ref{ass:rep}(i) includes new prompts, deeper same-family judging, and same-family
+checks of verdicts, provided they judge pairs.
+The result concerns invariance, not achievability.
+Twin mass is an input mass under $\D$; $\lF$ is a fault mass under $\mu$.
+The corollary does not relate them or show that twin mass is large.
+
+Added evidence can only lower twin mass. Evidence decided within $N$ still leaves simultaneous
+$F$- and $N$-twins indistinguishable; it need not separate all $N$ classes.
+A grounded procedure returning $\varphi$ on $S_g\subseteq\Z$, and no verdict elsewhere,
+prevents a twin from having a covered fault that $M$ lacks.
+Strict improvement depends on which pairs the procedures separate, not vendor identity or
+stealth-set equality alone.
+
+\begin{proposition}[Exact replay transfers the fault mass of the reference]\label{prop:replay}
+Let $y_{\mathrm{ref}}:S\to Y$ be a reference that is defined on all of $S$, with fault mass
+$\varepsilon_{\mathrm{ref}}=\D(\{x:\varphi(x,y_{\mathrm{ref}}(x))=0\}\mid S)$, and let
+$\delta=\D(\{x: M(x)\neq y_{\mathrm{ref}}(x)\}\mid S)$. Then
+$\lvert\pi(M)-\varepsilon_{\mathrm{ref}}\rvert\le\delta$.
+\end{proposition}
+\begin{proof}
+The fault indicators agree wherever $M(x)=y_{\mathrm{ref}}(x)$.
+Their difference is supported on a set of mass $\delta$.
+\end{proof}
+A recorded reference supports this statement only on its recorded scope.
+Grounded bounds likewise apply only on their covered scope; $\delta$ itself needs estimation.
+
+For accepted-output replay, let independent retry rounds at input $x$ produce a fault with
+probability $p_x$ and conditional law $\mu_x$.
+A stack $G_0$ accepts with positive probability; the first accepted candidate is emitted.
+For $x\sim\D(\cdot\mid S)$, write
+$p=\mathbb{E}_x[p_x]$ and $p\lF=\mathbb{E}_x[p_x\mu_x(\SigF)]$.
+These are raw, pre-gate quantities; with one site per segment, $p$ is the raw segment fault
+probability used elsewhere.
+A stack is \emph{sound in the sense of Part~II} if it has zero false-reject mass under a
+distribution on $\Zgood$ giving positive mass to every $\simF$ class meeting $\Zgood$.
+Zero false rejection under the executor's output distribution alone is insufficient.
+
+\begin{corollary}[A copy of accepted outputs inherits the floor]\label{cor:replayfloor}
+Let $G_0$ be decided within $F$ and sound in the sense of Part~II, and let $y_{\mathrm{ref}}(x)$ be
+the emitted output for $x$, drawn once per input. Let $M$ disagree with $y_{\mathrm{ref}}$ on a mass
+$\delta$, and let the retained stack $G$ be empty, or decided within $F$ and sound in the sense of
+Part~II. Then
+\[
+\mathbb{E}[\ecl]\;\ge\;p\,\lF-\mathbb{E}[\delta],
+\qquad\text{equivalently}\qquad
+\mathbb{E}[\lpc]\;\ge\;\lF-\mathbb{E}[\delta]/p ,
+\]
+where the expectation is over the reference.
+\end{corollary}
+\begin{proof}
+Part~II's sound inheritance theorem makes $G_0$ accept every pair in $\SigF$.
+If $A_x\le1$ is the round acceptance probability, independent retries give an emitted stealth
+pair with probability $p_x\mu_x(\SigF)/A_x\ge p_x\mu_x(\SigF)$.
+Averaging gives expected reference stealth mass at least $p\lF$.
+Where $M$ agrees with that reference, the pair is faulty and $G$ accepts it, by the same theorem
+or because $G$ is empty. Disagreement removes at most mass $\delta$.
+Take expectations and divide by $p$.
+\end{proof}
+This is an expectation over references, not a floor for every deployed copy.
+We have not developed the false-rejection tolerance case.
+The statement does not cover generalization with large disagreement.
+
+\begin{definition}[Build process and produced faults]\label{def:build}
+A \emph{build process} $\Bld$ is a random procedure that returns a mechanism in $\Mclass$. Its
+\emph{produced fault mass} is $\piB=\Pr[\varphi(x,M_0(x))=0]$ for $M_0\sim\Bld$ and
+$x\sim\D(\cdot\mid S)$, with $x$ independent of $M_0$. For $\piB>0$ the \emph{produced-fault distribution} $\muB$ is the law of
+$(x,M_0(x))$ given $\varphi(x,M_0(x))=0$; it is a distribution on $\Zbad$. The \emph{produced stealth
+share} is $\lFB=\muB(\SigF)$.
+\end{definition}
+The set $\SigF$ describes what evidence cannot detect; $\muB$ describes what the builder produces.
+Their overlap $\lFB$ can be any value in $[0,1]$.
+
+\begin{definition}[Undetected set]\label{def:undetected}
+Let the procedures in $\mathcal{E}$ return a verdict in $\{\textsf{agree},\textsf{disagree}\}$, and
+let $G$ be the retained stack. The \emph{combined procedure} accepts a pair if every procedure in
+$\mathcal{E}$ agrees and every gate in $G$ accepts. The \emph{undetected set}
+$\mathcal{U}\subseteq\Zbad$ is the set of faulty pairs that the combined procedure accepts.
+\end{definition}
+
+\begin{assumption}[Repair leaves undetected faults in place]\label{ass:repair}
+Let $M_0\sim\Bld$ be the mechanism that is submitted first. Every submitted mechanism is repaired
+until it is promoted, so every build ends with a mechanism $M$ in service. For every input $x$ with
+$(x,M_0(x))\in\mathcal{U}$, $M(x)=M_0(x)$.
+\end{assumption}
+Repair can violate this assumption by changing other outputs.
+Dropping builds with more undetected faults can also invalidate the conclusion for deployed builds.
+
+\begin{assumption}[False rejection]\label{ass:fr}
+The combined procedure has a false-reject mass of at most $\rho_0$ under a distribution $\nu$ on
+$\Zgood$ that gives positive mass to every class of $\simF$ that meets $\Zgood$ (so these classes are
+countably many, as in Part~II). For $\rho_0>0$ the uniform likelihood-ratio bound of Part~II holds
+with a finite constant~$\kappa$, with $\muB$ in the place of the fault distribution.
+\end{assumption}
+
+\begin{proposition}[Produced faults that nothing detects]\label{prop:produced}
+Under Assumption~\ref{ass:repair}, with $\piB>0$, in expectation over the builds,
+\[
+\mathbb{E}[\ecl]\;\ge\;\piB\,\muB(\mathcal{U}).
+\]
+If every procedure in $\mathcal{E}$ and every gate in $G$ is decided within $F$, and
+Assumption~\ref{ass:fr} holds, then $\muB(\mathcal{U})\ge\lFB-\kappa\rho_0$, with
+$\kappa\rho_0=0$ in the sound case $\rho_0=0$. Hence
+\[
+\mathbb{E}[\ecl]\;\ge\;\piB\bigl(\lFB-\kappa\rho_0\bigr),
+\qquad\text{equivalently}\qquad
+\mathbb{E}[\lpc]\;\ge\;\frac{\piB}{p}\bigl(\lFB-\kappa\rho_0\bigr).
+\]
+\end{proposition}
+\begin{proof}
+If $(x,M_0(x))\in\mathcal{U}$, repair preserves the faulty output and $G$ accepts it.
+Thus $\ecl\ge\D(\{x:(x,M_0(x))\in\mathcal{U}\}\mid S)$.
+Its expectation is $\Pr[(x,M_0(x))\in\mathcal{U}]=\piB\muB(\mathcal{U})$.
+For the second part, the combined procedure is constant on $\simF$ classes.
+Part~II's inheritance theorem puts $\SigF$ in its blind set $\mathcal{U}$ except for
+$\muB$-mass at most $\kappa\rho_0$. Substitute and divide by $p$.
+\end{proof}
+This lower bound need not be equality: repairs can add faults, and detectable faults can miss
+the evidence sample.
+
+\begin{hypothesis}[Distillation by a builder that generalizes]\label{hyp:distill}
+A builder of family $F$ that generalizes from the accepted outputs of an executor of family $F$, and
+does not copy them, produces at least as much stealth fault mass as the raw executor:
+$\piB\,\lFB\ge p\,\lF$, with $p$ and $\lF$ the raw quantities of the executor, before its gates.
+\end{hypothesis}
+Under this hypothesis and the repair and false-rejection assumptions, and with every evidence
+procedure and retained gate decided within $F$,
+Proposition~\ref{prop:produced} gives
+$\mathbb{E}[\lpc]\ge\lF-(\piB/p)\kappa\rho_0$.
+We have no evidence for or against the hypothesis.
+Reports about shared checker blind spots do not establish what a mechanism builder produces.
+Without the hypothesis, the proposition still holds with the builder's quantities.
+
+A machine-executed test authored by $F$ has execution as its deciding substrate.
+It is grounded only where its assertions realize $\varphi$.
+The same-family conclusions require an additional \emph{authored-coverage assumption}:
+the check never separates a fault in $\SigF$ from its acceptable twin.
+That empirical assumption can fail. Proposition~\ref{prop:twin} and the first inequality of
+Proposition~\ref{prop:produced} still apply to any such pointwise check.
+
+Fixed prior knowledge does not evade class-wide validity.
+It must restrict the class, separate twins, or change the requirement, for example to validity
+averaged over builds. Restricted mechanism languages can have smaller twin masses.
+Until $\tau_F$ is estimated, a ban on promotion by one family's evidence is a heuristic:
+the model motivates it where the required fault mass is below $\tau_F$.
+
+\subsection{R-C: mechanization break-even}\label{sec:rc}
+\begin{assumption}[Cost model]\label{ass:cost}
+A region receives calls at a constant rate $r$ and stays closed for a lifetime $\tau$ before a
+regression. Per served call, the open path costs $k_{\mathrm{o}}=a\,(c_x+g)$, with $c_x$ the cost of an
+executor call, $g$ the cost of the gate stack, and $a$ the expected number of attempts. The closed
+path costs $k_{\mathrm{c}}=c_m+g'+b\,k_{\mathrm{o}}$, with $c_m$ the cost of a mechanism call, $g'$ the
+cost of the retained acceptance, and $b$ the fallback mass of \S\ref{sec:ra}. A segment that falls
+back slips on the open path with probability $\varepsilon_{\mathrm{fb}}$ (\S\ref{sec:ra}). An escape
+costs~$L$.
+Closure has a one-time build cost $B$, a one-time validation cost $V$, and an upkeep $u$ per unit
+time. Costs of different regions add.
+\end{assumption}
+
+\begin{assumption}[Sampled validation]\label{ass:sampled}
+A promotion needs a \emph{certificate}. The sample is $n$ independent draws from $\D(\cdot\mid S)$,
+independent of the mechanism. The evidence is exact on the sample: it reports a fault on an input if
+and only if the mechanism has a fault on that input. The rule promotes if and only if the sample
+shows no fault. The rule promotes a mechanism with a fault mass above $\theta$ with probability at
+most $\eta$. The class $\Mclass$ contains mechanisms with fault masses arbitrarily close to $\theta$
+from above. Each evidence item
+that is not same-family evidence costs $c_e$.
+\end{assumption}
+
+\begin{proposition}[R-C: break-even with the validation cost]\label{prop:rc}
+Under Assumption~\ref{ass:cost}, let the saving per served call be
+\[
+\Delta\;=\;\bigl(k_{\mathrm{o}}+\eop L\bigr)-\bigl(k_{\mathrm{c}}+(\ecl+b\,\varepsilon_{\mathrm{fb}})L\bigr).
+\]
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=2em,itemsep=3pt]
+\item \textbf{Break-even.} The closed path has the lower total cost over the lifetime if and only if
+$(r\Delta-u)\,\tau>B+V$. The break-even volume is
+\[
+N^\star\;=\;\frac{B+V+u\,\tau}{\Delta}\qquad(\Delta>0),
+\]
+which is $(B+V)/\Delta$ without upkeep.
+\item \textbf{Sample size.} Under Assumption~\ref{ass:sampled},
+$n\ge\ln(1/\eta)/\ln(1/(1-\theta))$. If the items are not same-family evidence,
+\[
+V\;\ge\;c_e\,\frac{\ln(1/\eta)}{\ln\bigl(1/(1-\theta)\bigr)}\;\ge\;c_e\,\frac{(1-\theta)\ln(1/\eta)}{\theta}.
+\]
+\item \textbf{Frontier.} For regions $i$ with parameters
+$(r_i,\tau_i,\Delta_i,B_i,V_i,u_i)$, a closed set with the lowest total cost is
+$\{i:\ (r_i\Delta_i-u_i)\tau_i>B_i+V_i\}$; a region with equality can be open or closed. The closed
+share is below $1$ if some region with a positive volume share has
+$(r_i\Delta_i-u_i)\tau_i<B_i+V_i$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~Subtract the closed cost
+$B+V+u\tau+r\tau(k_{\mathrm{c}}+(\ecl+b\varepsilon_{\mathrm{fb}})L)$
+from the open cost $r\tau(k_{\mathrm{o}}+\eop L)$.
+The difference is $(r\Delta-u)\tau-(B+V)$; solving at zero gives $N^\star$.
+(b)~A mechanism of fault mass $\theta'>\theta$ is promoted with probability $(1-\theta')^n$.
+Validity requires this to be at most $\eta$.
+Taking $\theta'\downarrow\theta$ within the class gives $(1-\theta)^n\le\eta$ and the sample bound.
+Multiply by $c_e$ and use $\ln(1/(1-\theta))\le\theta/(1-\theta)$.
+(c)~Additive costs are minimized by selecting each region's cheaper path, with either choice at equality.
+\end{proof}
+
+If $\theta<\tau_F(M)$, a pointwise same-family rule promotes $M$ as often as a twin above
+$\theta$. A valid certificate therefore promotes $M$ with probability at most $\eta$.
+Promotion above that probability needs other evidence; part~(b) prices it when sampled.
+A proof need not have this sample-cost scaling.
+The suggestion that a model builder lowers $B$ is unmeasured.
+
+\subsection{R-D: composition}\label{sec:rd}
+A parent with acceptance $(\postf_p,\postr_p)$ has children $1,\dots,k$ under plan $\mathcal{P}$.
+It is accepted when the projection and all children are accepted and the trace satisfies the
+decidable sequencing predicate $\mathrm{Seq}(\mathcal{P})$.
+Let $I_i$ indicate that child $i$ is accepted with $\postr_i$ false, with $f_i=\Pr[I_i=1]$.
+Let $I_\pi$ indicate an escaped projection fault, with $f_\pi=\Pr[I_\pi=1]$.
+
+\begin{assumption}[Formal coverage]\label{ass:coverage}
+The checker of each formal part is correct: a child that is accepted satisfies $\postf_i$. The
+implication
+\[
+\Bigl(\textstyle\bigwedge_{i=1}^{k}\postf_i\Bigr)\wedge\mathrm{Seq}(\mathcal{P})\;\Longrightarrow\;\postf_p
+\]
+holds for every projection that is accepted.
+\end{assumption}
+
+\begin{assumption}[Residual completeness]\label{ass:complete}
+If the projection has no escaped fault and $\postr_i$ holds for every child, then $\postr_p$ holds.
+\end{assumption}
+
+\begin{assumption}[Monotone provenance]\label{ass:monotone}
+The escape indicators in the statement are coordinatewise non-decreasing functions of mutually
+independent primitive fault variables: $I_\pi,I_1,\dots,I_k$ for one parent, and the indicators of
+all projections and all leaves for a tree.
+\end{assumption}
+Part~III supplies the one-layer bound, not this assumption for a tree with internal gates.
+For one parent the assumption includes internal children.
+
+\begin{remark}[The formal part]\label{rem:formal}
+Under Assumption~\ref{ass:coverage}, an accepted parent satisfies $\postf_p$: its children are
+accepted, so every $\postf_i$ holds; the trace satisfies $\mathrm{Seq}(\mathcal{P})$; and the
+implication gives $\postf_p$. This restates the assumption and is not a result.
+\end{remark}
+
+\begin{proposition}[R-D: composition of the residual part]\label{prop:rd}
+\leavevmode
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=2em,itemsep=3pt]
+\item \textbf{One parent.} Under Assumptions~\ref{ass:complete} and~\ref{ass:monotone},
+\[
+\Pr[\text{the parent is accepted and }\postr_p\text{ is false}]
+\;\le\;1-(1-f_\pi)\prod_{i=1}^{k}(1-f_i).
+\]
+\item \textbf{Depth.} Let an intent tree be fixed and finite. Let every internal node satisfy
+Assumption~\ref{ass:complete}, let Assumption~\ref{ass:monotone} hold for the tree, and let the
+children of an accepted node be accepted. Then the probability that the root is accepted and its
+residual part is false is at most $1-\prod_{j}(1-f_j)$, where $j$ ranges over all leaves and all
+projections.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~Completeness makes an accepted false parent imply an escaped projection or a false residual
+part at some child. That child is accepted, so its indicator is $1$.
+The parent event lies in $\{I_\pi=1\}\cup\bigcup_i\{I_i=1\}$.
+By monotone provenance and Part~III,
+$\Pr[I_\pi=0,I_1=0,\ldots,I_k=0]\ge(1-f_\pi)\prod_i(1-f_i)$.
+Take complements.
+(b)~Acceptance descends from the root to every child.
+At each internal node with false residual part, completeness gives an escaped projection or
+a child with false residual part. Induction on finite depth puts the root event inside the union
+of all projection and leaf escapes. Apply Part~III to that union.
+\end{proof}
+Completeness carries most of the weight: conflicts among acceptable children count as projection
+faults. The result locates them in $f_\pi$ without making it small.
+It compares dependence at fixed marginals, not the benefit of shared provenance, and gives no
+lower bound. A projection fault can change which children exist, so monotonicity is not assured.
+
+\subsection{R-E: scale}\label{sec:re}
+\begin{corollary}[Reach and residual]\label{cor:reach}
+Under Assumptions~\ref{ass:series}--\ref{ass:fallback}, let each segment slip with probability
+$q(c)=(1-c)\,\eop+c\,(\ecl+b\,\varepsilon_{\mathrm{fb}})$, with $0<q(c)<1$. The half-success horizon
+is
+\[
+H(c)\;=\;\frac{s\ln 2}{-\ln\bigl(1-q(c)\bigr)} .
+\]
+Let $\eop$, $\ecl$, $b$, and $\varepsilon_{\mathrm{fb}}$ stay fixed when $c$ changes. Then $H(c)$
+grows with the routing share $c$ if and only if $\ecl+b\,\varepsilon_{\mathrm{fb}}<\eop$. If the
+routed segments are served without a fault and without a rejection ($\ecl=0$, $b=0$, so
+$c=c_{\mathrm{prod}}$) and $c<1$, then
+\[
+\frac{H(c)}{H(0)}\;\ge\;\frac{1}{1-c} ,
+\]
+and the ratio is asymptotically equivalent to $1/(1-c)$ as $\eop\to0$.
+\end{corollary}
+\begin{proof}
+Independence gives $\mathrm{success}(T)=(1-q(c))^{T/s}$; solve at one half.
+The affine $q(c)$ has slope $\ecl+b\varepsilon_{\mathrm{fb}}-\eop$, and $H$ decreases in $q$.
+For $\ecl=b=0$, let $g(x)=-\ln(1-x)$.
+Convexity and $g(0)=0$ give $g((1-c)\eop)\le(1-c)g(\eop)$, hence the ratio bound.
+Finally $g(x)\sim x$ as $x\to0$ gives the asymptotic equivalence.
+\end{proof}
+A fault-free mechanism alone is insufficient for the ideal gain.
+If $b\varepsilon_{\mathrm{fb}}>0$, fallback keeps the horizon finite as $c\to1$.
+
+\begin{hypothesis}[Load monotonicity]\label{hyp:load}
+The hazard $\lambda(\ell)$ of an executor does not decrease in the load $\ell$, for $0\le\ell\le K$.
+\end{hypothesis}
+Measurements on models of 2023--2025 report retrieval degradation within longer contexts, depending
+on model, task, and information position~\cite{liu2023lost,modarressi2025nolima}.
+They do not measure long-work fault hazard or establish its monotonicity.
+We know of no measurement of hazard as a function of load.
+
+\begin{proposition}[R-E: bounded load]\label{prop:load}
+Let faults arrive as a Poisson process whose rate at elapsed work $t$ is the hazard at the load in
+use. The clock $t$ counts the work of the executor; for a work program it counts the open work and
+not the closed work. The \emph{ungated horizon} is
+$H=\inf\{T\ge0:\int_0^T\lambda(\ell(t))\,dt\ge\ln 2\}$, with $\inf\varnothing=\infty$: the elapsed
+work at which the probability of no fault falls to one half, and $\infty$ if it never does. Let $0<\lambda(\lh)\le\lambda(\ell_0)\le\lambda(K)<\infty$. Under
+Hypothesis~\ref{hyp:load}:
+\begin{enumerate}[label=\textup{(\alph*)},leftmargin=2em,itemsep=3pt]
+\item \textbf{One agent that carries the state.} Let the load $\ell(t)$ of the agent not decrease in
+$t$, with $\ell(0)=\ell_0$ and $\ell(t)\le K$. Its ungated horizon $\Hmono$ satisfies
+\[
+\frac{\ln 2}{\lambda(K)}\;\le\;\Hmono\;\le\;\frac{\ln 2}{\lambda(\ell_0)} .
+\]
+\item \textbf{A work program with bounded holes.} Let every hole be $\lh$-bounded with
+$\lh\le\ell_0$, and let $\lambda_h$ be the supremum of the hazard over its open work. Then
+$\lambda_h\le\lambda(\lh)$, the hazard has a bound that does not depend on the elapsed work, and the
+ungated horizon of the open work is at least
+\[
+\frac{\ln 2}{\lambda(\lh)}\;\ge\;\frac{\lambda(\ell_0)}{\lambda(\lh)}\;\Hmono .
+\]
+\item \textbf{The gain is bounded for holes at one load.} If every call of every hole has the load
+$\lh$ exactly, the ungated horizon of the open work is $\ln 2/\lambda(\lh)$, and its ratio to
+$\Hmono$ is at most $\lambda(K)/\lambda(\lh)$. For holes that work below $\lh$ this upper bound does
+not hold.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a)~No-fault probability is $\exp(-\int_0^T\lambda(\ell(t))\,dt)$.
+Monotonicity and $\ell_0\le\ell(t)\le K$ bound the integral between
+$\lambda(\ell_0)T$ and $\lambda(K)T$. Solving at $\ln2$ gives both bounds.
+(b)~Loads at most $\lh$ have hazard at most $\lambda(\lh)$.
+No-fault probability is at least $\exp(-\lambda(\lh)T)$, giving the first bound.
+The upper bound in~(a) gives the comparison with $\Hmono$.
+(c)~Exact load $\lh$ gives constant hazard $\lambda(\lh)$ and horizon $\ln2/\lambda(\lh)$.
+Divide by $\Hmono\ge\ln2/\lambda(K)$.
+\end{proof}
+
+The closure gain compares gated horizons. The load gain compares ungated horizons.
+We do not multiply them: gates need not preserve hazard ratios.
+Bounded load gives neither constant hazard nor a clean context.
+Upstream faults, reset, and memorylessness remain separate issues.
+The comparisons fix the executor; load gain can be $1$ when hazard is load-independent.
+They give no hazard for work requiring state beyond the window.
+
+\subsection{Kept open}\label{sec:open}
+We claim no result on these problems.
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{Regression under drift.} A law for growth of $\lpc$ and a watch that bounds it.
+\item \textbf{An estimator for $\lpc$.} Fixed fault sets change what repeated observation identifies.
+\item \textbf{Authored checks.} When checks authored by a family and executed by a machine satisfy
+the authored-coverage assumption.
+\item \textbf{Decision and acceptance.} Their premature closure and its interaction with production.
+\item \textbf{Intent leakage.} A benchmark with known leak points and opposing local and global intents.
+\item \textbf{Authority blindness.} A worked example showing a fault it catches.
+\item \textbf{Measurement.} Estimates of $\lpc$, $\tau_F$, $\lFB$, costs, and $\lambda(\ell)$;
+tests of the assumptions and Hypotheses~\ref{hyp:distill} and~\ref{hyp:load}.
+\item \textbf{Closable share.} How much real work can close with small escape.
+\end{enumerate}
+
+\section{Simulation}\label{sec:sim}
+We illustrate Propositions~\ref{prop:ra} and~\ref{prop:produced}.
+\textbf{Every parameter is chosen, not measured.}
+The builders are stipulated, not evidence for or against Hypothesis~\ref{hyp:distill}.
+The standard-library Python script uses seed $20260930$.
+All $38$ sampling checks and $30$ structural checks pass.
+Sampling checks compare Monte-Carlo values with exact values or bounds at stated tolerances.
+Structural checks hold by construction and guard code; they do not test propositions.
+
+The executor has $\lambda=0.02$, $s=1$, $p\approx0.0198$, and $\Hraw\approx34.7$.
+Family $F$ has $\lF=0.15$.
+Each gate independently catches a visible fault with probability $q=0.6$; drawn verdicts stay fixed.
+The open path uses $8$ gates of $F$. Its escape per raw fault is
+$\lambda_8=\lF+(1-\lF)(1-q)^8\approx0.1506$, which includes visible faults that all eight gates
+miss; it is not the shared stealth mass $\lst$. As a stipulated finite-stack benchmark we take
+$\eop=p\lambda_8$ and use $\lambda_8$ in the place of $\lst$ in the formulas of \S\ref{sec:ra}.
+
+\paragraph{R-A.}
+Table~\ref{tab:simra} uses independent segments.
+Closed escape has probability $p\lpc$; rejection of mass $b$ gives fallback slip
+$\varepsilon_{\mathrm{fb}}$.
+Without fallback this is the ceiling's equality case. Rows 1--3: to first order,
+fault-free, rejection-free closure of a share $c$ raises the ceiling by $1/(1-c)$ (the logarithmic ratios are $2.0015$ and
+$10.013$). Rows 4--6: at $\lpc=\lambda_8$ the ceiling does not move, and at
+$\lpc=2\lambda_8$ it falls. Rows 7--8 compare fallback of mass $b=0.2$ at the usual slip and at
+four times the usual slip.
+Fallback lowers realized success, especially when rejection selects harder inputs.
+Every row is checked against exact success with
+$q=(1-c)\eop+c(\ecl+b\varepsilon_{\mathrm{fb}})$.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{cccccccc}
+\toprule
+$c$ & $\lpc/\lambda_8$ & $b$ & $\varepsilon_{\mathrm{fb}}/\eop$ & $\lmix$ & ceiling $H$ & realized $H$ &
+$\mathrm{success}(300)$: bound / realized \\
+\midrule
+$0$   & --    & $0$   & --  & $0.151$ & $232$  & $230$  & $0.408$ / $0.403$ \\
+$0.5$ & $0$   & $0$   & --  & $0.075$ & $465$  & $467$  & $0.639$ / $0.638$ \\
+$0.9$ & $0$   & $0$   & --  & $0.015$ & $2325$ & $2345$ & $0.914$ / $0.916$ \\
+$0.5$ & $0.5$ & $0$   & --  & $0.113$ & $310$  & $307$  & $0.511$ / $0.507$ \\
+$0.5$ & $1$   & $0$   & --  & $0.151$ & $232$  & $230$  & $0.408$ / $0.407$ \\
+$0.5$ & $2$   & $0$   & --  & $0.226$ & $155$  & $157$  & $0.261$ / $0.262$ \\
+$0.5$ & $0.5$ & $0.2$ & $1$ & $0.113$ & $310$  & $277$  & $0.511$ / $0.471$ \\
+$0.5$ & $0.5$ & $0.2$ & $4$ & $0.113$ & $310$  & $204$  & $0.511$ / $0.359$ \\
+\bottomrule
+\end{tabular}
+\caption{Proposition~\ref{prop:ra} in the benchmark $\eop=p\,\lambda_8$. The ceiling is the first form
+$s\ln2/(-\ln(1-p\,\lmix))$; the realized half-success horizon is the sample median of the first
+slip, over $40\,000$ runs. Realized values above the ceiling are sampling error: one standard error of the median is about
+$0.7\%$ at this run count. The script checks each value against the bound with a tolerance of $3\%$.}
+\label{tab:simra}
+\end{table}
+
+\paragraph{Promotion evidence.}
+The scope has $2000$ uniformly weighted inputs.
+Each build draws faults with probability $\piB$ and stealth membership with probability $\lFB$.
+The combined procedures are an $F$-tower; depth-$8$ towers of $F$ and $N$, with $\lN=0.15$
+and overlap $\rho\in\{0,0.5\}$; or a depth-$8$ $F$-tower with grounding on share $g$.
+Here $\rho=0$ is independence and $\rho=1$ maximal overlap.
+All procedures are sound, so $\kappa\rho_0=0$.
+The builder patches only rejected faults in a sample of $200$ inputs.
+The combined procedure is retained. Thus Assumption~\ref{ass:repair} holds and, by construction,
+$\mathbb{E}[\ecl]=\piB\muB(\mathcal{U})$.
+The table is not a test of that accounting identity.
+With empty retained acceptance, every unrepaired fault escapes; escape is about $0.018$ in each arm.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{builder B1: $\piB=p$, $\lFB=0.15$} & \multicolumn{2}{c}{builder B2: $\piB=p$, $\lFB=0.03$} \\
+evidence arm & $\muB(\mathcal{U})$ & $\mathbb{E}[\lpc]$ & $\muB(\mathcal{U})$ & $\mathbb{E}[\lpc]$ \\
+\midrule
+$F$-tower, $h=1$ & $0.490$ & $0.488$ & $0.418$ & $0.414$ \\
+$F$-tower, $h=3$ & $0.204$ & $0.204$ & $0.092$ & $0.092$ \\
+$F$-tower, $h=8$ & $0.151$ & $0.152$ & $0.031$ & $0.030$ \\
+$+$ exogenous $N$, $\rho=0$ & $0.023$ & $0.022$ & $0.005$ & $0.004$ \\
+$+$ exogenous $N$, $\rho=0.5$ & $0.086$ & $0.086$ & $0.017$ & $0.016$ \\
+$+$ grounded, $g=0.5$ & $0.075$ & $0.073$ & $0.015$ & $0.016$ \\
+$+$ grounded, $g=0.9$ & $0.015$ & $0.015$ & $0.003$ & $0.003$ \\
+\bottomrule
+\end{tabular}
+\caption{The share $\muB(\mathcal{U})$ of produced faults that the combined procedure accepts (closed
+form), and the mean premature-closure escape $\lpc=\ecl/p$ over $1500$ builds, with the combined
+procedure retained. Since $\piB=p$, $\mathbb{E}[\lpc]=\muB(\mathcal{U})$ up to sampling error. The
+script rounds each entry from the unrounded value.}
+\label{tab:simrb}
+\end{table}
+
+Deeper same-family towers approach the stipulated produced stealth share.
+Independent exogenous evidence and grounding reduce escape; overlap reduces the exogenous gain.
+B1 stipulates $\piB\lFB=p\lF$, the hypothesis's equality case.
+B2 stipulates a smaller produced stealth share. Neither estimates it.
+
+For orientation, at $c=0.5$ the logarithmic ceiling evaluated at mean $\lpc$ has ratio $1.00$
+to the open ceiling for B1 with depth-$8$ same-family evidence.
+The ratios are $1.75$ and $1.27$ with independent and overlapping exogenous evidence,
+and $1.35$ and $1.82$ with $g=0.5$ and $0.9$.
+These are not bounds on expected success.
+At $n=233$, the mean conditional bound exceeds its value at mean $\lpc$ in every arm;
+the largest difference is $0.008$.
+This illustrates Jensen's inequality for the conditional bounds. This comparison does not simulate
+realized success with fallback.
+
+\section{The mechanization plan}\label{sec:protocol}
+\textbf{This is a design.} It has not run in this form. It gives no thresholds or measured rates.
+
+\subsection{States}\label{sec:planstates}
+Stages are recorded per axis and scope beside closure states.
+Candidate and shadow preserve the prior \cstate{unknown} or \cstate{open} state.
+After withdrawal, an executor gives regression, an accepted mechanism gives replacement,
+and no fallback gives blocking.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{lp{0.65\linewidth}}
+\toprule
+stage & meaning and authority \\
+\midrule
+unclassified & Executor serves unexamined work; review is dated. \\
+open & Executor serves work with a reviewed reason and review date. \\
+candidate & Recurrence, review, a changed reason, or an available mechanism warrants examination;
+executor stays authoritative. \\
+shadow & Mechanism runs under ratified criteria; outputs are recorded, not used. \\
+closed & Promoted mechanism is authoritative. \\
+reopened & Mechanism is withdrawn; accepted fallback serves, or the axis blocks. \\
+\bottomrule
+\end{tabular}
+\caption{Plan stages. Executor-free service requires closure of every axis previously served by
+an executor.}\label{tab:planstates}
+\end{table}
+
+\subsection{Transitions and actors}\label{sec:plantrans}
+Mechanical actors read events or fixed results; semantic actors are executors.
+An authority issues criteria or decides promotion.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{p{0.35\linewidth}p{0.53\linewidth}}
+\toprule
+transition & actor and action \\
+\midrule
+new site $\to$ unclassified & Router creates a record and work item. \\
+unclassified, open $\to$ candidate & Detector uses computed signatures, recurrence, review dates,
+or a new mechanism. \\
+unclassified, candidate $\to$ open & Classifier records a reviewed reason and review date. \\
+candidate $\to$ shadow & Builder proposes; a separate authority ratifies criteria before evaluation. \\
+shadow $\to$ closed & Authority promotes on typed evidence. \\
+shadow $\to$ candidate & Fixed comparison exceeds a disagreement bar; counterexamples go to classification. \\
+closed $\to$ reopened & Watcher detects a reopening condition. \\
+reopened $\to$ closed, open & New promotion, accepted replacement, or reviewed open judgment. \\
+\bottomrule
+\end{tabular}
+\caption{Transitions. The builder and authority are separate roles.}\label{tab:plantrans}
+\end{table}
+
+\subsection{Rules}\label{sec:planrules}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item Recurrence warrants examination, not promotion. Promotion requires ratified acceptance,
+explained shadow disagreements, recorded assumptions, and evidence beyond the executor's family.
+This last requirement is policy. Corollary~\ref{cor:samefamily} motivates it where the required
+fault mass is below twin mass; it does not prove it necessary for every promotion.
+\item Close acceptance before production on the scope. The model permits the reverse; this plan does not.
+\item Shadow outputs are never authoritative.
+\item The builder neither issues acceptance criteria nor decides promotion.
+\item Refuse promotion without reopening conditions evaluable by a program on named events:
+revised assumptions or sources, failed acceptance, or reopened dependencies.
+\item Promotion authority grows with blast radius. A low-radius class can have a shared bar.
+\item Withdrawal reopens dependent axes and uses only an accepted fallback.
+An executor fallback has valid acceptance, including when the executor serves as a judge;
+its closure state is \cstate{open} or \cstate{unknown} according to review.
+An accepted replacement remains \cstate{closed}. Otherwise the axis blocks and raises work.
+The withdrawn mechanism may run without authority beside an executor until repromotion.
+For reopened acceptance, mark outputs accepted since the condition held for new acceptance.
+\item Mechanical actors do not judge content.
+\end{enumerate}
+
+\subsection{Measures}\label{sec:planmeasures}
+The \emph{mechanization rate} is the share of decisions made by programs over a window.
+The \emph{unclassified surface} is the share on unclassified axes.
+Promotion and reopening rates count their events per period.
+The regression rate counts only reopenings followed by executor service.
+These decision counts differ from segment-weighted $c$.
+The program share of design nodes is only a structural proxy, since node frequencies differ.
+
+\subsection{What the plan does not say}\label{sec:plannot}
+Promotion and demotion lifecycles already exist~\cite{malik2026crystallization}.
+This design adds the model's axes, scopes, evidence classes, and authority separation.
+It does not specify mechanism discovery, candidate priority, worker context selection, or thresholds.
+Its costs and rates are unmeasured.
+
+\section{Instance}\label{sec:instance}
+\textbf{This instance reports counts and shapes, not modeled quantities or a test of a proposition.}
+Counts were derived by script from system records on 2026-09-29 and can be re-derived from them;
+the records are private.
+One person operates language-model workers under written rules.
+Method and format repositories hold routing designs and typed records.
+Repository checks gate changes.
+
+\paragraph{Routing designs.}
+Five designs have $54$ nodes: $20$ \texttt{program}, $29$ \texttt{agent}, and $5$ \texttt{human}.
+The $34$ executor sites cite no known constructor ($14$), no known decider ($14$),
+authority ($5$), or missing information ($1$).
+There are $29$ recorded reviewed justifications and $5$ unreviewed ones; the review record is an
+unsigned draft. We did not check whether each review establishes the axis-and-scope condition
+for \cstate{open}. Labels are provisional: at most $29$ nodes are \cstate{open} and at least $5$
+are \cstate{unknown}. The program share $20/54\approx0.37$ is a structural proxy, not a
+mechanization rate.
+
+\paragraph{Formats and mechanisms.}
+There are $34$ format and protocol definitions: $20$ candidates, $11$ deferred, and $3$ proposals;
+none is ratified. An unadopted investigation classifies $99$ fields in $17$ formats:
+programs lead $63$ decisions, models or people $35$, and nothing $1$.
+
+Three implemented mechanisms have stated assumptions and residuals and run under repository checks.
+A spend-reservation meter replaces a manual spend clearance.
+Import reachability replaces the mechanical part of impact analysis; coupling beyond imports
+remains open. A check links each acceptance criterion to tests that changed from failing to passing;
+test adequacy and fidelity to the specification remain residual.
+None is adopted. No shadow run or promotion is recorded, so each is at most a candidate.
+
+\paragraph{Reviews.}
+From 2026-08-02 to 2026-09-26, $758$ records cover $544$ reviews.
+Records identify author and reviewer families and the issues that only one reviewer raised.
+In $25$ reviews, both the author's family and another family reviewed the same artifact.
+Same-family reviewers raised $52$ such issues; other families raised $55$.
+Other families raised at least one in $15$ of these $25$ reviews.
+
+These records do not test a proposition.
+A raised issue is not a fault; ground truth is absent; the authoring family decided acceptance.
+Pairings were not randomized.
+Only one review had two reviewers from the author's family, so there is no control separating
+family effects from a second-reviewer effect.
+
+\paragraph{Unmeasured quantities.}
+Of $47$ repositories, $24$ run check suites.
+Three of these suites invoke about $54$, $78$, and $28$ checks.
+A check supports closed acceptance only where its verdict is deterministic and authoritative.
+The designed mechanization-rate measure is unimplemented and has no series.
+No $\lpc$, $\tau_F$, $\lFB$, or closable-share estimate is available.
+
+\section{Discussion}\label{sec:discussion}
+This section adds no result. Read together, the results make one argument, each step under its own
+conditions. Fault-free, rejection-free closure of a share $c$ raises the modeled ceiling by $1/(1-c)$ to first order
+(Proposition~\ref{prop:ra}, Corollary~\ref{cor:reach}); this is a lever outside the setting of Part~I,
+in which the executor serves every segment, and it is distinct from diversity and grounding. Whether a closure is correct is a question for the promotion
+evidence, and pointwise evidence decided within one family cannot certify a fault mass below the twin
+mass, except with the allowed error probability (Corollary~\ref{cor:samefamily}). A promotion that
+needs such a certificate, with probability above $\eta$, therefore needs evidence from outside the
+family, and that evidence has a cost (Proposition~\ref{prop:rc}). In the model, executors are
+implementations of typed holes whose contracts and acceptance the program owns, not the architecture
+of the system.
+
+The results connect closure, evidence, and cost under separate conditions.
+They do not rank the four closure combinations.
+The plan favors open production under closed acceptance, but a fixed checker can still miss intent.
+
+The model names unmeasured failure modes: premature production closure, false acceptance,
+hidden assumptions, closure retained after drift, and growth of the residual.
+Reopening conditions address only recorded assumptions.
+The unknown share tracks unexamined work, not all residual growth:
+regression into \cstate{open} enlarges the residual without increasing the unknown share.
+
+Closure is relative to a bar. Under Assumption~\ref{ass:sampled} the bar is the pair
+$(\theta,\eta)$: the tolerated fault mass and the allowed error probability. Each domain sets its
+own bar: a fault mass that a game tolerates is unacceptable in avionics. By
+Proposition~\ref{prop:rc}, a stricter bar needs more evidence, $n\ge\ln(1/\eta)/\ln(1/(1-\theta))$.
+When evidence is priced per item as in Proposition~\ref{prop:rc}(b), a stricter bar also raises the
+lower bound on $V$ and, with the other cost parameters fixed and $\Delta>0$, the lower bound on the
+break-even volume $N^\star$. A closure certified under a bar meets every bar that is looser in both
+components, $\theta$ and $\eta$, if the mechanism, the intent predicate, the scope, the operating
+distribution, and the validation assumptions are the same; the converse need not hold. One body of
+formalized work can therefore serve several systems that share these conditions. Each system admits
+only the closures whose evidence meets its own bar. With the candidates and the evidence fixed, a
+stricter bar admits a subset of the closures, so a stricter system keeps at least as much of the work
+open. We call each such system a \emph{variant}. This is a reading of the results, not a further
+result; the conditions above apply to it in full.
+
+The author's view, which the results do not test, returns to the analogy of the introduction.
+A model is to a mechanized system roughly what mitochondria are to a complex cell: an ingredient
+the larger organism depends on, but not the organism itself. In the model, the executor is needed
+wherever semantics stay open.
+The results above state conditions under which closure raises the modeled ceiling and promotion
+evidence can support it.
+
+\section{Limitations}\label{sec:limitations}
+No modeled quantity is measured. The simulation's parameters are chosen.
+The instance supplies counts only, and the plan has not run in the stated form.
+
+The horizon ceiling assumes independent segments, fixed mechanisms, and no drift.
+Dependence can make realized success exceed the bound, so the ceiling need not hold.
+Evidence results use Part~II's fixed representation relation and the evidence-record assumption.
+Produced-fault bounds additionally require repair to preserve undetected faults.
+They concern expectations over builds; mean escape cannot be substituted into the conditional
+success bound. Pointwise evidence excludes text review and does not automatically include
+machine-executed checks in the author's family.
+
+Composition assumes residual completeness and monotone provenance for the tree.
+Neither is established for real projections.
+The cost model assumes additive regional costs and given lifetimes.
+Its sample bound requires exact, independent, zero-failure validation.
+It omits grounding latency and economies of scope; proofs need not incur the sample scaling.
+
+Scale comparisons omit projection, interface, and acceptance overhead.
+They neither establish a complete bounded projection nor estimate the closable share.
+Their baselines differ. Both empirical hypotheses remain untested.
+Decision and acceptance closure are defined but not quantitatively analyzed.
+Adaptive adversarial interaction and strategic manipulation of evidence are outside the analysis.
+A fixed faulty mechanism, including a deliberate one, is covered where the assumptions hold.
+
+\section{Related work}\label{sec:related}
+LATM makes reusable tools for lighter models~\cite{cai2023latm}.
+Compiled AI generates, validates, and runs code without a model~\cite{trooskens2026compiled}.
+TraceCompiler compiles agent traces into mostly deterministic workflows and declines to compile
+irreversible effects that the traces leave under-determined~\cite{elyadouni2026tracecompiler}.
+Progressive Crystallization reports production promotion and demotion
+lifecycles~\cite{malik2026crystallization}.
+Its criteria include successful-run counts, action agreement, trace-derived tests, classification
+consistency, a model-free regression suite, and human logic review.
+Their classification here requires knowing deciding substrates and what assertions establish
+about $\varphi$. Successful traces count as grounded only where success verification is stated.
+Aggregate agreement is outside our evidence definition unless made pointwise; logic review is
+outside it. We claim nothing about that system's faults.
+DSPy optimizes model-call pipelines, leaving production open~\cite{khattab2023dspy}.
+
+Programs with holes come from sketching~\cite{solarlezama2008} and typed
+editors~\cite{omar2017}; residual programs from partial evaluation~\cite{jones1993};
+compiled reasoning from knowledge compilation~\cite{darwiche2002}; and untrusted production under
+checking from proof-carrying code~\cite{necula1997}.
+We add closure axes, scopes, states, and their link to verification evidence.
+
+Part~II places shared blind spots in the multiversion-failure literature.
+A recent test-generation study reports $14\%$ fault detection after exposure to faulty code,
+against $25\%$ for independently generated tests~\cite{konstantinou2026risk}.
+This is lower, not zero, detection in that setting and does not measure our plan.
+Long-context retrieval studies motivate, but do not establish, the load
+hypothesis~\cite{liu2023lost,modarressi2025nolima}.
+
+\section{Conclusion}\label{sec:conclusion}
+In this model, routing a share of production to mechanisms raises the ceiling where $\lpc<\lst$.
+With path laws fixed, it improves realized horizon where
+$\ecl+b\varepsilon_{\mathrm{fb}}<\eop$.
+Promotion evidence must support that distinction, and pointwise same-family evidence has the
+twin limits proved here. The next steps are an escape estimator, a distillation-hypothesis test,
+and measurement of the closable share.
+
+\section*{Code and data availability}
+The standard-library Python script \texttt{simulate\_psm.py} uses seed $20260930$ and reproduces
+Tables~\ref{tab:simra} and~\ref{tab:simrb} and the simulation numbers. It is at
+\url{https://github.com/ivmat/gated-computation-sim}. Instance records are private.
+Companion papers are on Zenodo:
+Part~I, \href{https://doi.org/10.5281/zenodo.20820968}{10.5281/zenodo.20820968};
+Part~II, \href{https://doi.org/10.5281/zenodo.20837102}{10.5281/zenodo.20837102};
+Part~III, \href{https://doi.org/10.5281/zenodo.21456783}{10.5281/zenodo.21456783}.
+
+\begin{thebibliography}{99}
+\small
+\bibitem{matijasevic2026n1} I.~Matija\v{s}evi\'c. A Fault-Tolerance Threshold for Gated Agentic
+Computation: Reliable Long-Horizon Work from Unreliable Executors. 2026.
+Archived on Zenodo, DOI:~10.5281/zenodo.20820968.
+\bibitem{matijasevic2026gg} I.~Matija\v{s}evi\'c. Generated Gates Inherit Their Generator's Blind
+Spots: A Diversity Floor for Self-Generated Verification. 2026.
+Archived on Zenodo, DOI:~10.5281/zenodo.20837102.
+\bibitem{matijasevic2026floor} I.~Matija\v{s}evi\'c. Escape, Cost, and Correlation at the
+Verification Floor of Gated Agentic Computation. 2026.
+Archived on Zenodo, DOI:~10.5281/zenodo.21456783.
+\bibitem{solarlezama2008} A.~Solar-Lezama. \emph{Program Synthesis by Sketching.} PhD thesis,
+University of California, Berkeley, 2008.
+\bibitem{omar2017} C.~Omar, I.~Voysey, M.~Hilton, J.~Aldrich, and M.~A.~Hammer. Hazelnut: a
+bidirectionally typed structure editor calculus. In \emph{POPL}, 2017.
+\bibitem{jones1993} N.~D.~Jones, C.~K.~Gomard, and P.~Sestoft. \emph{Partial Evaluation and Automatic
+Program Generation.} Prentice Hall, 1993.
+\bibitem{darwiche2002} A.~Darwiche and P.~Marquis. A knowledge compilation map.
+\emph{J.~Artificial Intelligence Research}, 17:229--264, 2002.
+\bibitem{necula1997} G.~C.~Necula. Proof-carrying code. In \emph{POPL}, 1997.
+\bibitem{malik2026crystallization} A.~Malik. Progressive Crystallization: Turning Agent Exploration
+into Deterministic, Lower-Cost Workflows in Production. \emph{arXiv:2607.07052}, 2026.
+\bibitem{trooskens2026compiled} G.~Trooskens, A.~Karlsberg, A.~Sharma, L.~De~Brouwer,
+M.~Van~Puyvelde, M.~Young, J.~Thickstun, G.~Alterovitz, and W.~A.~De~Brouwer. Compiled AI:
+Deterministic Code Generation for LLM-Based Workflow Automation. \emph{arXiv:2604.05150}, 2026.
+\bibitem{konstantinou2026risk} M.~Konstantinou, F.~Tambon, and M.~Papadakis. On the risk of coding
+before testing: An empirical study on LLM-based test generation workflow.
+\emph{arXiv:2607.05139}, 2026.
+\bibitem{yates1989} J.~Yates. \emph{Control through Communication: The Rise of System in American
+Management}. Johns Hopkins University Press, 1989.
+\bibitem{liu2023lost} N.~F.~Liu, K.~Lin, J.~Hewitt, A.~Paranjape, M.~Bevilacqua, F.~Petroni, and
+P.~Liang. Lost in the Middle: How Language Models Use Long Contexts. \emph{TACL} 12:157--173, 2024. arXiv:2307.03172.
+\bibitem{modarressi2025nolima} A.~Modarressi, H.~Deilamsalehy, F.~Dernoncourt, T.~Bui, R.~A.~Rossi,
+S.~Yoon, and H.~Sch\"utze. NoLiMa: Long-Context Evaluation Beyond Literal Matching. In \emph{ICML},
+2025. arXiv:2502.05167.
+\bibitem{cai2023latm} T.~Cai, X.~Wang, T.~Ma, X.~Chen, and D.~Zhou. Large Language Models as Tool
+Makers. \emph{arXiv:2305.17126}, 2023.
+\bibitem{elyadouni2026tracecompiler} S.~El~Yadouni and G.~Li. TraceCompiler: Skill-Guided Mining and
+Compilation of LLM Agent Traces into Mostly Deterministic Workflows. \emph{arXiv:2608.02680}, 2026.
+\bibitem{khattab2023dspy} O.~Khattab, A.~Singhvi, P.~Maheshwari, Z.~Zhang, K.~Santhanam, S.~Vardhamanan,
+S.~Haq, A.~Sharma, T.~T.~Joshi, H.~Moazam, H.~Miller, M.~Zaharia, and C.~Potts. DSPy: Compiling
+Declarative Language Model Calls into Self-Improving Pipelines. \emph{arXiv:2310.03714}, 2023.
+\end{thebibliography}
+
+\end{document}

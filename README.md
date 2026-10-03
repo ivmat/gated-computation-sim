@@ -1,12 +1,12 @@
 # Gated Agentic Computation — verification-floor papers
 
-Three linked papers on the reliability *floor* of gated (verified) agentic systems, with
+Four linked papers on the reliability *floor* of gated (verified) agentic systems, with
 self-contained simulations that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
-## The three papers
+## The four papers
 
 **1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
 Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
@@ -34,16 +34,29 @@ draws three **consequences** — a size-axis escape identity, a gating-vs-scalin
 **assurance framing** (an ordinal evidence ladder and a typed-evidence non-collapse rule). The
 mathematics is classical and attributed to its sources; the contribution is the synthesis.
 
+**4 — Progressive Semantic Mechanization** *(Compiling Intellectual Work into Deterministic
+Programs with Typed Semantic Holes)* · **published**, DOI [10.5281/zenodo.23119225](https://doi.org/10.5281/zenodo.23119225) ·
+[`paper_psm.pdf`](paper_psm.pdf) · [`paper_psm.tex`](paper_psm.tex) · reproduce with
+[`simulate_psm.py`](simulate_psm.py). Asks which work should remain an executor call. Work is
+a program with typed **semantic holes**, open or closed separately for decision, production and
+acceptance. Routing a share `c` of production to deterministic mechanisms gives the first-order
+ceiling `H_raw/((1-c)λ_st + c·λ_pc)`, which rises only where premature-closure escape `λ_pc` is
+below `λ_st`. Pointwise same-family promotion evidence cannot certify a fault mass below the
+*twin mass* except with the allowed error probability. Further results: a validation-inclusive
+break-even, a composition bound, and two scale comparisons. The promotion plan is a design that
+has not run, and the simulation's parameters are chosen.
+
 **How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
 spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
 and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
-propagates across output size and shared provenance, and how to grade assurance honestly against it.
+propagates across output size and shared provenance, and how to grade assurance honestly against it; (4) asks which work can leave the
+executor for deterministic mechanisms, and what evidence that closure needs at the floor.
 
 **Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
 models, reproduced here by the included simulations; none has been validated on a deployed agent
 system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
 deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
-is the claim to rely on.
+is the claim to rely on. Paper 4 estimates none of its modeled quantities from data.
 
 ---
 
@@ -219,10 +232,20 @@ Cite whichever paper you use, via its Zenodo DOI:
   url          = {https://doi.org/10.5281/zenodo.21456783},
   note         = {Preprint; archived on Zenodo.}
 }
+
+@misc{matijasevic2026psm,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Progressive Semantic Mechanization: Compiling Intellectual Work into
+                  Deterministic Programs with Typed Semantic Holes},
+  year         = {2026},
+  doi          = {10.5281/zenodo.23119225},
+  url          = {https://doi.org/10.5281/zenodo.23119225},
+  note         = {Preprint; archived on Zenodo.}
+}
 ```
 
-> Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2), and
-> `10.5281/zenodo.21456783` (paper 3). Each GitHub Release that Zenodo archives gets its own version
+> Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2),
+> `10.5281/zenodo.21456783` (paper 3), and `10.5281/zenodo.23119225` (paper 4). Each GitHub Release that Zenodo archives gets its own version
 > DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
 > for early "cite my work" use.
 
