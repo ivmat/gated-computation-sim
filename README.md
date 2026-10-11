@@ -1,12 +1,12 @@
 # Gated Agentic Computation — verification-floor papers
 
-Four linked papers on the reliability *floor* of gated (verified) agentic systems, with
-self-contained simulations that reproduce every numerical claim.
+Five linked papers on the reliability *floor* of gated (verified) agentic systems, with
+self-contained simulations and finite-model checks that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
-## The four papers
+## The five papers
 
 **1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
 Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
@@ -46,17 +46,41 @@ below `λ_st`. Pointwise same-family promotion evidence cannot certify a fault m
 break-even, a composition bound, and two scale comparisons. The promotion plan is a design that
 has not run, and the simulation's parameters are chosen.
 
+**5 — Beyond Constant Fault Rates** *(Reliability Bounds for Gated Computation and Semantic
+Mechanization)* · **published**, DOI [10.5281/zenodo.23293740](https://doi.org/10.5281/zenodo.23293740) ·
+[`paper_fault_process.pdf`](paper_fault_process.pdf) ·
+[`paper_fault_process.tex`](paper_fault_process.tex) · reproduce with
+[`simulate_fault_process.py`](simulate_fault_process.py), which reads
+[`fault_process_assessment.json`](fault_process_assessment.json). Papers 1–4 rest on different
+mixes of four assumptions: a constant fault rate, independent segments, fresh retries, and a
+fixed fault distribution. This paper separates them and asks which conclusions survive
+without them. A conditional survival identity replaces the independent-segment product.
+Logarithmic verification overhead survives under uniform conditional bounds on gate accuracy
+and progress, with no Poisson arrival model. A verification floor gives a finite horizon
+only when its exposure persists along correct prefixes. For the ideal gated survival curve,
+the `1/σ` ceiling multiplier of paper 1 is exact in the model where a
+latent rate is drawn once per run; it is an upper bound under an increasing failure rate and
+a lower bound under a decreasing one. Uneven difficulty, latent regimes, persistent retry
+defects and drifting inputs give counterexamples to
+predictions from one average rate. The paper classifies all 25 named results of papers 1–4
+as arrival-free, conditionally preserved, or formulas that need replacement outside a
+stationary model. The checks are finite-model checks, not measurements of deployed agents.
+
 **How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
 spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
 and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
 propagates across output size and shared provenance, and how to grade assurance honestly against it; (4) asks which work can leave the
-executor for deterministic mechanisms, and what evidence that closure needs at the floor.
+executor for deterministic mechanisms, and what evidence that closure needs at the floor;
+(5) separates the fault-process assumptions behind (1)–(4) and shows which results survive
+without them.
 
 **Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
-models, reproduced here by the included simulations; none has been validated on a deployed agent
+models, reproduced here by the included simulations and checks; none has been validated on a deployed agent
 system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
 deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
-is the claim to rely on. Paper 4 estimates none of its modeled quantities from data.
+is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Paper 5 is likewise a
+mathematical model, not a measurement; its script checks finite instances and
+counterexamples and does not replace the proofs.
 
 ---
 
@@ -242,10 +266,20 @@ Cite whichever paper you use, via its Zenodo DOI:
   url          = {https://doi.org/10.5281/zenodo.23119225},
   note         = {Preprint; archived on Zenodo.}
 }
+
+@misc{matijasevic2026fault,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Beyond Constant Fault Rates: Reliability Bounds for Gated Computation
+                  and Semantic Mechanization},
+  year         = {2026},
+  doi          = {10.5281/zenodo.23293740},
+  url          = {https://doi.org/10.5281/zenodo.23293740},
+  note         = {Preprint; archived on Zenodo.}
+}
 ```
 
 > Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2),
-> `10.5281/zenodo.21456783` (paper 3), and `10.5281/zenodo.23119225` (paper 4). Each GitHub Release that Zenodo archives gets its own version
+> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), and `10.5281/zenodo.23293740` (paper 5). Each GitHub Release that Zenodo archives gets its own version
 > DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
 > for early "cite my work" use.
 

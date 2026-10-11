@@ -1,0 +1,1016 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,booktabs,longtable,array,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Counterexample}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\Prb}{\mathbb P}
+\newcommand{\E}{\mathbb E}
+\newcommand{\ind}{\mathbf 1}
+\newcommand{\TV}{d_{\mathrm{TV}}}
+\title{Beyond Constant Fault Rates:\\Reliability Bounds for Gated Computation\\and Semantic Mechanization}
+\author{Ivo Matija\v{s}evi\'c}
+\date{October 2026}
+\newcommand\blfootnote[1]{\begingroup\renewcommand\thefootnote{}\footnote{#1}\addtocounter{footnote}{-1}\endgroup}
+\begin{document}
+\maketitle
+\blfootnote{\textcopyright~2026 Ivo Matija\v{s}evi\'c.\ This work is licensed under a Creative Commons
+Attribution 4.0 International (CC BY 4.0) license, \url{https://creativecommons.org/licenses/by/4.0/}.\ Preprint, DOI \href{https://doi.org/10.5281/zenodo.23293740}{10.5281/zenodo.23293740}.}
+\begin{abstract}
+Constant fault intensity, independent segments, fresh retries, and a fixed fault distribution
+are different assumptions. Earlier papers on gated computation use different subsets of them.
+We separate these assumptions and examine which conclusions survive their removal.
+A conditional survival identity replaces the independent-segment product. Uniform conditional
+gate accuracy and progress bounds preserve logarithmic verification overhead without a Poisson
+arrival model. A verification floor yields a finite horizon only when its exposure persists
+along correct prefixes. Unequal difficulty, latent regimes, persistent retry defects, and
+changing input distributions give counterexamples to predictions based on one average rate.
+Two positive results locate the $1/\sigma$ ceiling multiplier of the first paper. For the ideal
+gated survival curve, a latent rate drawn once per run preserves it exactly, and a monotone hazard
+orders it: at most $1/\sigma$ for an increasing failure rate and at least $1/\sigma$ for a
+decreasing one. With finite segments, the upper bounds hold after rounding to whole segments.
+For semantic mechanization, local escape and fallback probabilities replace one volume-weighted
+closure fraction. The twin result survives changes in the arrival law and dependent or adaptive
+sampling, provided twins induce the same observation law. We classify all 25 named results of
+the four earlier papers as arrival-free, conditionally preserved, or stationary-parameter
+formulas that need replacement, and we give executable finite-model checks. These are mathematical models, not
+measurements of deployed agents. The contribution is their application and synthesis; the
+probability identities and inequalities are classical.
+\end{abstract}
+
+\section{Introduction}
+Part I models faults by a homogeneous Poisson process and derives a verification threshold,
+a stealth-limited horizon, and a checkpoint interval~\cite{p1}. Part II studies representation
+blind spots~\cite{p2}. Part III studies accepted-output escape, cost, and shared
+provenance~\cite{p3}. Part IV studies progressive semantic mechanization (PSM): moving work
+from executor calls to deterministic mechanisms~\cite{p4}.
+
+A natural question is whether their conclusions depend on faults entering at a constant rate.
+The answer differs by result. A blind-set inclusion is a statement about what a gate can
+distinguish. A horizon is a statement about how often unresolved faults occur over a sequence.
+One does not determine the other. Even a constant expected count per unit work need not give
+an exponential probability of completing without fault.
+
+Ord's analysis motivates the constant-hazard baseline on a particular task suite and leaves
+its wider validity open~\cite{ord}. A fit of success against task duration also does not,
+by itself, identify within-run fault arrivals, retry behavior, or checkpoint completeness.
+We do not select an empirically correct alternative here. We identify the assumptions needed
+to use each result and provide countermodels when those assumptions are absent.
+
+The contributions are: (i) a catalog of candidate fault-introduction models, mapped to the
+results they affect; (ii) conditional versions of the threshold and floor arguments;
+(iii) a cumulative-exposure extension, two results on when the $1/\sigma$ ceiling multiplier
+survives, and counterexamples to average-rate substitution;
+(iv) a separation of PSM's closure, evidence, drift, and cost assumptions; and
+(v) an assessment and classification of every named theorem, proposition, lemma, and corollary
+in Parts I--IV, with a list of errata candidates found on the way.
+We call a result \emph{preserved} only with its remaining hypotheses. A failed extension does
+not refute a theorem inside its original model. Separate wording issues are identified as such.
+
+\section{What is allowed to change?}\label{sec:axes}
+We distinguish six axes.
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item \textbf{Difficulty:} a segment's prior fault probability can depend on its work, length,
+and context load. A deterministic rate $\lambda(t)$ is one model.
+\item \textbf{Dependence:} segments can share a latent regime, input, mechanism, or upstream fault.
+Constant marginal probabilities do not remove this dependence.
+\item \textbf{Retry:} a rejected attempt can change the next attempt's distribution. A rollback
+can restore an artifact while retaining a faulty premise or environment.
+\item \textbf{Fault type and visibility:} the distribution of produced faults and the gates'
+blind sets can change together. Fault intensity alone omits this interaction.
+\item \textbf{Intervention:} repair, reset, routing, and mechanization can change later state.
+Their effect is not generally a substitution into a fixed sequence of risks.
+\item \textbf{Semantics and workload:} input distributions, specifications, and mechanisms can
+drift. A deterministic mechanism can then have time-varying error without random execution.
+\end{enumerate}
+
+Three clocks must also stay separate: useful work or emitted units, attempted work including
+retries, and calendar time. The first indexes reliability below. The second determines execution
+cost. The third matters for drift and maintenance. A median horizon on one clock is not a
+median on another. A fixed semantic defect is not a new arrival on every affected output.
+
+\paragraph{Candidate fault-introduction models.}
+Table~\ref{tab:catalog} lists candidate replacements for the constant-rate model. Each is an
+established modeling family; none is selected here as empirically correct. The last column names
+the earlier results most sensitive to each model; Section~\ref{sec:audit} gives the full mapping.
+Adversarial fault introduction is not a stochastic process and is out of scope, as it is for
+Part~I's benign-executor analysis.
+
+\begin{table}[h]\centering\small
+\caption{Candidate fault-introduction models and where this paper treats them.}\label{tab:catalog}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.265\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}}
+\toprule Model & What changes & Treated in & Most sensitive earlier results\\\midrule
+Nonhomogeneous Poisson, deterministic $\lambda(t)$, incl.\ Weibull~\cite{goel} & difficulty by position
+ & Props.~\ref{prop:hazard}, \ref{prop:monotone} & ceiling multiplier, checkpoint interval, R-A\\
+Mixed Poisson / frailty: rate drawn once per run~\cite{vaupel} & dependence via a latent rate
+ & Ex.~\ref{ex:latent}, Prop.~\ref{prop:mixing} & horizon value; the multiplier only at finite $s$ (ideal limit: exact)\\
+Markov-modulated / regime switching~\cite{mmpp} & dependence, persistence
+ & Eq.~\eqref{eq:kernel} & slip, threshold uniformity\\
+Self-exciting / propagation~\cite{hawkes} & faults beget faults
+ & Sec.~\ref{sec:cost}, propagation & after an escape: damage only; before an escape: slip, horizon, retry cost\\
+Common-cause / shared defect & one fault in many outputs
+ & Ex.~\ref{ex:shared} & series identity, horizon\\
+Persistent retry / imperfect repair~\cite{brownproschan} & retry distribution
+ & Prop.~\ref{prop:retry}, Ex.~\ref{ex:retry}, Eq.~\eqref{eq:kernel} & slip, checkpoint cost, R-C\\
+Load- or context-dependent hazard & hazard as a function of state
+ & Prop.~\ref{prop:monotone}; R-E row & R-E, ceiling multiplier\\
+Visibility that co-varies with intensity & fault type $\times$ gate
+ & Sec.~\ref{sec:hazard}, Prop.~\ref{prop:mixing} & diversity, ceiling\\
+Input or specification drift & the fault set itself
+ & Prop.~\ref{prop:drift} & replay, evidence, validation\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{definition}[Success and emission]\label{def:success}
+Fix a workload and policy. Unless stated otherwise, each requested unit eventually emits with
+probability one. Let $I_i$ indicate that emitted unit $i$ has an escaped fault. Put
+$A_n=\{I_1=\cdots=I_n=0\}$, $S_n=\Prb(A_n)$, and $A_0=\Omega$.
+Success means no escaped fault in the first $n$ emitted units. Later repair does not erase an
+earlier escape in this metric. The discrete half-success horizon is
+$H_{1/2}=\inf\{n:S_n\le1/2\}$, with $\inf\varnothing=\infty$.
+\end{definition}
+If emission can stall, report its probability and cost separately, or count non-completion as
+failure. Conditioning on eventual completion can select easier runs. We do not use that
+conditioning to conceal failures. Damage, the number of faulty outputs, and terminal correctness
+after repair are different metrics. They require additional models.
+
+\section{Conditional risk replaces constant rate}
+\begin{proposition}[Survival and exposure]\label{prop:survival}
+For each $i$ with $S_{i-1}>0$, define $q_i=\Prb(I_i=1\mid A_{i-1})$. Then
+\begin{equation}\label{eq:survival}
+S_n=\prod_{i=1}^n(1-q_i),\qquad
+-\log S_n=\sum_{i=1}^n-\log(1-q_i).
+\end{equation}
+The second equality uses $-\log0=\infty$. After survival reaches zero, set later $q_i=0$.
+If $\ell_i\le q_i\le u_i$ at every index where $q_i$ is defined, with $0\le\ell_i\le u_i\le1$, then
+\[
+\prod_i(1-u_i)\le S_n\le\prod_i(1-\ell_i),\qquad
+1-S_n\le\sum_i q_i\le\sum_i u_i.
+\]
+If all $q_i<1$, then $S_\infty>0$ if and only if $\sum_i q_i<\infty$.
+\end{proposition}
+\begin{proof}
+The chain rule gives $S_i=S_{i-1}(1-q_i)$. Iterate and take logarithms.
+The product bounds follow factor by factor. The inequality
+$1-\prod_i(1-q_i)\le\sum_iq_i$ follows by induction.
+For the last claim, $-\log(1-x)\ge x$. Conversely, summability makes $q_i\to0$;
+eventually $q_i\le1/2$, where $-\log(1-q_i)\le2q_i$. The finite prefix has positive product.
+\end{proof}
+
+The identity is the chain rule, not a new independence theorem. Its useful consequence is
+where bounds must hold: on histories that have remained correct. Unconditional marginals
+$f_i=\Prb(I_i=1)$ cannot generally replace $q_i$.
+For arbitrary dependence they imply only
+\begin{equation}\label{eq:marginal}
+\max_i f_i\le\Prb\Big(\bigcup_i\{I_i=1\}\Big)\le\min(1,\sum_i f_i).
+\end{equation}
+These bounds are sharp: nested events attain the lower bound; disjoint events attain the upper
+bound when the sum is at most one. No homogeneous arrival process is needed for either bound.
+
+\begin{example}[Same marginal risk, different horizons]\label{ex:shared}
+Let $f=0.01$. Independent indicators give $S_{100}=0.99^{100}\approx0.3660$.
+If $I_i=Z$ for all $i$, with $Z$ Bernoulli$(0.01)$, then $S_n=0.99$ for every $n\ge1$.
+Here $q_1=0.01$ and $q_i=0$ for $i>1$. Both models have expected fault count $0.01n$.
+The second has no finite half-success horizon, but has probability $0.01$ of all $n$ outputs
+being faulty. Dependence changes the distribution of damage, not just a horizon constant.
+\end{example}
+
+\begin{example}[A floor that declines with exposure]\label{ex:summable}
+Let independent segment slips have $q_i=0.1\,2^{-i}$. Every segment has positive risk, yet
+$\Prb(\text{any escape ever})\le\sum_{i\ge1}q_i=0.1$. Thus a positive local floor at each
+step does not imply an eventual escape with probability one, or a finite median horizon.
+A persistent lower bound, or sufficient cumulative exposure, is needed.
+\end{example}
+
+\section{Retries and a threshold without Poisson arrivals}
+\begin{proposition}[First accepted attempt]\label{prop:retry}
+For a single unit, let $R_r$ mean attempt $r$ is reached, with $R_1=\Omega$.
+Let $a_r=\Prb(\text{accept at }r\mid R_r)$ and
+$b_r=\Prb(\text{bad and accept at }r\mid R_r)$. If emission occurs almost surely, then
+\begin{equation}\label{eq:retry}
+\Prb(\text{emitted bad})=\sum_{r\ge1}\Prb(R_r)b_r,
+\quad \E N=\sum_{r\ge1}\Prb(R_r),
+\quad \Prb(R_{r+1})=\Prb(R_r)(1-a_r).
+\end{equation}
+If $a_r=a>0$ and $b_r=b$ for every reached attempt, these reduce to $b/a$ and $1/a$.
+More generally, if $a_r\ge a_0>0$ and $b_r\le b_0$, then
+$\E N\le1/a_0$ and $\Prb(\text{emitted bad})\le b_0/a_0$.
+A ratio bound is often sharper: if emission occurs almost surely and $b_r\le\kappa a_r$ at
+every reached attempt, then $\Prb(\text{emitted bad})\le\min(1,\kappa)$.
+\end{proposition}
+\begin{proof}
+First acceptance events are disjoint. Sum their bad parts. The tail-sum identity gives $\E N$.
+Conditional rejection gives the recursion. A geometric tail follows from $a_r\ge a_0$.
+Summing that tail proves both bounds and also establishes almost-sure emission in this case.
+For the ratio bound, $\sum_r\Prb(R_r)b_r\le\kappa\sum_r\Prb(R_r)a_r=\kappa$, because the last
+sum is the emission probability.
+\end{proof}
+The same reasoning applies conditional on a pre-unit history. Independent and identically
+distributed retries are sufficient for constant $a,b$, but are not necessary.
+In the usual notation, $a=(1-p)(1-\beta_m)+p\alpha_m$ and $b=p\alpha_m$.
+
+\begin{example}[Persistent difficulty invalidates pooled retry arithmetic]\label{ex:retry}
+Choose a unit type once. With probability $1/2$, it is always good and accepted.
+Otherwise it is always bad and each retry accepts independently with probability $1/2$.
+Every unit eventually emits. A fresh, pooled first attempt has $a=3/4$, $b=1/4$, but
+the eventual bad fraction is $1/2$, not $b/a=1/3$.
+Expected attempts are $\tfrac12(1)+\tfrac12(2)=3/2$, not $1/a=4/3$.
+If bad units instead always reject, half the units never emit. A fresh first-attempt
+acceptance probability of $1/2$ does not imply finite expected completion time.
+\end{example}
+
+\begin{theorem}[Uniform conditional threshold]\label{thm:threshold}
+Fix $n$ units and $0<\delta<1$. At every reachable pre-attempt history, including previous
+rejections and earlier slips, suppose:
+\begin{enumerate}[label=(\roman*),itemsep=1pt]
+\item the candidate is bad with probability at most $\bar p<1$;
+\item conditional on its good/bad status and that history, the $m$ gate-error indicators
+are independent, each with probability at most $1/2-\gamma$, for fixed $\gamma>0$;
+\item a majority decides acceptance; an attempt costs at most $s+mg$ for fixed $s,g$.
+\end{enumerate}
+Choose odd $m$ and write $d_m=e^{-2m\gamma^2}$. If
+\[
+d_m\le\min\{1/2,\ \delta(1-\bar p)/(2n\bar p)\},
+\]
+where the second constraint is omitted when $\bar p=0$, then
+\[
+S_n\ge1-\delta,\qquad
+\E[\text{total cost}]\le\frac{2n(s+mg)}{1-\bar p}.
+\]
+For fixed $\bar p,\gamma,s,g$ this gives $m=O(\log(n/\delta))$ and logarithmic
+multiplicative overhead. Neither Poisson arrivals nor independence across units is required.
+\end{theorem}
+\begin{proof}
+Hoeffding's inequality bounds each majority error by $d_m$~\cite{hoeffding}.
+At every history, acceptance has probability at least
+$(1-\bar p)(1-d_m)\ge(1-\bar p)/2$, and bad acceptance has probability at most $\bar p d_m$.
+These uniform bounds remain valid after averaging over rejected histories.
+The ratio bound of Proposition~\ref{prop:retry}, with $\kappa=2\bar p d_m/(1-\bar p)$, bounds
+each unit's slip conditional on every pre-unit history by $\kappa\le\delta/n$. Its geometric
+tail bounds the expected attempts by $2/(1-\bar p)$.
+Average the slip bound over correct prefixes and apply Proposition~\ref{prop:survival}.
+Sum conditional expected costs over all units, including histories with earlier slips.
+\end{proof}
+
+This theorem permits changing priors and adaptive history. Its uniform hypotheses are strong.
+A latent hard state can violate (i); shared gate blindness can violate (ii). Bounds only on
+correct prefixes suffice for the reliability calculation, but not for unconditional expected
+cost after a slip. A decreasing gate edge also changes the conclusion: the sufficient gate count
+scales as $\gamma^{-2}\log(n/\delta)$, not uniformly as $\log n$ if $\gamma$ tends to zero.
+
+\begin{proposition}[Conditional verification floor]\label{prop:floor}
+At each correct pre-unit history $h$, suppose the first attempt is bad with probability $p_i(h)$.
+Conditional on badness, a fraction $\sigma_i(h)$ passes every gate and the aggregator accepts
+unanimous passes. Then
+\[
+q_i\ge \E[p_i(h)\sigma_i(h)\mid A_{i-1}].
+\]
+In particular, if $p_i(h)\sigma_i(h)\ge\ell_i$ uniformly, then
+$S_n\le\prod_i(1-\ell_i)\le\exp(-\sum_i\ell_i)$.
+If $\ell_i\ge\ell>0$, then
+$H_{1/2}\le\lceil\log 2/[-\log(1-\ell)]\rceil$ for $\ell<1$.
+\end{proposition}
+\begin{proof}
+A stealth fault on the first attempt immediately emits a bad unit. Subsequent attempts can
+only add to this event, not remove it. Average over correct histories and use
+Proposition~\ref{prop:survival} and $1-x\le e^{-x}$.
+\end{proof}
+Fresh retries are unnecessary for this lower bound. Persistent exposure on correct histories
+is necessary for the stated horizon consequence. The shared-defect example has no such
+exposure after its first correct output.
+
+\section{Unequal difficulty and cumulative hazard}\label{sec:hazard}
+For a deterministic locally integrable nonnegative intensity $\lambda(t)$, a nonhomogeneous
+Poisson process has no-fault probability $e^{-\Lambda(T)}$, where
+$\Lambda(T)=\int_0^T\lambda(t)\,dt$. Its raw half-success horizon is the first time
+$\Lambda$ reaches $\log2$, if it ever does. This extends the baseline without adding dependence.
+An intensity depending on random history is not interchangeable with this deterministic function.
+
+\begin{proposition}[A vanishing-segment extension of the stealth ceiling]\label{prop:hazard}
+Partition $[0,T]$ into segments with cumulative intensities
+$L_i=\int_{t_{i-1}}^{t_i}\lambda(t)\,dt$ and raw badness $p_i=1-e^{-L_i}$.
+Suppose segments are independent; within each segment, retries are fresh, good candidates
+always pass, and a bad candidate passes with probability $\sigma\in(0,1]$.
+Then
+\begin{equation}\label{eq:finitehazard}
+S(T)=\prod_i\frac{1-p_i}{1-p_i+p_i\sigma}.
+\end{equation}
+As $\max_i L_i\to0$, at fixed finite $\Lambda(T)$,
+$S(T)\to e^{-\sigma\Lambda(T)}$. Thus the limiting gated horizon is
+$H_\sigma=\inf\{t:\Lambda(t)\ge\log2/\sigma\}$, with $\inf\varnothing=\infty$; when it is finite,
+$\Lambda(H_\sigma)=\log2/\sigma$. A bounded $\Lambda$ can give a finite raw horizon and an infinite
+gated one: $\lambda(t)=e^{-t}$ and $\sigma=1/2$ give $e^{-\sigma\Lambda(t)}>e^{-1/2}>1/2$. If $\Lambda(t)=(t/\eta)^k$, with $k,\eta>0$, the limiting ratio is
+\begin{equation}\label{eq:weibull}
+H_{\mathrm{gated}}/H_{\mathrm{raw}}=\sigma^{-1/k}.
+\end{equation}
+For $\sigma<1$, the ratio $1/\sigma$ is recovered only at $k=1$ in this family.
+\end{proposition}
+\begin{proof}
+Proposition~\ref{prop:retry} gives accepted slip
+$p_i\sigma/(1-p_i+p_i\sigma)$. Independent segments give the displayed product.
+Its $i$th logarithm is $-L_i-\log(1-(1-\sigma)(1-e^{-L_i}))
+=-\sigma L_i+O(L_i^2)$, uniformly as $\max_iL_i\to0$.
+Since $\sum_i L_i^2\le(\max_iL_i)\Lambda(T)$, the error vanishes.
+Solve the limiting survival curve at one half. For the power cumulative intensity,
+$H_{\mathrm{raw}}=\eta(\log2)^{1/k}$ and
+$H_{\mathrm{gated}}=\eta(\log2/\sigma)^{1/k}$.
+\end{proof}
+\begin{corollary}[Finite-segment bound under fresh Poisson retries]\label{cor:finitefloor}
+In the same independent-segment model, allow false rejection and any bad-accept probability
+$\alpha_i\ge\sigma_i\in[0,1]$. Let acceptance have positive probability. Then
+\[
+S(T)\le\prod_i\frac{1-p_i}{1-p_i+p_i\sigma_i}
+\le\exp\left(-\sum_i\sigma_i L_i\right).
+\]
+For constant intensity $\lambda$ and stealth share $\sigma>0$, this yields the exact bound
+$H\le\log2/(\lambda\sigma)$ at any fixed segment length, under log-linear interpolation between
+boundaries: for $T=(k+\theta)s$ with $0\le\theta<1$,
+$S(T)=\big[\prod_{i=1}^{k}(1-q_i)\big](1-q_{k+1})^\theta$. With identical gate behavior this is
+$(1-q)^{T/s}$, Part I's horizon convention. Other interpolation rules
+need not satisfy it: with $\lambda=1$, $\sigma=1/2$, and $s=4$, linear interpolation crosses one
+half near $2.0746>2\log2$.
+For the discrete horizon, round the number of segments up.
+\end{corollary}
+\begin{proof}
+The accepted slip $p_i\alpha_i/[(1-p_i)(1-\beta_i)+p_i\alpha_i]$ increases with
+$\alpha_i$ and $\beta_i$. Set $\alpha_i=\sigma_i$ and $\beta_i=0$ for its lower bound.
+The corresponding survival factor is $1/[1-\sigma_i+\sigma_i e^{L_i}]$.
+Convexity of the exponential gives $1-\sigma_i+\sigma_i e^{L_i}\ge e^{\sigma_i L_i}$.
+Multiply the factors.
+\end{proof}
+This is a reliability limit, not a cost-free policy: fixed positive gate cost makes arbitrarily
+short segments expensive. It models ideal visibility outside the stealth set and zero false
+rejection. A time-varying $\sigma(t)$ gives $\exp(-\int_0^T\lambda(t)\sigma(t)dt)$ under
+piecewise-continuous bounded marks and the same refinement argument. Independent thinning of
+the underlying Poisson process gives that survival exactly, but thinning and the finite-segment
+retry protocol are different models.
+
+The relevant average is $\int\lambda\sigma/\int\lambda$, not generally the ordinary
+time-average of $\sigma$. On two equal intervals, rates $(0.01,0.09)$ and stealth shares
+$(0.1,0.5)$ give mean escape intensity $0.023$. Multiplying their separate means gives $0.015$.
+High fault intensity and low visibility can coincide.
+
+The Weibull ratio~\eqref{eq:weibull} is one instance of a general ordering. We use the standard
+reliability classes: increasing failure rate (IFR) and decreasing failure rate (DFR)~\cite{bp}.
+
+\begin{proposition}[Monotone hazard orders the multiplier]\label{prop:monotone}
+Let $\Lambda$ be continuous and nondecreasing with $\Lambda(0)=0$. For $\sigma\in(0,1]$ put
+$H_{\mathrm{raw}}=\inf\{t:\Lambda(t)\ge\log2\}$ and $H_\sigma=\inf\{t:\Lambda(t)\ge\log2/\sigma\}$.
+If $\lambda$ is nondecreasing (IFR), then $H_\sigma\le H_{\mathrm{raw}}/\sigma$.
+If $\lambda$ is nonincreasing (DFR), then $H_\sigma\ge H_{\mathrm{raw}}/\sigma$.
+Under IFR and the model of Corollary~\ref{cor:finitefloor} with $\sigma_i=\sigma$ and equal
+segment length $s$, the discrete gated horizon, measured in work, is at most
+$s\lceil H_\sigma/s\rceil\le s\lceil H_{\mathrm{raw}}/(\sigma s)\rceil$.
+\end{proposition}
+\begin{proof}
+Under IFR, $\Lambda$ is convex with $\Lambda(0)=0$, so $\Lambda(t)/t$ is nondecreasing for $t>0$.
+If $H_{\mathrm{raw}}<\infty$, continuity gives $\Lambda(H_{\mathrm{raw}})=\log2$, and at
+$t=H_{\mathrm{raw}}/\sigma\ge H_{\mathrm{raw}}$ we get $\Lambda(t)\ge\Lambda(H_{\mathrm{raw}})/\sigma
+=\log2/\sigma$. Under DFR, $\Lambda(t)/t$ is nonincreasing. For
+$H_{\mathrm{raw}}\le t<H_{\mathrm{raw}}/\sigma$, $\Lambda(t)\le t\log2/H_{\mathrm{raw}}<\log2/\sigma$;
+for $t<H_{\mathrm{raw}}$, $\Lambda(t)<\log2\le\log2/\sigma$. For the last claim,
+Corollary~\ref{cor:finitefloor} gives $S(T)\le e^{-\sigma\Lambda(T)}$ at every segment boundary.
+At the first boundary $T\ge H_\sigma$, this is at most one half. The rounding is necessary:
+with constant rate $1$, $\sigma=1/2$, and $s=1$, one segment survives with probability
+$2/(1+e)>1/2$, so the discrete horizon is $2>2\log2$.
+\end{proof}
+Part~IV's load-monotonicity hypothesis, together with a nondecreasing load (its R-E case (a)),
+makes the state-carrying agent IFR. That result is ungated. If the agent is also gated under the
+independent-segment, fresh-retry model of Corollary~\ref{cor:finitefloor} with constant $\sigma$,
+Part~I's $1/\sigma$ multiplier is an upper bound for it, up to the rounding above.
+Bounded-load holes (R-E case (b)) bound the hazard but do not order it.
+
+\begin{example}[Constant expected arrival rate does not determine a horizon]\label{ex:latent}
+Draw $Z$ once: $Z=0$ with probability $0.9$, and $Z=10\lambda$ otherwise, with $\lambda>0$.
+Conditional on $Z$, arrivals are homogeneous Poisson of rate $Z$. Then $\E N(T)=\lambda T$,
+but $\Prb(N(T)=0)=0.9+0.1e^{-10\lambda T}>0.9$. The half-success horizon is infinite.
+An ordinary rate-$\lambda$ Poisson process has the same expected counts and finite horizon
+$\log2/\lambda$. For any nonnegative random rate $Z$,
+$\E e^{-ZT}\ge e^{-\E[Z]T}$ by Jensen's inequality. This compares zero arrivals at fixed
+mean rate, not multi-fault damage or retry cost.
+\end{example}
+
+A latent rate changes the horizon value. If visibility does not depend on the latent rate, the
+rounded $1/\sigma$ ceiling survives at every segment length, and in the ideal vanishing-segment
+limit the multiplier is exactly $1/\sigma$. At finite segment length the exact multiplier is not
+invariant: with ideal gates at a deterministic rate $z>0$, log-linear interpolation gives
+$H_{\mathrm{gated}}/H_{\mathrm{raw}}=zs/\log(1-\sigma+\sigma e^{zs})$, which depends on $z$ when
+$0<\sigma<1$. A numerical ratio also requires finite horizons.
+
+\begin{proposition}[Rate mixing preserves the multiplier]\label{prop:mixing}
+Draw $Z\ge0$ once per run. Conditional on $Z$, let the independent-segment model of
+Corollary~\ref{cor:finitefloor} hold with constant intensity $Z\lambda_0$ and a stealth share
+$\sigma\in(0,1]$ that does not depend on $Z$. Let $S_{\mathrm{raw}}(t)=\E e^{-Z\lambda_0t}$
+be the ungated survival, and let segments have equal length $s$. Then, at every segment
+boundary $T$,
+\[
+S_{\mathrm{gated}}(T)\le S_{\mathrm{raw}}(\sigma T),
+\qquad\text{hence}\qquad
+H_{\mathrm{gated}}\le s\left\lceil H_{\mathrm{raw}}/(\sigma s)\right\rceil
+\]
+for the discrete horizon measured in work.
+For ideal gates ($\alpha=\sigma$, $\beta=0$, as in Proposition~\ref{prop:hazard}), the first
+inequality becomes an equality in the vanishing-segment limit. Without ideal gates it need not:
+with $\sigma=\alpha=1/2$ and $\beta=1/2$, each accepted-segment survival is exactly
+$e^{-Z\lambda_0s}$, so $S_{\mathrm{gated}}(T)=S_{\mathrm{raw}}(T)$. If instead $\sigma=\sigma(Z)$, then
+$S_{\mathrm{gated}}(T)\le\E e^{-\sigma(Z)Z\lambda_0T}$, and no fixed multiplier follows.
+\end{proposition}
+\begin{proof}
+Corollary~\ref{cor:finitefloor}, applied conditional on $Z$, gives
+$S_{\mathrm{gated}}(T\mid Z)\le e^{-\sigma Z\lambda_0T}$. Take expectations. At the first
+boundary $T\ge H_{\mathrm{raw}}/\sigma$, $S_{\mathrm{raw}}(\sigma T)\le S_{\mathrm{raw}}(H_{\mathrm{raw}})=1/2$
+by continuity and monotonicity of $S_{\mathrm{raw}}$. For the limit, apply
+Proposition~\ref{prop:hazard} conditional on $Z$ and use bounded convergence. An interpolated
+bound needs log-linear interpolation of the conditional boundary survivals before averaging.
+\end{proof}
+Without rounding the horizon bound is false at fixed $s$: the example in the proof of
+Proposition~\ref{prop:monotone} is the case $Z\equiv1$.
+The survival form also covers Counterexample~\ref{ex:latent}, where both horizons are infinite.
+With $Z\in\{0.5,1.5\}$ equally likely, $\lambda_0=1$, and ideal gates, independent visibility
+$\sigma=0.2$ gives multiplier $5.0000$ in the limit. Visibility $\sigma(Z)=(0.1,0.3)$, with the
+same mean $0.2$, gives $5.0549$. Together with Proposition~\ref{prop:monotone}, for the ideal
+vanishing-segment survival curve: random rate mixing keeps the multiplier, deterministic IFR
+lowers it, DFR raises it, and visibility that co-varies with difficulty removes any fixed value.
+At finite segment length the gated horizon can be shorter: with constant rate $1$ (both IFR and
+DFR), ideal gates, $\sigma=1/2$, and $s=1.2$, one segment survives with probability
+$2/(1+e^{1.2})<1/2$, so the discrete horizon is $1.2<2\log2$. The DFR lower bound concerns
+$H_\sigma$, not finite-segment horizons.
+
+\section{Checkpoint cost and persistent state}\label{sec:cost}
+\begin{proposition}[Heterogeneity changes mean retry cost]\label{prop:cost}
+Consider equal-length segments $s>0$, perfect detection, no false rejection, independent fresh
+retries within each segment, and a segment-specific rate $L\ge0$ that stays fixed during its
+retries. Each attempt costs $s+G$. If the workload distribution of rates has finite mean, then
+\[
+C(s)=(1+G/s)\E[e^{Ls}]\ge(1+G/s)e^{\E[L]s}.
+\]
+Equality holds only for a constant rate (when $s>0$); the left side can be infinite.
+If the rate distribution does not depend on $s$, and the moment and its derivative are finite
+near an interior optimizer, the stationarity condition is
+\begin{equation}\label{eq:checkpoint}
+\frac{\E[L e^{Ls}]}{\E[e^{Ls}]}=\frac{G}{s(s+G)}.
+\end{equation}
+\end{proposition}
+\begin{proof}
+A rate-$L$ attempt passes with probability $e^{-Ls}$. Expected attempts are $e^{Ls}$.
+Average the conditional cost and apply strict convexity of the exponential. Differentiating
+$\log C(s)$ gives the stationarity equation under the stated moment conditions.
+\end{proof}
+For constant $L=\lambda$, the exact stationary equation in this model is
+$s(s+G)=G/\lambda$. Its positive root approaches $\sqrt{G/\lambda}$ when $G\lambda\to0$.
+This is the model used for Part I's approximation. Other detection times and recovery costs
+give other checkpoint formulas; general failure distributions already have a large
+checkpointing literature~\cite{toueg}.
+
+At $s=1,G=0.1$, equal workload shares with rates $0$ and $2$ give
+$C=1.1(1+e^2)/2\approx4.6140$. Replacing them by their mean rate $1$ gives
+$1.1e\approx2.9901$. The inequality of Proposition~\ref{prop:cost} holds at every $s$, so it
+also holds between the two optimal costs. With the two rates held fixed as $s$ varies, the
+optimal gap is much smaller: about $1.8530$ at $s\approx0.239$ against $1.7951$ at
+$s\approx0.270$, because the heterogeneous optimum uses shorter segments. The fixed-interval
+figure alone overstates the practical effect.
+No randomness is needed. Take a deterministic intensity $\lambda(t)$ indexed by work position,
+and let a retry repeat the same position, so that it keeps the same rate. A segment's rate is
+then the average of $\lambda$ over that segment. At each fixed $s$ these averages have mean
+equal to the overall mean rate, so the same Jensen comparison holds at every $s$. Their
+distribution changes with $s$, however, so Equation~\eqref{eq:checkpoint} does not apply
+directly; the derivative must include that dependence.
+Part~I's limitations paragraph states that a clustered or time-varying hazard leaves the mean
+checkpointing overhead governed by the same $\lambda$ and inflates only its variance. The
+countermodel above assumes that a retry keeps its segment's rate, as a retry of the same hard
+step would. The paragraph does not state that assumption, but its own mechanism, runs of bad
+segments that trigger consecutive recomputations, is consistent with it. Under that assumption
+the statement is false and the mean rises.
+This example changes no gate behavior and uses fresh retries within each segment.
+If the rate is redrawn independently on each attempt instead, perfect detection gives
+expected attempts $1/\E[e^{-Ls}]$. The reset law therefore changes even the direction of a
+comparison with mean-rate substitution.
+
+\paragraph{Finite state models.}
+A latent-state model can include context poisoning, repair, and reset without pretending that
+state is an average rate. Let $X_i$ be a finite state before emitted unit $i$ and let
+\[
+K_i(x,y)=\Prb(I_i=0,X_{i+1}=y\mid X_i=x)
+\]
+under a Markov assumption that makes $X_i$ sufficient for this transition. $K_i$ is
+substochastic. For initial row distribution $\pi$,
+\begin{equation}\label{eq:kernel}
+S_n=\pi K_1K_2\cdots K_n\mathbf1.
+\end{equation}
+This follows by summing probabilities of correct state paths. For retries within one unit,
+let $R(x,y)$ be the joint probability of rejection and next state $y$, and let $b(x)$ be
+immediate bad acceptance. If the spectral radius of $R$ is below one, the eventual bad
+probability vector is $(I-R)^{-1}b$, and expected attempts are $(I-R)^{-1}\mathbf1$.
+Both follow by summing the convergent series $\sum_{r\ge0}R^r$.
+Perfect reset, retained premises, and learning correspond to different kernels. These formulas
+do not establish which kernel is appropriate for an agent.
+
+\paragraph{Propagation.}
+One escaped root fault can corrupt many descendants. A model of fresh introduction counts
+the root once; a model of faulty outputs counts its consequences. For the metric of
+Definition~\ref{def:success}, what happens after the first escaped fault cannot change the
+already-failed prefix. It can change damage and repair cost. Excitation by a detected or
+otherwise unescaped fault is different: it acts before any escape and changes the conditional
+prefix risks. If a root fault occurs with probability $p$ and escapes with probability $\sigma$,
+and a detected root causes one further faulty attempt that escapes with probability $\sigma$,
+the escape probability is $p\sigma+p(1-\sigma)\sigma$, not $p\sigma$. A self-exciting arrival model can
+represent some forms of increased subsequent fault activity~\cite{hawkes}, but does not by
+itself identify distinct causes, visibility, or semantic propagation.
+
+\section{Mechanization with heterogeneous risks}\label{sec:psm}
+At a correct pre-unit history $h$, let $c_i(h)$ be the probability of routing to a mechanism.
+Let $o_i(h)$ be the open-path slip conditional on choosing that path.
+On the mechanism branch, let $e_i(h)$ be direct escaped-fault probability and $b_i(h)$ the
+probability of rejection into fallback. Let $f_i(h)$ be the fallback slip conditional on
+that rejection. Direct escape and rejection are disjoint events.
+
+\begin{proposition}[Routing identity and a restricted closure comparison]\label{prop:closure}
+At each such history, the slip probability is
+\begin{equation}\label{eq:closure}
+q_i(h)=(1-c_i(h))o_i(h)+c_i(h)\{e_i(h)+b_i(h)f_i(h)\}.
+\end{equation}
+Averaging over histories conditional on $A_{i-1}$ gives the $q_i$ of
+Proposition~\ref{prop:survival}.
+For a fixed exogenous sequence of independent units, suppose routing changes neither later
+input laws nor branch risks. Put $d_i=e_i+b_if_i$. Replacing the open path at unit $i$ by the
+mechanism improves its survival factor exactly when $d_i<o_i$.
+It strictly improves total finite-run survival if the other factors are positive.
+For stationary identical units this recovers Part IV's realized-slip criterion and product law.
+\end{proposition}
+\begin{proof}
+Condition first on routing, then on rejection within the mechanism branch. This gives the
+identity. Under the additional comparison assumptions, total survival is the product of
+fixed local factors. Replacing $1-o_i$ by $1-d_i$ has the stated effect.
+\end{proof}
+
+The comparison assumptions matter. A mechanism with lower immediate risk can move execution
+to a state with higher later risk. For example, an open first step can have risk $0.1$ and
+leave a safe second step. A closed first step can have risk zero but leave a second-step risk
+$0.9$. Total survival falls from $0.9$ to $0.1$. Equation~\eqref{eq:closure} remains true;
+the claim that local improvement implies global improvement does not.
+
+\paragraph{Work share and risk share.}
+For small risks on a fixed independent workload, $1-S_n=\sum_iq_i+O((\sum_iq_i)^2)$.
+For units with small $p_i$, fresh retries, ideal acceptance outside a common stealth set
+($\alpha_i=\sigma$, $\beta_i=0$), and closed units with zero escape, the first-order remaining
+risk is $\sigma\sum_i(1-c_i)p_i$. A stealth floor alone gives only a lower-bound contribution:
+with $\sigma=0.1$ but bad acceptance $0.5$, the open slip is $0.5p_i+O(p_i^2)$.
+Define the fault-exposure share $c_{\mathrm{risk}}=\sum_i c_i p_i/\sum_i p_i$ when the denominator
+is positive. It equals work share only under additional homogeneity or selection assumptions.
+Consider one unit with risk $0.01$ and one with risk $0.09$. Closing either one gives 50\%
+work closure, but leaves risk $0.09$ or $0.01$. The original PSM formula is appropriate for
+its stationary mixing model; volume share alone does not generalize it to this workload.
+These risks describe escapes, not confidence scores.
+
+\paragraph{Costs under changing demand.}
+For deterministic exogenous call intensity $r(t)$, expected per-call saving $\Delta(t)$,
+upkeep rate $u(t)$, fixed lifetime $\tau$, build cost $B$, and validation cost $V$, linear
+accounting gives closure benefit
+\begin{equation}\label{eq:benefit}
+\int_0^\tau[r(t)\Delta(t)-u(t)]dt-B-V.
+\end{equation}
+Here per-call saving includes the actual expected retry, fallback, and loss costs on each path.
+With random lifetime and demand, use the expectation of the stopped total; products of means
+need not agree. Part IV's $(r\Delta-u)\tau>B+V$ is the constant-parameter special case.
+Selecting regions separately remains valid only with additive costs and no coupling.
+
+\section{Blind sets, evidence, validation, and drift}\label{sec:evidence}
+\begin{proposition}[A structural blind set under changing fault laws]\label{prop:blind}
+Let $\Sigma$ be a measurable fault set accepted by every gate in a fixed allowed collection.
+For every fault distribution $\mu_t$ and every stack from that collection,
+its conditional false-accept mass is at least $\mu_t(\Sigma)$.
+For two ideal stacks accepting exactly fault sets $\Sigma_F,\Sigma_N$, the combined mass is
+$\mu_t(\Sigma_F\cap\Sigma_N)$. It equals the product of the two masses only under independence
+of these events under that same $\mu_t$.
+\end{proposition}
+\begin{proof}
+The combined accepted-fault set contains $\Sigma$. Apply monotonicity of measure.
+For the two ideal stacks, conjunction is set intersection; independence is precisely the
+condition giving the product of masses.
+\end{proof}
+Part II supplies the inclusion from its representation and zero-false-rejection assumptions.
+Its finite false-rejection extension also needs the stated likelihood-ratio control.
+Arrival stationarity is not used. A constant numerical floor does require a lower bound on
+$\mu_t(\Sigma)$ in the relevant conditional workloads. A changed representation, predicate,
+or allowed evidence class can change $\Sigma$ itself.
+
+\begin{proposition}[Twins under dependent observation]\label{prop:twins}
+Fix a target distribution and a mechanism class with fault mass $\pi(M)$.
+Suppose two mechanisms produce the same law for the full observation record and auxiliary
+randomness used by a promotion rule. Their promotion probabilities are equal.
+Let $U=u(\text{record},\text{auxiliary randomness})$ for one fixed measurable rule $u$.
+If this upper bound satisfies
+$\Prb_M\{\pi(M)\le U\}\ge1-\eta$ for every mechanism in the class, then
+\[
+\Prb_M\Big\{U\ge\sup_{M'\sim M}\pi(M')\Big\}\ge1-\eta,
+\]
+where $M'\sim M$ denotes equality of those observation laws.
+Pointwise twins have equal observation laws under any common exogenous sampling law,
+even with dependent samples, provided the joint auxiliary-randomness law is also common.
+\end{proposition}
+\begin{proof}
+The same measurable rule applied to identically distributed records has identical laws.
+The common rule is necessary: an oracle bound $U=\pi(M)$ is valid for every mechanism but is
+not a function of the record, and it would separate twins of masses $0$ and $1$.
+For each $t$ below the supremum, choose a twin with fault mass greater than $t$ and apply
+validity for that twin. Transfer the distribution of $U$ to $M$. The events $\{U\ge t\}$
+decrease as $t$ increases to the supremum along a sequence, and their intersection is
+$\{U\ge\sup_{M'\sim M}\pi(M')\}$. Continuity of measure from above gives the displayed bound.
+Pointwise twins agree on every realized sample, so common joint sampling and randomness give
+the required equality in law.
+\end{proof}
+Common adaptive sampling based only on the shared transcript and common independent random
+seeds also preserves pointwise twins, by induction on the transcript. Side information about
+mechanism text or identity can break this condition. Neither the result nor Part IV's original
+twin result forces the mechanism itself to be wrong. They constrain what the specified evidence
+can certify. This extension does not validate the separate generalizing-builder hypothesis.
+
+\begin{proposition}[Validation needs conditional exposure]\label{prop:validation}
+Let $D_j$ mean that validation item $j$ detects a fault, with exact evidence on that item.
+If every candidate above target fault mass $\theta\in(0,1)$ has
+\[
+\Prb(D_j\mid D_1^c,\ldots,D_{j-1}^c)\ge\theta
+\]
+whenever the conditioning event has positive probability, then a zero-detection promotion
+rule falsely promotes such a candidate with probability at most $(1-\theta)^n$.
+Thus $n\ge\log(1/\eta)/[-\log(1-\theta)]$ is sufficient for error at most $\eta$.
+\end{proposition}
+\begin{proof}
+Apply the chain rule to the event of no detections.
+\end{proof}
+Independent target-distribution samples satisfy this condition. Repeating one randomly drawn
+input $n$ times does not: for a deterministic mechanism of fault mass $\theta'$ the chance
+of no detection is $1-\theta'$, for every $n\ge1$.
+At $\theta'=0.1,n=20$, the two probabilities are $0.9$ and $0.9^{20}\approx0.1216$.
+Part IV's sample-size necessity follows within its original class with masses arbitrarily
+close to $\theta$ and independent target samples. Necessity is not asserted for arbitrary
+adaptive or targeted validation schemes.
+
+\begin{proposition}[Distribution drift and changing fault sets]\label{prop:drift}
+For probability measures $D_t,D_0$, use
+$\TV(D_t,D_0)=\sup_A|D_t(A)-D_0(A)|$.
+If a mechanism's escaped-fault set $B$ is fixed, then
+$|D_t(B)-D_0(B)|\le\TV(D_t,D_0)$.
+If the set also changes from $B_0$ to $B_t$, then
+\[
+|D_t(B_t)-D_0(B_0)|\le\TV(D_t,D_0)+D_0(B_t\mathbin\triangle B_0).
+\]
+\end{proposition}
+\begin{proof}
+The first statement is the definition of total variation. For the second, add and subtract
+$D_0(B_t)$; the difference between masses of two sets is bounded by their symmetric difference.
+\end{proof}
+The bound needs information about drift; it does not estimate it. With unrestricted shift,
+a mechanism correct on all validation inputs can fail on all future inputs.
+A watch/reopen policy therefore needs a measurement model and delay analysis, which remain open.
+
+\section{When the earlier results hold}\label{sec:audit}
+The companion assessment (\texttt{fault\_process\_assessment.json}) identifies every formal result by its source label and hash.
+The following tables summarize the logical dependencies. ``Preserved'' means preserved under
+the listed assumptions, not established empirically. ``Replace'' means the formula changes
+outside the original model. No published source is edited by this assessment.
+
+Table~\ref{tab:matrix} classifies the 25 results. \emph{Arrival-free} results use no arrival or
+stationarity assumption in their stated conclusion; their masses still depend on the current
+fault law. \emph{Conditional} results keep the form of their conclusion when uniform or
+conditional bounds hold on the reachable histories. \emph{Formula} results are quantitative
+formulas derived under constant or stationary parameters (a constant rate, or stationary
+Bernoulli risks); their form changes outside the original model. The classes are applied in
+this order of precedence. The counts are 14, 10, and 1.
+A bullet marks an axis of Section~\ref{sec:axes} whose change can break the result's stated
+conclusion: D difficulty, P dependence, R retry, V visibility, I intervention, W drift. Bullets
+concern the conclusion itself, not surrounding applications; for example, Part III's
+cost-separation comparison is per unit, while translating an output target into a per-unit target
+depends on output dependence. The R bullets on the horizon ceiling and stealth decomposition
+concern their exact $H_{\mathrm{raw}}/\sigma$ forms; their first-attempt bounds survive any retry
+law. R-A is conditional because its displayed form holds whenever
+$q_i\ge p\lambda_{\mathrm{mix}}$ on correct prefixes (Proposition~\ref{prop:survival}). The
+zero-escape and reach results are conditional for the same reason: a constant correct-prefix
+risk keeps their conclusions, even with dependent outputs. A geometric first-failure index $K$
+with $I_i=\ind\{i\ge K\}$ gives dependent outputs and exactly $S_n=(1-f)^n$. The classification
+is a review judgment recorded with the assessment; it is not a mechanical proof classification.
+
+\begin{table}[!ht]\centering\small
+\caption{Classification of the earlier results and the axes that can break them.}\label{tab:matrix}
+\begin{tabular}{lllcccccc}
+\toprule Part & Result & Class & D & P & R & V & I & W\\\midrule
+I & Per-segment slip & conditional &  &  & $\bullet$ &  &  & \\
+I & Threshold and overhead & conditional & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ &  & \\
+I & Horizon ceiling & conditional & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ &  & \\
+I & Diversity product & arrival-free &  & $\bullet$ &  & $\bullet$ &  & \\
+I & Stealth decomposition & conditional & $\bullet$ & $\bullet$ & $\bullet$ & $\bullet$ &  & \\
+I & Optimal interval & formula & $\bullet$ &  & $\bullet$ &  &  & \\
+II & GG1 inheritance & arrival-free &  &  &  & $\bullet$ &  & $\bullet$\\
+II & GG2 fixed point & arrival-free &  &  &  & $\bullet$ &  & $\bullet$\\
+II & Exogenous family & arrival-free &  & $\bullet$ &  & $\bullet$ &  & \\
+II & Reality grounding & arrival-free &  &  &  & $\bullet$ &  & $\bullet$\\
+III & Series-system identity & conditional & $\bullet$ & $\bullet$ &  &  &  & \\
+III & Zero-escape corollary & conditional & $\bullet$ & $\bullet$ &  &  &  & \\
+III & Cost separation & arrival-free &  &  &  &  &  & \\
+III & Association lemma & arrival-free &  & $\bullet$ &  &  &  & \\
+III & Correlated-escape bound & arrival-free &  & $\bullet$ &  &  &  & \\
+IV & R-A partial closure & conditional & $\bullet$ & $\bullet$ &  & $\bullet$ & $\bullet$ & $\bullet$\\
+IV & Evidence twins & arrival-free &  &  &  &  &  & $\bullet$\\
+IV & Same-family evidence & arrival-free &  &  &  & $\bullet$ &  & $\bullet$\\
+IV & Exact replay & arrival-free &  &  &  &  &  & $\bullet$\\
+IV & Accepted-output copy & arrival-free &  &  &  & $\bullet$ &  & \\
+IV & Produced undetected faults & arrival-free &  &  &  & $\bullet$ & $\bullet$ & \\
+IV & R-C break-even & conditional &  & $\bullet$ &  &  & $\bullet$ & $\bullet$\\
+IV & R-D composition & arrival-free &  & $\bullet$ &  &  &  & \\
+IV & Reach and residual & conditional & $\bullet$ & $\bullet$ &  &  & $\bullet$ & \\
+IV & R-E bounded load & conditional & $\bullet$ &  &  &  & $\bullet$ & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\small
+\begin{longtable}{p{0.23\textwidth}p{0.70\textwidth}}
+\toprule Result & Assessment \\\midrule\endhead
+\multicolumn{2}{l}{\textbf{Part I: gated computation}}\\
+Per-segment slip & Preserved with constant conditional retry probabilities. For nonfresh retries,
+replace $p\alpha_m/P_{\mathrm{adv}}$ by Proposition~\ref{prop:retry}. Counterexample~\ref{ex:retry}.\\
+Threshold and overhead & Preserved under uniform conditional gate accuracy and progress:
+Theorem~\ref{thm:threshold}. Mean accuracy alone is insufficient, and unbounded difficulty
+($p_i\to1$) removes the uniform acceptance bound. The converse needs persistent badness and
+conditional escape, rather than a marginal nonzero rate.\\
+Horizon ceiling & Replace a fixed $p\sigma$ by conditional exposure bounds
+(Proposition~\ref{prop:floor}). A positive marginal floor alone does not imply a finite horizon.
+The printed first-attempt bound $s\log2/(p\sigma)$ survives arbitrary retries; the exact
+$H_{\mathrm{raw}}/\sigma$ form needs fresh retries (Corollary~\ref{cor:finitefloor}) or an
+equally strong conditional survival bound. The $1/\sigma$ multiplier survives rate mixing (Proposition~\ref{prop:mixing}) and is an upper
+bound under IFR (Proposition~\ref{prop:monotone}); under DFR the multiplier can exceed it.\\
+Diversity product & Preserved under independence of stealth events under the operative fault
+law. Family names or temporal independence do not establish this independence.\\
+Stealth decomposition & Its mixture identity survives pointwise under the stated conditional
+family model. The appended horizon consequence needs persistent exposure. Under fresh Poisson
+retries the exact constant-rate bound follows from Corollary~\ref{cor:finitefloor}; a changed
+retry law can break it. Its breadth limit needs $\rho<1$ (errata candidate 4).\\
+Optimal interval & The constant-rate approximation survives in its cost model. Heterogeneity,
+including a deterministic $\lambda(t)$, raises mean cost at every interval and requires
+Equation~\eqref{eq:checkpoint} when the rate distribution does not depend on $s$; persistent state
+requires a retry model. The printed minimum drops a $1/(1-\beta_m)$ factor (errata candidate 3).\\
+\midrule
+\multicolumn{2}{l}{\textbf{Part II: generated gates}}\\
+GG1 inheritance & Structural inclusion survives without an arrival model, under fixed
+representation and soundness/support assumptions. Mass is evaluated under the new fault law.\\
+GG2 fixed point & Lower bound survives for sound stacks. Equality additionally requires
+reachable coverage outside the blind set. This is an existing achievability qualification,
+independent of arrival stationarity.\\
+Exogenous family & Intersection identity survives for the ideal stacks. Product requires
+independence under the current law; strict reduction requires positive removed mass, not
+set noncontainment (errata candidate 5).\\
+Reality grounding & Zero covered-scope escape survives if the oracle matches the current
+correctness predicate. Exact residual equality off scope requires further conditions
+(errata candidate 6).\\
+\midrule
+\multicolumn{2}{l}{\textbf{Part III: escape, cost, correlation}}\\
+Series-system identity & For independent unequal marginals use $1-\prod_i(1-f_i)$.
+For arbitrary dependence use conditional risks or Equation~\eqref{eq:marginal}.\\
+Zero-escape corollary & Preserved when the correct-prefix risk is constant, $q_i=f$;
+independence across outputs is not needed. For varying sequential risks,
+summability governs positive infinite survival; a triangular array has vanishing total escape
+iff its conditional-risk sum tends to zero.\\
+Cost separation & Preserved if the per-unit power law, geometric gate improvement, fixed
+prevalence, good-acceptance rate, and cost assumptions remain. No Poisson law is needed.
+The translation from output risk to per-unit target must be revised under dependence.\\
+Association lemma & Preserved for same-direction monotone functions of independent primitives;
+no constant arrival rate is needed~\cite{epw}.\\
+Correlated-escape bound & Preserved under that provenance model at fixed marginals. Arbitrary
+dependence can violate it. The bound concerns any escape, not simultaneous damage.\\
+\midrule
+\multicolumn{2}{l}{\textbf{Part IV: progressive semantic mechanization}}\\
+R-A partial closure & Original ceiling needs independent stationary mixing and fixed mechanisms.
+Use conditional routing risks for history dependence. Work share alone is insufficient.
+Its $(1+O(\lambda s))$ factor is necessary for the closed branch (errata candidate 2).\\
+Evidence twins & Preserved under equal observation laws. Independent samples can be weakened
+as in Proposition~\ref{prop:twins}; changes that distinguish twins are outside that premise.\\
+Same-family evidence & Preserved under the representation restriction; the explicit twin-mass
+formula also needs the countable scope and finite-patch closure. Drift changes its target mass.
+Evidence not decided within $F$, such as exact correctness evidence, can separate $F$-twins.\\
+Exact replay & The disagreement bound is pointwise and survives every fixed target law.
+It must be recomputed or bounded under shift.\\
+Accepted-output copy & The displayed lower bound $p\lambda_F-\E[\delta]$ survives without fresh
+retries: under eventual emission a first-attempt stealth fault is emitted at once. Fresh retries
+only give the proof's intermediate denominator step. An exact reference gate removes the floor.
+No realized-build floor follows.\\
+Produced undetected faults & Preserved with the build/input law, preservation of undetected
+outputs, and no discarded builds. Repair that changes undetected outputs can break it. Both
+parts depend on visibility: detecting previously invisible build faults removes the floor.\\
+R-C break-even & Accounting survives with actual expected costs; use Equation~\eqref{eq:benefit}
+for varying demand. Conditional exposure gives a sufficient zero-failure sample count
+(Proposition~\ref{prop:validation}); the source's necessary count needs its independent target
+sampling and near-threshold class, and targeted validation can need far fewer items. Separable
+frontier selection also needs additive uncoupled costs.\\
+R-D composition & Preserved under residual completeness and monotone provenance.
+Without provenance association, completeness still gives a union bound. Missing interaction
+faults can invalidate completeness itself.\\
+Reach and residual & Exact geometric horizon and $1/(1-c)$ comparison need the stated fixed
+branch parameters and a constant correct-prefix risk $q(c)$; independence across outputs is not
+needed. Feedback and selected routing require a new comparison.\\
+R-E bounded load & Already uses a varying load-dependent Poisson rate. Its bounds survive
+with the stated load/intensity bounds and clock. Bounded load alone establishes neither
+monotonicity nor clean reset. With nondecreasing load the ungated agent is IFR; if it is also
+gated under the model of Corollary~\ref{cor:finitefloor}, Proposition~\ref{prop:monotone} makes
+Part~I's $1/\sigma$ an upper bound on the multiplier, up to rounding.\\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Errata candidates in the published papers.}
+The assessment found seven items in Parts I and II. Each carries a severity: a \emph{false claim}
+within the stated model, a \emph{strengthening} of a correct bound, a \emph{dropped factor}, an
+\emph{overstated equality or strictness}, or an \emph{endpoint} restriction. Only item 1 depends on
+the arrival model. These qualifications concern the cited versions; this paper does not amend them.
+
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item \emph{Part I, limitations: mean checkpoint overhead (false claim, prose).} The claim that a
+clustered or time-varying hazard changes only the variance of checkpointing overhead is false
+when a retry keeps its segment's rate, including for a deterministic $\lambda(t)$
+(Proposition~\ref{prop:cost} and Section~\ref{sec:cost}). The paragraph does not state that
+retry assumption; the countermodel adds it. The effect at the respective optimal intervals can be
+small.
+
+\item \emph{Part I, horizon ceiling: the $(1+O(\lambda s))$ factor (strengthening).} The theorem
+prints $H\le s\log2/(p\sigma)=(\log2/(\lambda\sigma))(1+O(\lambda s))$, from the floor
+$S_n\le(1-p\sigma)^n$. That bound is correct. Retaining the acceptance denominator gives
+Corollary~\ref{cor:finitefloor}: under Part I's fresh-retry assumptions and its continuous
+horizon convention, $H\le H_{\mathrm{raw}}/\sigma$ holds at every segment length, so the factor can
+be removed. The discrete horizon rounds up to whole segments. The stealth decomposition prints
+the exact form $H_{\mathrm{gated}}\le H_{\mathrm{raw}}/\lambda_{\mathrm{irr}}$, but its proof
+substitutes into the first-order ceiling; Corollary~\ref{cor:finitefloor} supplies the exact form
+under fresh retries. Without fresh retries the exact form can fail while the printed first-order
+bound holds: with $\lambda=s=1$, $\sigma=1/2$, stealth faults accepted, and a rejected nonstealth
+fault followed by a good retry, $H\approx1.8246>H_{\mathrm{raw}}/\sigma\approx1.3863$, while
+$s\log2/(p\sigma)\approx2.1931$.
+Part~IV's closed paths cannot inherit this. With $\varepsilon_{\mathrm{cl}}=p\lambda_{\mathrm{pc}}$
+and $0<\lambda_{\mathrm{pc}}\le1$, the function $t\mapsto-\log(1-t(1-e^{-L}))-tL$ is convex on
+$[0,1]$ and vanishes at both ends. Hence $-\log(1-p\lambda_{\mathrm{pc}})\le\lambda_{\mathrm{pc}}L$,
+and an all-closed run has exact horizon at least $H_{\mathrm{raw}}/\lambda_{\mathrm{pc}}$. At
+$\lambda s=1$ and $\lambda_{\mathrm{pc}}=1/2$ it is $1.3162\,H_{\mathrm{raw}}/\lambda_{\mathrm{pc}}$.
+The $(1+O(\lambda s))$ factor of R-A is therefore necessary for its closed component; the open
+component can use Corollary~\ref{cor:finitefloor}.
+
+\item \emph{Part I, optimal interval: the minimal overhead (dropped factor).} The printed cost is
+$C(s)\approx(1+G/s)e^{\lambda s}/(1-\beta_m)$, but the printed minimum $1+2\sqrt{G\lambda}$ omits
+the factor $1/(1-\beta_m)$. For fixed $\beta_m=1/4$ the minimum tends to $4/3$, not $1$, as
+$G\lambda\to0$. The corrected statement is
+$C_{\min}=(1+2\sqrt{G\lambda}+O(G\lambda))/(1-\beta_m)$, or the theorem should assume small
+$\beta_m$. The minimizing interval is unaffected.
+
+\item \emph{Part I, stealth decomposition: convergence (endpoint).} The limit
+$\lambda_{\mathrm{irr}}+(1-\lambda_{\mathrm{irr}})\rho^k\to\lambda_{\mathrm{irr}}$ needs $\rho<1$
+(or $\lambda_{\mathrm{irr}}=1$); at $\rho=1$ breadth does not help.
+
+\item \emph{Part II, exogenous family: strict reduction (overstated strictness).} Set
+noncontainment does not imply a strict reduction in mass. Under uniform measure on $[0,1]$,
+$\Sigma_F=[0,1/2]$ and $\Sigma_N=[0,1/2)$ satisfy $\Sigma_F\not\subseteq\Sigma_N$, but both masses
+are $1/2$. The condition should be $\mu(\Sigma_F\setminus\Sigma_N)>0$. Part~II's model section states that equality between fault sets may be read up to $\mu$-null
+sets; extending that reading to containment also repairs the statement, so this item is a wording
+repair.
+
+\item \emph{Part II, grounding proposition: off-scope residual (overstated equality).} The
+proposition guarantees that no fault passes on the covered scope. An oracle declared arbitrary off
+scope can reject additional stealth faults there, so the displayed off-scope residual mass is not
+always an equality. Conversely, a nonideal family stack can pass additional nonstealth faults off
+scope. If the family stack accepts exactly $\Sigma_F$ and the oracle accepts everything outside
+$S$, residual escape is exactly $\mu(\Sigma_F\setminus S)$. Under the first condition alone it is
+at most that mass. The covered-scope guarantee is unaffected.
+
+\item \emph{Part II, GG2: equality needs reachable coverage (overstated equality; already flagged).}
+The equality needs sufficient reachable gates to reject faults outside the stealth set. The
+published repository already flags this. Its lower-bound proof uses sound gates. Separate
+per-gate false-rejection tolerances do not automatically give a fixed tolerance for an
+arbitrarily large conjunction.
+\end{enumerate}
+
+\paragraph{What has not been proved.}
+We do not prove that real faults follow any listed process, that resets remove hidden state,
+that real gate stacks satisfy a uniform conditional edge, or that drift is observable in time.
+Part IV's generalizing-builder and load-monotonicity hypotheses remain hypotheses.
+An arbitrary adaptive provenance graph need not satisfy the monotone primitive model.
+The evidence ladder and typed-evidence framing in Part III are not probability theorems and
+do not become invalid merely because an arrival model changes.
+
+\section{Executable checks and counterexamples}\label{sec:checks}
+The companion script (\texttt{simulate\_fault\_process.py}) enumerates small probability spaces, checks closed forms against direct
+enumeration, and evaluates the examples below. Checks are deterministic. They do not establish
+the universal propositions; the proofs do that subject to their stated assumptions.
+Negative controls deliberately reinstate false independence, pooled-retry, sample-count, or
+fixed-multiplier claims and must be rejected by the check runner.
+
+\begin{center}\small
+\begin{tabular}{p{0.49\textwidth}rr}
+\toprule Comparison & First model & Second model\\\midrule
+100 outputs, marginal risk 0.01: independent / shared survival & 0.3660 & 0.9900\\
+Persistent retry example: pooled prediction / actual bad fraction & 0.3333 & 0.5000\\
+Same example: pooled prediction / actual expected attempts & 1.3333 & 1.5000\\
+Mean rate / unequal rates: overhead, $s=1,G=0.1$ & 2.9901 & 4.6140\\
+20 validation items, risk 0.1: independent / repeated no-detection & 0.1216 & 0.9000\\
+Close half of two units: close low-risk / close high-risk, remaining risk & 0.0900 & 0.0100\\
+Optimal overhead, $G=0.1$: mean rate / unequal rates & 1.7951 & 1.8530\\
+Rate mixing, $\sigma=0.2$: multiplier, independent / $Z$-dependent visibility & 5.0000 & 5.0549\\
+Weibull, $\sigma=0.2$: multiplier, IFR $k=2$ / DFR $k=1/2$ & 2.2361 & 25.0000\\
+Closed path, $\lambda s=1$, $\lambda_{\mathrm{pc}}=1/2$: horizon in units of $H_{\mathrm{raw}}/\lambda_{\mathrm{pc}}$, first-order / exact & 1.0000 & 1.3162\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The assessment manifest binds each prior-result row to the exact source snapshot. A coverage
+check rejects a missing formal result or a changed source hash. This is a completeness and
+provenance check, not an automated judgment of the source proofs. The local verification
+receipt records check output, negative-control exits, and source hashes. No empirical dataset
+is introduced.
+
+\section{Related work and limitations}
+The constant-hazard baseline is motivated by Ord's task-duration analysis~\cite{ord}.
+Hoeffding supplies the exponential majority-error bound~\cite{hoeffding}.
+Association and the fixed-marginal reliability bound are classical~\cite{epw}.
+Checkpoint placement for nonidentical tasks and general failure distributions predates this
+series~\cite{toueg}. Hawkes processes provide one established family for history-dependent
+arrivals~\cite{hawkes}. The IFR and DFR classes are standard in reliability theory~\cite{bp}.
+Frailty models show that mixing individual hazards changes the population hazard~\cite{vaupel};
+Proposition~\ref{prop:mixing} is the corresponding statement for the gating multiplier.
+Nonhomogeneous Poisson models of software failures~\cite{goel}, imperfect repair~\cite{brownproschan},
+and Markov-modulated Poisson processes~\cite{mmpp} supply the other candidate families of
+Table~\ref{tab:catalog}. None is introduced here as a new stochastic process.
+
+Our contribution is an assumption-separated application to the interaction of imperfect gates,
+retries, representation floors, and mechanization. The mathematical results are elementary.
+The literature check is scoped, not a systematic novelty review. This is a preprint; it has not been
+peer reviewed.
+
+The analysis uses an all-correct prefix metric, eventual emission except in explicit
+counterexamples, and declared clocks. It does not infer an arrival process from benchmark
+success rates. It does not optimize a general adaptive policy, price correlated catastrophic
+loss, or analyze a watch policy's detection delay. Numerical parameters are illustrative.
+Changing a model outside its assumptions does not overturn a result within those assumptions.
+
+\section{Conclusion}
+Constant fault intensity is not the common foundation of every result in the series.
+Of the 25 named results, 14 are arrival-free, 10 survive under stated conditional bounds, and 1
+is a stationary-parameter formula that needs replacement outside its original model.
+Conditional accuracy and progress suffice for a logarithmic verification threshold.
+For the ideal gated survival curve, the $1/\sigma$ ceiling multiplier survives random rate
+mixing, is an upper bound under an increasing failure rate, and can be exceeded under a decreasing
+one; at finite segment length the upper bounds hold after rounding.
+Persistent conditional exposure, rather than a marginal floor alone, creates a horizon ceiling.
+Blind-set and evidence-indistinguishability results survive many changes in arrivals, while
+their numerical masses depend on the workload. Mechanization changes both exposure and
+dependence. Its effect requires branch risks, fallback, state transitions, and maintenance
+costs to be stated. These distinctions specify when Parts I--IV apply and where a different
+model is required.
+
+\section*{Code and data availability}
+\begin{sloppypar}
+The standard-library Python script \texttt{simulate\_fault\_process.py} and the assessment
+\texttt{fault\_process\_assessment.json} reproduce the checks and tables of Section~\ref{sec:checks} and the
+result classification of Section~\ref{sec:audit}. Both are at \url{https://github.com/ivmat/gated-computation-sim}.
+This paper is archived on Zenodo, DOI~\href{https://doi.org/10.5281/zenodo.23293740}{10.5281/zenodo.23293740}.
+\end{sloppypar}
+
+\begin{thebibliography}{99}
+\bibitem{p1} I. Matija\v{s}evi\'c. A Fault-Tolerance Threshold for Gated Agentic Computation.
+2026. \url{https://doi.org/10.5281/zenodo.20820968}.
+\bibitem{p2} I. Matija\v{s}evi\'c. Generated Gates Inherit Their Generator's Blind Spots.
+2026. \url{https://doi.org/10.5281/zenodo.20837102}.
+\bibitem{p3} I. Matija\v{s}evi\'c. Escape, Cost, and Correlation at the Verification Floor of
+Gated Agentic Computation. 2026. \url{https://doi.org/10.5281/zenodo.21456783}.
+\bibitem{p4} I. Matija\v{s}evi\'c. Progressive Semantic Mechanization. 2026.
+\url{https://doi.org/10.5281/zenodo.23119225}.
+\bibitem{ord} T. Ord. Is there a half-life for the success rates of AI agents? 2025.
+\url{https://arxiv.org/abs/2505.05115}.
+\bibitem{hoeffding} W. Hoeffding. Probability inequalities for sums of bounded random variables.
+\emph{Journal of the American Statistical Association} 58(301):13--30, 1963.
+\url{https://doi.org/10.1080/01621459.1963.10500830}.
+\bibitem{epw} J. D. Esary, F. Proschan, and D. W. Walkup. Association of random variables,
+with applications. \emph{Annals of Mathematical Statistics} 38(5):1466--1474, 1967.
+\url{https://doi.org/10.1214/aoms/1177698701}.
+\bibitem{toueg} S. Toueg and \"O. Babaoglu. On the optimum checkpoint selection problem.
+\emph{SIAM Journal on Computing} 13(3):630--649, 1984.
+\url{https://doi.org/10.1137/0213039}.
+\bibitem{hawkes} A. G. Hawkes. Spectra of some self-exciting and mutually exciting point processes.
+\emph{Biometrika} 58(1):83--90, 1971.
+\url{https://doi.org/10.1093/biomet/58.1.83}.
+\bibitem{bp} R. E. Barlow and F. Proschan. \emph{Mathematical Theory of Reliability}.
+Wiley, New York, 1965.
+\bibitem{vaupel} J. W. Vaupel, K. G. Manton, and E. Stallard. The impact of heterogeneity in
+individual frailty on the dynamics of mortality. \emph{Demography} 16(3):439--454, 1979.
+\url{https://doi.org/10.2307/2061224}.
+\bibitem{goel} A. L. Goel and K. Okumoto. Time-dependent error-detection rate model for software
+reliability and other performance measures. \emph{IEEE Transactions on Reliability}
+R-28(3):206--211, 1979.
+\bibitem{brownproschan} M. Brown and F. Proschan. Imperfect repair.
+\emph{Journal of Applied Probability} 20(4):851--859, 1983.
+\bibitem{mmpp} W. Fischer and K. Meier-Hellstern. The Markov-modulated Poisson process (MMPP)
+cookbook. \emph{Performance Evaluation} 18(2):149--171, 1993.
+\end{thebibliography}
+\end{document}
