@@ -1,12 +1,12 @@
 # Gated Agentic Computation — verification-floor papers
 
-Five linked papers on the reliability *floor* of gated (verified) agentic systems, with
+Six linked papers on the reliability *floor* of gated (verified) agentic systems, with
 self-contained simulations and finite-model checks that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
-## The five papers
+## The six papers
 
 **1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
 Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
@@ -66,21 +66,43 @@ predictions from one average rate. The paper classifies all 25 named results of 
 as arrival-free, conditionally preserved, or formulas that need replacement outside a
 stationary model. The checks are finite-model checks, not measurements of deployed agents.
 
+**6 — Risk-Gated Mechanization** *(Severity, Verifiability, and Decisions Invariant to the
+Executor's Error Law)* · **published**, DOI [10.5281/zenodo.23324667](https://doi.org/10.5281/zenodo.23324667) ·
+[`paper_risk_mechanization.pdf`](paper_risk_mechanization.pdf) ·
+[`paper_risk_mechanization.tex`](paper_risk_mechanization.tex) · reproduce with
+[`simulate_risk_mechanization.py`](simulate_risk_mechanization.py). Adds severity to the
+question of paper 4: when should a step be replaced by a deterministic mechanism? The
+informal rule — mechanize a high-severity step whose correctness can be verified, and do not
+mechanize one whose correctness cannot — overreaches when read literally; the paper gives its
+exact conditions. Severity sets a risk budget. An option is admissible when its worst-case
+loss over all models compatible with the evidence fits the budget. Mechanization is mandatory
+when closure is admissible and no other option is, and forbidden when a compatible closed
+model, such as an indistinguishable unsafe twin, exceeds the budget. The deciding bounds hold
+for every error law, dependence structure and mixture of executors that satisfies them.
+Further results: worst-case regret that grows linearly in severity when indistinguishable
+worlds disagree, an anytime budget guarantee under adaptive routing, a convex-order comparison of
+persistent and fresh faults, and an exact dominance order for reviewers by blind-set
+containment. With linear loss and constant severity the results reduce to the criterion of
+paper 4. The decision-theoretic and probabilistic tools are classical; the contribution is
+their application to the mechanization decision. These are mathematical models, not
+measurements.
+
 **How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
 spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
 and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
 propagates across output size and shared provenance, and how to grade assurance honestly against it; (4) asks which work can leave the
 executor for deterministic mechanisms, and what evidence that closure needs at the floor;
 (5) separates the fault-process assumptions behind (1)–(4) and shows which results survive
-without them.
+without them; (6) adds severity to the mechanization decision of (4) and states when
+mechanization is mandatory or forbidden.
 
 **Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
 models, reproduced here by the included simulations and checks; none has been validated on a deployed agent
 system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
 deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
-is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Paper 5 is likewise a
-mathematical model, not a measurement; its script checks finite instances and
-counterexamples and does not replace the proofs.
+is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Papers 5–6 are likewise
+mathematical models, not measurements; their scripts check finite instances and
+counterexamples and do not replace the proofs.
 
 ---
 
@@ -276,10 +298,20 @@ Cite whichever paper you use, via its Zenodo DOI:
   url          = {https://doi.org/10.5281/zenodo.23293740},
   note         = {Preprint; archived on Zenodo.}
 }
+
+@misc{matijasevic2026risk,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Risk-Gated Mechanization: Severity, Verifiability, and Decisions
+                  Invariant to the Executor's Error Law},
+  year         = {2026},
+  doi          = {10.5281/zenodo.23324667},
+  url          = {https://doi.org/10.5281/zenodo.23324667},
+  note         = {Preprint; archived on Zenodo.}
+}
 ```
 
 > Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2),
-> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), and `10.5281/zenodo.23293740` (paper 5). Each GitHub Release that Zenodo archives gets its own version
+> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), `10.5281/zenodo.23293740` (paper 5), and `10.5281/zenodo.23324667` (paper 6). Each GitHub Release that Zenodo archives gets its own version
 > DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
 > for early "cite my work" use.
 

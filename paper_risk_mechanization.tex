@@ -1,0 +1,866 @@
+\documentclass[11pt]{article}
+\emergencystretch=2em
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,booktabs,array,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\Prb}{\mathbb P}
+\newcommand{\E}{\mathbb E}
+\newcommand{\ind}{\mathbf 1}
+\newcommand{\Bin}{\mathrm{Bin}}
+\newcommand{\cx}{\le_{\mathrm{cx}}}
+\newcommand{\st}{\le_{\mathrm{st}}}
+\newcommand{\TV}{d_{\mathrm{TV}}}
+\title{Risk-Gated Mechanization:\\Severity, Verifiability, and Decisions Invariant\\to the Executor's Error Law}
+\author{Ivo Matija\v{s}evi\'c}
+\date{October 2026}
+\newcommand\blfootnote[1]{\begingroup\renewcommand\thefootnote{}\footnote{#1}\addtocounter{footnote}{-1}\endgroup}
+\begin{document}
+\maketitle
+\blfootnote{\textcopyright~2026 Ivo Matija\v{s}evi\'c.\ This work is licensed under a Creative Commons
+Attribution 4.0 International (CC BY 4.0) license, \url{https://creativecommons.org/licenses/by/4.0/}.\ Preprint, DOI \href{https://doi.org/10.5281/zenodo.23324667}{10.5281/zenodo.23324667}.}
+\begin{abstract}
+When should a step of agentic work be replaced by a deterministic mechanism? Earlier papers in
+this series answered with escape probabilities and costs, and treated every escaped fault as
+equally bad. We add severity and formalize a two-way principle, which reads informally as:
+mechanize a high-severity step whose correctness can be verified, and do not mechanize one whose
+correctness cannot. Read literally, the principle overreaches; we give its exact conditions.
+Severity sets a risk budget; it does not decide alone. An option is admissible when its
+worst-case loss over the models compatible with the evidence fits the budget. Mechanization is
+mandatory when closure is admissible and every other available option is not, and forbidden when
+a compatible closed model exceeds the budget; when no option is admissible, the step needs more
+evidence, an exogenous gate, or a redesign. Verification is a sufficient way to make closure
+admissible, and an evidence-compatible closed model whose expected loss exceeds the budget, such as an
+indistinguishable unsafe twin, forbids it. The bounds that decide are an executor's conditional escape floor and ceiling and
+a mechanism's certified ceiling. They hold uniformly over every error law, dependence
+structure, adaptive routing, and mixture of executors that satisfies them; a stochastic-dominance
+theorem extends this invariance to every nondecreasing loss. When evidence-indistinguishable worlds
+prefer opposite actions, every evidence-based rule has worst-case regret that grows linearly with
+severity. A martingale budget gives a scheduler an
+anytime guarantee under adaptive routing. Persistence enters through convex order: within
+conditionally independent processes, an uncertain mechanism fault mass is worse than fresh
+errors of the same mean for every convex loss, by the convexity of Bernstein polynomials, while
+the probability of any escape moves the other way. Production mixing averages floors;
+conjunctive review intersects blind sets, and one reviewer dominates another for every producer
+exactly when its blind set is contained in the other's. With linear loss and constant severity,
+the results reduce to the earlier mechanization criterion. The decision-theoretic and probabilistic
+tools are classical; the contribution is their application to the mechanization decision. These are
+mathematical models, not measurements.
+\end{abstract}
+
+\section{Introduction}
+Part~I of this series models gated computation and shows that a gate family with a common blind
+set leaves every executor with a verification floor~\cite{p1}. Part~II shows that gates generated
+within one family inherit its blind set, and that exogenous or exact evidence is needed to lower
+the floor~\cite{p2}. Part~III treats escape, cost, and correlated escape~\cite{p3}. Part~IV studies
+progressive semantic mechanization: moving work from executor calls to deterministic
+mechanisms~\cite{p4}. It shows that closure helps only when the mechanism's escape-plus-fallback
+risk is below the open path's risk, and that evidence cannot separate \emph{twins}, mechanisms
+with the same observation law. Part~V removes the constant-fault-rate assumption and works with
+conditional risks~\cite{p5}.
+
+None of these papers weighs how bad a fault is. This paper adds severity through the following
+principle.
+
+\begin{quote}
+\textbf{Risk-gated mechanization.} Consequence-weighted risk is the main gate for mechanization.
+If a step's correctness is verifiable and its severity is high, the step must be mechanized. If
+its correctness is not verifiable and its severity is high, it must not be mechanized; it stays
+open behind a human or exact-evidence gate. A fully determined step is the simplest verifiable
+case.
+\end{quote}
+Read literally, the principle is a heuristic. Verifiable closure is not mandatory if another option,
+such as an exact added gate, also fits the budget; and failure to verify does not forbid closure if
+every compatible closed model is safe. Theorem~\ref{thm:admissible} gives the exact conditions.
+
+A second aim shapes the results. Executors differ: a person, and several language models at
+different effort levels, have different and unknown error laws, and work is routed among them.
+A scheduler's decision rule should not depend on knowing those laws. We therefore look for
+statements that use only bounds, and that hold uniformly over every error law satisfying them.
+\emph{Invariance} in this paper always means this uniformity. Without any bound, no positive floor
+and no mandate to mechanize can exist, because a fault-free executor is among the possible laws.
+
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item Classes of executor processes defined by full-history conditional escape bounds, closed
+under mixtures and adaptive routing, with the classical binomial domination of such
+processes~\cite{doerr} (Lemma~\ref{lem:mixture}, Theorem~\ref{thm:dominance}).
+\item Robust admissibility under a severity-derived budget, which gives ``must'' and ``must not''
+a precise meaning, including the case where no option is admissible (Theorem~\ref{thm:admissible}).
+\item The regret price of the second arm: for observational twins, Le~Cam's two-point bound and
+minimax-regret allocation give a worst-case regret linear in severity (Theorem~\ref{thm:regret}).
+\item Expected-loss thresholds for both arms, with the actual-risk, ex-ante, and worst-case readings
+kept apart, and the classical sharp convex bounds from the mean applied to mean-only certificates
+(Theorem~\ref{thm:arms}, Proposition~\ref{prop:meanonly}).
+\item Persistence versus fresh errors as a convex-order comparison of mixed binomial counts
+(Theorem~\ref{thm:convex}).
+\item An anytime consequence budget for an adaptive scheduler, from the standard supermartingale
+construction (Theorem~\ref{thm:budget}).
+\item Production mixing, reviewer conjunction, and the statewise-dominance condition for universal
+reviewer superiority, in the gated form of design-diversity models (Proposition~\ref{prop:review}).
+\item Structural severity as a weighted reach, with a damage envelope and an ancestry bound
+(Proposition~\ref{prop:severity}).
+\item A reduction to Part~IV's criterion (Proposition~\ref{prop:reduction}).
+\end{enumerate}
+The probabilistic and decision-theoretic tools are classical: coupling and domination by independent
+variables, stochastic and convex orders, Bernstein polynomials, total variation and two-point bounds,
+minimax risk and minimax regret, nonnegative supermartingales, and positive association. The
+contribution is their application to the mechanization decision and the invariance they give.
+Section~\ref{sec:related} gives the sources.
+
+\section{Setting}\label{sec:setting}
+\paragraph{Units, escapes, and losses.}
+A step of work is executed on $n$ units, where $n$ is fixed unless stated otherwise. Let
+$J_i\in\{0,1\}$ indicate that unit $i$ emits an escaped fault, and $N_n=\sum_{i\le n}J_i$. Let
+$\mathcal F_{i-1}$ be the full history before unit $i$: earlier outputs and escapes, verdicts,
+routing choices, and internal states. A \emph{loss function} is a nondecreasing
+$\varphi:\{0,\dots,n\}\to[0,\infty)$ with $\varphi(0)=0$. Examples are the expected count
+$\varphi(k)=k$, the any-escape indicator $\varphi(k)=\ind\{k\ge1\}$ of Part~V's success metric,
+and convex losses that penalize concentrated damage. A step has severity $S\ge0$
+(Section~\ref{sec:severity}); its loss is $S\varphi(N_n)$.
+
+\paragraph{Executor classes.}
+\begin{definition}[Conditional escape class]\label{def:class}
+For $0\le\ell\le u\le1$, the class $\mathcal P(\ell,u)$ contains every escape process with
+\[
+\ell\le\Prb(J_i=1\mid\mathcal F_{i-1})\le u\quad\text{almost surely, for every }i\le n .
+\]
+\end{definition}
+The lower bound is a \emph{floor}. Under Part~I's model, with first-attempt badness $p(h)$ and a
+stealth share $\sigma(h)$ that passes every gate at once, the floor at history $h$ is at least
+$p(h)\sigma(h)$~\cite{p1,p5}. The upper bound is a \emph{ceiling}; independent majority gating
+drives it down, but not below the floor~\cite{p1,p5}. The class says nothing about arrival laws,
+dependence, retries, or the shape of the error law. The bounds must hold on the full history,
+including histories after earlier escapes; a floor on correct prefixes only is weaker
+(Example~\ref{ex:prefix}). Under routing, an executor's bound must hold on the histories and tasks
+actually routed to it; an unconditional benchmark does not supply it.
+
+\paragraph{Mechanisms and evidence.}
+A mechanism $M$ maps inputs to outputs. Its fault mass $\pi(M)$ is the probability that an input
+from the target law is mapped to a faulty output. With a retained gate and a fallback path, its
+per-unit escape is $d(M)=e(M)+b(M)f$, as in Parts~IV and~V. We write $a(M)$ and $A(M)$ for lower and
+upper bounds on its conditional per-unit escape that hold at every history. When deployment is
+ungated, or the retained gate accepts every faulty output, inputs are independent draws from the target
+law, and there is no fallback, both equal $\pi(M)$; repeated or adaptively selected inputs need not
+satisfy this. A retained gate can make escape smaller than fault mass: an exact fail-closed gate on an
+always-faulty mechanism gives escape $0$. With a gate or fallback, the escape bounds come from the gate
+and fallback model. A gate that only suppresses outputs keeps escape at most the fault mass, so a
+fault-mass bound remains an escape ceiling; a fallback can add escapes, and then validation of raw fault
+mass does not by itself certify the closed path's escape.
+
+A promotion rule sees evidence: the full record of an evidence experiment, including any adaptive
+or sequential choices, and auxiliary randomness. Two mechanisms are \emph{twins} for that experiment if
+they induce the same law for its full record. Twin status is relative to the experiment: equality of
+one-sample record laws does not imply equality for two samples (two independent fair bits and two
+identical fair bits agree on one bit and differ on two). Independent repetitions of an identical
+per-sample record law preserve twin status at every sample size. Let $\mathcal C$ be the mechanisms
+compatible with the stated assumptions. Two twin floors are needed, one for raw fault mass and one
+for closed-path escape:
+\[
+\tau_\pi(M)=\sup\{\pi(M'):M'\in\mathcal C\text{ a twin of }M\},\qquad
+\tau(M)=\sup\{a(M'):M'\in\mathcal C\text{ a twin of }M\}.
+\]
+Part~IV shows that a valid upper bound on fault mass, computed by a fixed rule from the record, is at
+least $\tau_\pi(M)$ with high probability~\cite{p4,p5}; the same argument shows that a valid upper bound
+on closed-path escape is at least $\tau(M)$ with high probability. Each certificate must be compared with
+its own floor: a fault-free mechanism whose retained gate always rejects and whose fallback always emits
+a fault has $\pi(M)=0$ but $a(M)=1$. Certifying escape needs validation that covers the whole closed
+path, including the gate and fallback. Twin floors limit what evidence can certify; they are not lower
+bounds on actual risk: a fault-free mechanism can have a faulty twin.
+
+\begin{definition}[Verifiable]\label{def:verifiable}
+Fix a level $U$ in advance. A step is \emph{verifiable at level $U$ with confidence $1-\eta$} if an
+available build-and-evidence experiment promotes a mechanism with $\Prb(A(M)>U\mid
+\text{promoted})\le\eta$.
+\end{definition}
+The level is fixed before the experiment; a data-dependent bound is not treated as having posterior
+error $\eta$. The guarantee is about the randomized build-and-evidence experiment, averaged over
+promoted builds; it is not a guarantee for every build compatible with the evidence, even with
+$\eta=0$. Robust admissibility of a deployed build needs the uniform premise of
+Theorem~\ref{thm:admissible}(iii). A fully determined step, whose decision tree is known, closed, and checked exactly on
+every branch, is verifiable at level $U=0$ with $\eta=0$. Zero-failure validation on $m$ independent
+target samples bounds the joint probability of promotion with fault mass above $U$ by $(1-U)^m$, the
+classical zero-failure demonstration bound~\cite{littlewood93,butler93}; the conditional level divides
+this by the promotion probability~\cite{p5}.
+
+\paragraph{Gates and blind sets.}
+A producer $e$ emits a bad unit with probability $p_e$; given badness, its fault has law $\mu_e$. A
+gate accepts every fault in its blind set. A blind set is \emph{complete} if it is exactly the set of
+accepted faults, and \emph{guaranteed} if it is only known to be accepted. A conjunctive stack
+accepts a fault only if every member accepts it~\cite{p2}.
+
+\section{Invariance lemmas}\label{sec:invariance}
+\begin{lemma}[Mixtures and routing stay in the class]\label{lem:mixture}
+Let $K$ be a component index, possibly chosen adaptively from the history, and suppose
+$\ell\le\Prb(J_i=1\mid\mathcal F_{i-1},K)\le u$ almost surely for every $i$. Then the mixed process is
+in $\mathcal P(\ell,u)$. In particular, adaptive routing among executors whose conditional escape
+lies in $[\ell_e,u_e]$ on the routed histories yields a process in
+$\mathcal P(\min_e\ell_e,\max_eu_e)$; with routing weights $w_{i,e}$, the conditional escape is
+$\sum_ew_{i,e}q_{i,e}\ge\sum_ew_{i,e}\ell_e$.
+\end{lemma}
+\begin{proof}
+By the tower property, $\Prb(J_i=1\mid\mathcal F_{i-1})=\E[\Prb(J_i=1\mid\mathcal F_{i-1},K)\mid
+\mathcal F_{i-1}]$, an average of values in $[\ell,u]$.
+\end{proof}
+
+\begin{theorem}[Binomial dominance]\label{thm:dominance}
+For every process in $\mathcal P(\ell,u)$,
+\[
+\Bin(n,\ell)\ \st\ N_n\ \st\ \Bin(n,u).
+\]
+Hence $\E\varphi(\Bin(n,\ell))\le\E\varphi(N_n)\le\E\varphi(\Bin(n,u))$ for every loss function
+$\varphi$. For the any-escape indicator, a floor on correct prefixes alone gives Part~V's survival
+bound $\Prb(N_n=0)\le(1-\ell)^n$.
+\end{theorem}
+\begin{proof}
+This is the classical domination of a binary sequence with bounded conditional probabilities by
+independent variables~\cite[Lemma~1.8.7]{doerr}, stated there for conditioning on past indicators,
+which the tower property gives from bounds given $\mathcal F_{i-1}$. We include the coupling. On an
+enlarged probability space, take independent uniform variables $V_1,\dots,V_n$ independent of
+everything else. Construct the process sequentially: given the history, set
+$J_i=\ind\{V_i\le\Prb(J_i=1\mid\mathcal F_{i-1})\}$ and draw the remaining history variables from
+their conditional law given $J_i$. This reproduces the joint law. Put $L_i=\ind\{V_i\le\ell\}$ and
+$H_i=\ind\{V_i\le u\}$. Then $L_i\le J_i\le H_i$ pointwise, with $\sum L_i\sim\Bin(n,\ell)$ and
+$\sum H_i\sim\Bin(n,u)$. Pointwise order gives stochastic order, and $\varphi$ is nondecreasing. The
+survival bound is Part~V's conditional floor.
+\end{proof}
+
+\begin{example}[A correct-prefix floor does not order counts]\label{ex:prefix}
+Let $J_1$ be Bernoulli$(1/2)$ and $J_2=1-J_1$. The conditional risks on correct prefixes are $1/2$ and
+$1$, both at least $1/2$, but $N_2=1$ always, which is not stochastically above $\Bin(2,1/2)$: the
+binomial gives $\Prb(N\ge2)=1/4$. Likewise a marginal ceiling does not give a binomial ceiling:
+$J_1=J_2=Z$ with $Z$ Bernoulli$(0.1)$ has $\Prb(N_2=2)=0.1>0.01$.
+\end{example}
+
+\begin{remark}
+Any statement that uses only $\E\varphi(\Bin(n,\ell))$ and $\E\varphi(\Bin(n,u))$ therefore holds
+uniformly over arrival laws, dependence, retry laws, and every mixture of executors within the
+bounds. The map $t\mapsto\E\varphi(\Bin(n,t))$ is a nondecreasing polynomial, hence continuous. An
+outcome-dependent number of units needs the stopping-time form of Section~\ref{sec:budget}.
+\end{remark}
+
+\section{Robust admissibility under a risk budget}\label{sec:admissible}
+Severity enters as a budget. Fix a tolerated expected loss $K>0$ for a step of severity $S>0$. For an
+option $a$, let $\mathcal C_a$ be the set of models compatible with the available evidence and
+assumptions, and define its worst-case expected loss
+\[
+r_a^+=\sup_{P\in\mathcal C_a}\E_P\varphi(N_a).
+\]
+This is the maximum risk of Wald's minimax criterion~\cite{wald45}, taken over the set of compatible models, as in multiple-prior
+decision theory and partial identification~\cite{gilboa89,manski00}. Option $a$ is \emph{robustly
+admissible}\footnote{Here \emph{admissible} means that the option fits the budget. In statistical
+decision theory the word means that a rule is not dominated~\cite{wald45}; the two notions are
+unrelated.} if $Sr_a^+\le K$. Under linear loss, $r_a^+/n$ is the
+worst-case per-unit escape, and admissibility reads $r_a^+/n\le r^\ast$ with the \emph{risk budget}
+$r^\ast=K/(Sn)$. High severity means a small budget. For closure we distinguish two readings. A
+\emph{deployed build} is robustly admissible if the worst case over builds compatible with the
+evidence fits the budget. A \emph{build-and-evidence experiment} is admissible ex ante if the worst
+case, over experiments satisfying Definition~\ref{def:verifiable}, of the expected loss averaged over
+promoted builds fits the budget.
+
+\begin{theorem}[Admissibility; the two arms]\label{thm:admissible}
+Consider the options \emph{open} (executors with a gate stack), \emph{gated} (open with an added gate
+$H$ from an available set), and \emph{closed} (a promoted mechanism).
+\begin{enumerate}[label=(\roman*),itemsep=2pt]
+\item \emph{Invariance.} Replacing $\mathcal C_a$ by its convex hull does not change $r_a^+$, so
+whole-process mixtures of compatible models leave admissibility unchanged. If $\mathcal C_a$ is a bound
+class $\mathcal P(\ell,u)$, it is also closed under adaptive routing (Lemma~\ref{lem:mixture}). A compatible
+set given by specific executor laws need not be: routing can produce a process outside its convex hull.
+\item \emph{Open path.} If the open path's compatible set is $\mathcal P(\ell,u)$, then
+$r_{\mathrm{open}}^+$ lies between $\E\varphi(\Bin(n,\ell))$ and $\E\varphi(\Bin(n,u))$. If
+$S\E\varphi(\Bin(n,\ell))>K$, the open path is inadmissible for every error law, dependence structure,
+and routing within the bounds. A gate generated within the producing family leaves the floor unchanged
+under Part~II's inheritance assumptions.
+\item \emph{Closure, exact certificate.} If every build compatible with the evidence has its closed units
+in $\mathcal P(0,U)$, the deployed build is robustly admissible whenever $S\E\varphi(\Bin(n,U))\le K$.
+A fully determined step checked exactly on every branch gives this with $U=0$.
+\item \emph{Closure, statistical certificate.} If the step is verifiable at level $U$ with confidence
+$1-\eta$, and given promotion the closed units are in $\mathcal P(0,A(M))$, then the expected loss of a
+promoted build, averaged over the experiment, is at most $(1-\eta)\E\varphi(\Bin(n,U))+\eta\varphi(n)$.
+This gives ex-ante admissibility of the experiment, not robust admissibility of the deployed build: an
+always-promoted build that is fault-free with probability $0.99$ and always faulty otherwise has
+$U=0$ and $\eta=0.01$, average risk $0.01$, and worst-case risk $1$.
+\item \emph{Closure forbidden.} If some compatible twin $M'$ of $M$ has closed units in
+$\mathcal P(a(M'),1)$ and $S\E\varphi(\Bin(n,a(M')))>K$, closure is not robustly admissible. In
+particular this holds when $S\E\varphi(\Bin(n,\tau(M)))>K$. If the twin relation holds for the whole
+evidence experiment at every sample size, no amount of that evidence changes the conclusion.
+\item \emph{Gated open path.} With complete blind sets, adding a gate $H$ gives producer $e$ the
+first-attempt floor $p_e\mu_e(\Sigma\cap\Sigma_H)$. If $\Sigma_H$ is only guaranteed, this is a lower bound;
+lowering the ceiling needs knowledge of what $H$ rejects. Exact evidence on a scope removes escape there
+if it is sound, bound to the executed artifact or action, and enforced fail-closed. A human gate has no
+special status: its effect is its acceptance set.
+\end{enumerate}
+Consequently, closure is \emph{mandatory} among the available options when it is admissible in the
+chosen reading and the open path and every available gated option are inadmissible. Closure is
+\emph{forbidden} when (v) holds. If no option is admissible, the step needs more distinguishing evidence,
+an additional exogenous gate, a lower severity through redesign, or must not be performed.
+\end{theorem}
+\begin{proof}
+(i) A supremum of expectations over a set equals the supremum over its convex hull, because an
+expectation is linear in the model. Routing closure of $\mathcal P(\ell,u)$ is Lemma~\ref{lem:mixture}.
+For the last claim, let executor A always produce escapes $(1,0)$ on two units and executor B always
+$(0,1)$: every whole-process mixture has count $1$, while routing unit~1 to A and unit~2 to B gives $2$.
+(ii) Theorem~\ref{thm:dominance} gives both bounds, and the lower bound applies to every compatible law.
+A generated gate keeps the family's blind set (Part~II), so the first-attempt stealth share and the floor
+are unchanged.
+(iii) By Theorem~\ref{thm:dominance}, every compatible build has expected loss at most
+$\E\varphi(\Bin(n,U))$.
+(iv) On the event $A(M)\le U$, of conditional probability at least $1-\eta$, the closed count is
+stochastically below $\Bin(n,U)$; otherwise the loss is at most $\varphi(n)$. The example has the stated
+values.
+(v) The twin is compatible and its expected loss is at least $\E\varphi(\Bin(n,a(M')))$ by
+Theorem~\ref{thm:dominance}. The supremum over compatible twins of that quantity is
+$\E\varphi(\Bin(n,\tau(M)))$, by monotonicity and continuity. If twins stay twins at every sample size,
+the compatible set never excludes $M'$.
+(vi) A fault passes the conjunction only if every member accepts it; with complete sets the passing set
+is exactly $\Sigma\cap\Sigma_H$, and with guaranteed sets it contains it. Sound, bound, fail-closed exact
+evidence accepts no fault on its scope.
+\end{proof}
+
+\begin{corollary}[Below the floor, inherited gates are not enough]\label{cor:exogenous}
+If $S\E\varphi(\Bin(n,\ell_e))>K$ for every executor $e$, no open path whose gates all come from the
+producing family is admissible, under any routing. An admissible option, if one exists, is a closure
+with $Sr_{\mathrm{closed}}^+\le K$, or an open path gated outside the family. Parts (iii), (iv), and (vi)
+give sufficient ways to establish these; they are not necessary. For example, with $n=2$, linear loss,
+$S=1$, $K=0.05$, and an open escape of $0.1$ per unit, a closed process with $J_1=J_2=Z$ and
+$Z\sim$ Bernoulli$(0.01)$ is robustly admissible ($\E N_2=0.02$), although its uniform conditional ceiling is
+$1$, so neither (iii) nor (iv) certifies it.
+\end{corollary}
+\begin{proof}
+By Theorem~\ref{thm:admissible}(ii) and Lemma~\ref{lem:mixture}, every routing of an open path with
+inherited gates has expected loss at least $S\E\varphi(\Bin(n,\min_e\ell_e))>K$. The example has
+$\E N_2=2\cdot0.01$ and $\Prb(J_2=1\mid J_1=1)=1$.
+\end{proof}
+
+\begin{remark}
+The theorem gives the principle precise sufficient conditions, not unconditional implications.
+\emph{Verifiable at a level within budget} is a sufficient way to make closure admissible; with a
+statistical certificate the admissibility is ex ante. \emph{High severity} means a budget below the executor floors.
+A step that is not verifiable at a chosen level is not thereby forbidden: closure is admissible when
+every compatible closed model fits the budget, whether or not twins are separated. A safe twin set is
+not enough, because compatible models need not be twins: a safe $M_0$ with evidence Bernoulli$(1/2)$ and
+an unsafe $M_1$ with evidence Bernoulli$(1/4)$ both remain compatible after observing $0$. Closure is
+forbidden when some compatible closed model violates the budget; a violating twin is one way this
+happens. Severity alone decides nothing: it sets the budget, and the comparison
+with the floors, the certified level, and the compatible twins decides. Part (v) concerns what evidence
+permits, not actual risk; Theorem~\ref{thm:regret} prices the gap.
+\end{remark}
+
+\section{Decisions on twins: severity-scaled regret}\label{sec:regret}
+Keeping a step open because closure cannot be certified may be wrong in a world where the
+mechanism is in fact fault-free. When evidence-indistinguishable worlds prefer opposite actions,
+evidence cannot remove this dilemma. Unverifiability alone does not create it: if indistinguishable
+mechanisms of fault mass $0.8$ and $0.9$ face an open path of escape $0.1$, always keeping the step
+open has zero regret.
+
+\begin{theorem}[Twin regret]\label{thm:regret}
+Consider two worlds whose evidence records have laws $Q_0,Q_1$ with $\TV(Q_0,Q_1)\le\varepsilon$, and
+suppose that in each world the deployment losses are independent of the evidence record. In world~0,
+closure beats the open path by expected total loss $\alpha S>0$; in world~1, the open path beats
+closure by $\beta S>0$. Every decision rule based on the evidence, possibly randomized, has
+\[
+\max\{R_0,R_1\}\ \ge\ (1-\varepsilon)\,\frac{\alpha\beta}{\alpha+\beta}\,S,
+\]
+where $R_j$ is the expected regret in world $j$, measured against the better action's expected loss. For exact twins, $\varepsilon=0$ and the bound is
+attained by choosing closure with probability $\alpha/(\alpha+\beta)$.
+\end{theorem}
+\begin{proof}
+Let $p_j$ be the probability of choosing closure in world $j$. The data-processing property of total
+variation gives $|p_0-p_1|\le\varepsilon$. Because losses are independent of the evidence, the expected
+loss of a rule is $p_j$ times the closed loss plus $1-p_j$ times the open loss, so the regrets are $R_0=\alpha S(1-p_0)$ and $R_1=\beta Sp_1$,
+so $R_0/(\alpha S)+R_1/(\beta S)=1-p_0+p_1\ge1-\varepsilon$. Since
+$\max\{R_0,R_1\}(1/(\alpha S)+1/(\beta S))\ge R_0/(\alpha S)+R_1/(\beta S)$, the bound follows. With
+$\varepsilon=0$ and $p_0=p_1=\alpha/(\alpha+\beta)$, both regrets equal $\alpha\beta S/(\alpha+\beta)$.
+\end{proof}
+The theorem combines two classical results. The inequality $1-p_0+p_1\ge1-\varepsilon$ is Le~Cam's
+two-point argument~\cite{lecam73}. The exact-twin rule and its regret are the two-state case of
+minimax-regret treatment allocation~\cite{manski05,manski09}, with $\alpha S$ and $\beta S$ as the
+welfare gaps. What is added here is their reading as the cost of the second arm.
+The independence assumption matters: if the evidence predicts deployment losses, a rule can exploit
+it. With a fair evidence bit $X$ and losses (closed, open) equal to $(0,2)$ or $(1,0)$ in world~0 and
+$(0,1)$ or $(2,0)$ in world~1 according to $X$, the unconditional preferences reverse, yet closing
+exactly when $X=0$ has zero loss in both worlds. Under the assumption, the unavoidable worst-case regret
+grows linearly with severity. A richer scheduler cannot resolve
+it with evidence that remains indistinguishable; when the transcript includes an adaptive
+build-and-test process, the twin relation is taken over that whole transcript. Only evidence that
+separates the worlds, or a change of available actions such as an exogenous gate, reduces it. This
+is the precise cost behind the second arm of the principle.
+
+\section{Expected loss: thresholds for both arms}\label{sec:arms}
+Admissibility uses a hard budget. A softer formulation compares expected severity-weighted loss plus
+cost. Let $C_{\mathrm{op}}$ and $C_{\mathrm{cl}}$ be the expected costs of the open and closed paths
+over the $n$ units, including build, validation, upkeep, gates, retries, and fallback.
+
+\begin{theorem}[Two arms under expected loss]\label{thm:arms}
+Let the open path be in $\mathcal P(\ell,u)$ and let $\varphi$ be a loss function.
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item \emph{Mandatory closure (ex ante).} Under the assumptions of
+Theorem~\ref{thm:admissible}(iv), put
+$\Delta_1=\E\varphi(\Bin(n,\ell))-(1-\eta)\E\varphi(\Bin(n,U))-\eta\varphi(n)$. If $\Delta_1>0$,
+closure has lower ex-ante expected loss plus cost than the open path whenever
+$S>S_1^\ast=(C_{\mathrm{cl}}-C_{\mathrm{op}})_+/\Delta_1$. If instead the uniform premise of
+Theorem~\ref{thm:admissible}(iii) holds, take $\eta=0$; the comparison then holds for every compatible
+model, not only in expectation. A statistical certificate with $\eta=0$ alone does not give this.
+\item \emph{Forbidden closure (worst case).} Under the assumptions of
+Theorem~\ref{thm:admissible}(v), put $\Delta_2=\E\varphi(\Bin(n,\tau(M)))-\E\varphi(\Bin(n,u))$. If
+$\Delta_2>0$, the worst-case expected loss plus cost of closure over the compatible twins exceeds that
+of the open path whenever $S>S_2^\ast=(C_{\mathrm{op}}-C_{\mathrm{cl}})_+/\Delta_2$.
+\end{enumerate}
+Both thresholds depend on the executors only through $\ell$ and $u$. A threshold exists only when
+the corresponding gap is positive: a valid but loose certificate with $U\ge\ell$ gives no mandate.
+\end{theorem}
+\begin{proof}
+(a) The open path's expected loss is at least $S\E\varphi(\Bin(n,\ell))$ by
+Theorem~\ref{thm:dominance}, and the closed path's is at most
+$S[(1-\eta)\E\varphi(\Bin(n,U))+\eta\varphi(n)]$ by Theorem~\ref{thm:admissible}(iv). Compare the
+totals. (b) The worst case over compatible twins of the closed loss is at least $S\E\varphi(\Bin(n,\tau(M)))$,
+and the open loss is at most $S\E\varphi(\Bin(n,u))$. Compare the totals.
+\end{proof}
+Part (b) is a worst-case preference. It does not say that the open path is better in every
+compatible world: with twins of fault mass $0$ and $0.9$, an open path of escape $0.1$, equal costs,
+and linear loss, (b) prefers the open path while the fault-free twin favours closure.
+Theorem~\ref{thm:regret} prices that gap. For a fully determined step, $U=0$ and $\eta=0$, so
+$\Delta_1=\E\varphi(\Bin(n,\ell))>0$ whenever $\ell>0$ and $\varphi(1)>0$, and $S_1^\ast$ is finite
+for every cost difference.
+
+\paragraph{Mean-only certificates.}
+Validation may certify average fault mass without certifying a conditional ceiling.
+
+\begin{proposition}[Sharp convex bounds from the mean]\label{prop:meanonly}
+Let $N\in\{0,\dots,n\}$ with $\E N=m<n$, and let $\varphi$ be convex. With $k=\lfloor m\rfloor$ and
+$\alpha=m-k$,
+\[
+(1-\alpha)\varphi(k)+\alpha\varphi(k+1)\ \le\ \E\varphi(N)\ \le\ \Big(1-\frac mn\Big)\varphi(0)+\frac mn\varphi(n),
+\]
+and both bounds are attained. If $\varphi$ is a nondecreasing convex loss and $\E N\le nU$, then
+$\E\varphi(N)\le U\varphi(n)$, and closure has lower expected loss plus cost than an open path in
+$\mathcal P(\ell,u)$ whenever $S[\E\varphi(\Bin(n,\ell))-U\varphi(n)]>C_{\mathrm{cl}}-C_{\mathrm{op}}$.
+\end{proposition}
+\begin{proof}
+The lower bound is Jensen's inequality for the piecewise-linear interpolation of $\varphi$, attained
+by a law on $\{k,k+1\}$. The upper bound is the chord of $\varphi$ between $0$ and $n$, attained by a
+law on $\{0,n\}$. Each extremal law is the count of an exchangeable Bernoulli sequence: choose a
+uniformly random subset of the drawn size. For the last claim, $\varphi(0)=0$ and the chord bound is
+nondecreasing in $m$. Both bounds are classical: the upper one is the Edmundson--Madansky
+bound~\cite{madansky59}, and both are the discrete convex extrema with a given mean~\cite{denuit97}.
+\end{proof}
+The gap between $\E\varphi(\Bin(n,U))$ and $U\varphi(n)$ measures what is lost when validation
+cannot certify how faults cluster.
+
+\section{Persistence and convex order}\label{sec:convex}
+Linear loss sees only the mean escape. A convex loss also sees how escapes cluster. Part~V showed
+that persistence, a shared defect or a latent regime, changes the damage distribution at equal
+mean~\cite{p5}. Convex order makes this exact. For integer random variables write $X\cx Y$ if
+$\E g(X)\le\E g(Y)$ for every convex $g$; this forces equal means. For a function $f$ on
+$\{0,\dots,n\}$, the Bernstein polynomial is
+$B_nf(\theta)=\sum_{k=0}^nf(k)\binom nk\theta^k(1-\theta)^{n-k}=\E f(\Bin(n,\theta))$.
+
+\begin{lemma}[Bernstein polynomials preserve convexity]\label{lem:bernstein}
+For $n\ge2$,
+\[
+(B_nf)''(\theta)=n(n-1)\sum_{k=0}^{n-2}\Delta^2f(k)\binom{n-2}{k}\theta^k(1-\theta)^{n-2-k},
+\qquad\Delta^2f(k)=f(k+2)-2f(k+1)+f(k).
+\]
+Hence $B_nf$ is convex on $[0,1]$ if $f$ is convex, and strictly convex if every $\Delta^2f(k)>0$.
+\end{lemma}
+\begin{proof}
+Differentiate twice and collect terms; this is the classical identity behind convexity
+preservation~\cite{lorentz}.
+\end{proof}
+
+\begin{theorem}[Persistence is convex spread]\label{thm:convex}
+Let $J_1,\dots,J_n$ be conditionally independent Bernoulli$(\Theta)$ given a random
+$\Theta\in[0,1]$, and let $J'$ be the same with $\Theta'$. If $\Theta\cx\Theta'$, then $N_n\cx N'_n$.
+At a given mean escape $\bar\theta$:
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item fresh independent errors, $\Theta\equiv\bar\theta$, are convex-minimal among such processes;
+\item a closed mechanism drawn from a build process, deployed ungated with independent inputs so that
+all units share $\Theta=\pi(M)$, has $\Bin(n,\bar\theta)\cx N_n$, strictly for strictly convex losses
+when $n\ge2$ and $\pi(M)$ is not almost surely constant;
+\item linear loss cannot distinguish them: $\E N_n=n\bar\theta$ in both cases, while
+$\operatorname{Var}N_n=n\bar\theta(1-\bar\theta)+n(n-1)\operatorname{Var}\Theta$.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+For convex $g$, $\E g(N_n)=\E[B_ng(\Theta)]$, and $B_ng$ is convex by Lemma~\ref{lem:bernstein}, so
+$\Theta\cx\Theta'$ gives $\E g(N_n)\le\E g(N'_n)$. Part (a): a constant is convex-below every variable
+with the same mean, by Jensen. Part (b) is (a) with strict Jensen for the strictly convex $B_ng$. Part
+(c): $B_n$ maps linear functions to linear functions, and the variance follows from the law of total
+variance.
+\end{proof}
+The implication from $\Theta\cx\Theta'$ to $N_n\cx N'_n$ for mixed binomial counts is
+known~\cite{adell,lefevre17}; the new part is its reading as persistence against fresh errors.
+Part~(a) concerns mixtures only: independent errors with unequal probabilities and the same mean are
+convex-below $\Bin(n,\bar\theta)$~\cite{hoeffding56}.
+
+\begin{remark}
+Three limits apply. First, the comparison is within conditionally independent processes; finite
+exchangeability is not enough: a uniformly random ordering of $(0,1)$ is exchangeable with constant
+count $1$, convex-below $\Bin(2,1/2)$. Second, the mixture over builds expresses uncertainty about
+which build is deployed; for a single deployed build the count is binomial with its own fault mass.
+A persistent executor regime drawn once per run (Part~V) is also a mixture, so the contrast is
+persistent versus fresh, not mechanism versus executor. Third, the any-escape indicator is not
+convex and moves the other way: with $n=2$ and mean $1/2$, complete persistence gives
+$\Prb(N\ge1)=1/2$ against $3/4$ for fresh errors, while $\Prb(N=2)$ rises from $1/4$ to $1/2$.
+Persistence trades frequent small damage for rare concentrated damage; the loss shape decides which
+matters.
+\end{remark}
+
+\begin{example}[Same mean, different risk]\label{ex:spread}
+Take $n=10$, mean escape $0.1$, and $\varphi(k)=\max(0,k-2)^2$, a loss that starts after two escapes.
+Fresh errors give $\E\varphi=0.1179$. A mechanism with fault mass $0.02$ or $0.18$ with equal
+probability gives $0.3327$. Under $\varphi(k)=k$ both give $1.0000$; the variances are $0.900$ and
+$1.476$.
+\end{example}
+
+\section{An anytime budget for a scheduler}\label{sec:budget}
+A scheduler chooses actions unit by unit, and the number of units may depend on outcomes. Local
+certificates then need to add up to a lifetime guarantee.
+
+\begin{theorem}[Adaptive consequence budget]\label{thm:budget}
+At each unit the scheduler chooses, from the history, an action, a weight $s_i\ge0$, and a
+conditional escape ceiling $u_i$ with $\Prb(J_i=1\mid\mathcal F_{i-1})\le u_i$. Let
+$D_t=\sum_{i\le t}s_iJ_i$ and let $T$ be a stopping time.
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item If $\sum_{i\le T}s_iu_i\le B$ almost surely, then $\E D_T\le B$. If $s_i$ bounds the conditional
+expected damage of an escape at unit $i$ given the history, the expected total damage is at most $B$.
+\item For every fixed $\lambda>0$ and $\delta\in(0,1)$,
+\[
+\Prb\Big(\exists t:\ \lambda D_t-\sum_{i\le t}\log\big[1+u_i(e^{\lambda s_i}-1)\big]\ge\log(1/\delta)\Big)\le\delta .
+\]
+\end{enumerate}
+In (b), $D_t$ bounds the actual damage pathwise only if each $s_i$ bounds the damage of unit $i$
+pathwise. Both parts hold under adaptive routing and every mixture of executors whose ceilings hold on
+the routed histories.
+\end{theorem}
+\begin{proof}
+(a) $\E D_T=\E\sum_{i\le T}s_i\Prb(J_i=1\mid\mathcal F_{i-1})\le\E\sum_{i\le T}s_iu_i\le B$, by
+optional stopping for the nonnegative increments with predictable weights; monotone convergence
+handles unbounded $T$. For the damage claim, the expected damage of unit $i$ given the history is
+at most $\Prb(J_i=1\mid\mathcal F_{i-1})s_i$. (b) $\E[e^{\lambda s_iJ_i}\mid\mathcal F_{i-1}]=1+\Prb(J_i=1\mid\mathcal
+F_{i-1})(e^{\lambda s_i}-1)\le1+u_i(e^{\lambda s_i}-1)$, so
+$M_t=\exp(\lambda D_t-\sum_{i\le t}\log[1+u_i(e^{\lambda s_i}-1)])$ is a nonnegative supermartingale
+with $M_0=1$. Ville's maximal inequality gives the bound~\cite{ville}. This is the standard
+supermartingale construction of time-uniform Chernoff bounds~\cite{howard20}.
+\end{proof}
+For expected damage, $s_i$ can be the structural severity of Section~\ref{sec:severity}, an expected
+damage. For the anytime tail of actual damage, $s_i$ must be a pathwise bound, such as the total cost of
+the reach set; with expected severities, part (b) controls the severity-weighted escape sum, a proxy. The theorem turns per-step certificates into a budget that the
+scheduler can spend: closing a step with a verified mechanism lowers its $u_i$; adding a gate lowers
+$u_i$ at a cost; high-severity steps consume the budget fastest.
+
+\section{Producers average, reviewers intersect}\label{sec:review}
+\begin{proposition}[Production mixing and review]\label{prop:review}
+Let producers $e$ have badness $p_e$ and fault laws $\mu_e$, and let gates accept their blind sets at
+once.
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item \begin{sloppypar}Routing production with weights $w_e$ gives the first-attempt floor
+$\sum_ew_ep_e\mu_e(\Sigma)\ge\min_ep_e\mu_e(\Sigma)$; lower bounds average as lower bounds.\end{sloppypar}
+\item Conjunctive review by $r_1,\dots,r_k$ gives producer $e$ the escape
+$p_e\mu_e(\bigcap_j\Sigma_{r_j})$ if the blind sets are complete, and at least that if they are only
+guaranteed.
+\item \emph{Universal superiority.} Let costs be equal, let blind sets be complete, and for every fault
+$z$ let some admissible producer have $p_e>0$ and $\mu_e=\delta_z$. Reviewer $r_1$ has escape at most that of $r_2$ for every
+producer if and only if $\Sigma_{r_1}\subseteq\Sigma_{r_2}$. More generally, let a unit's state $z$ range
+over a fault-free state $z_0$ and the fault states, with residual damages $h_j\ge0$, $h_j(z_0)=0$, and
+per-unit costs $c_j$, so that design $j$'s per-unit total is $c_j+S\,\E h_j(Z)$ (for producer $e$,
+$\E h_j(Z)=p_e\int h_j\,d\mu_e$). If every point-mass state law is admissible, including the fault-free
+state, design~1 is at least as good for every admissible state law if and only if
+$c_1+Sh_1(z)\le c_2+Sh_2(z)$ for every state $z$, which requires $c_1\le c_2$. With a smaller admissible
+class only sufficiency holds: if every producer has $p_e=0.01$, then with $S=1$, $(c_1,h_1)=(0.005,0)$
+and $(c_2,h_2)=(0,\ind)$, design~1 costs $0.005<0.01$ for every such producer although it is worse at
+the fault-free state.
+\item \emph{No universal ranking.} Let blind sets be complete, and let producers with positive badness
+concentrated on $\Sigma_{r_1}\setminus\Sigma_{r_2}$, and others concentrated on
+$\Sigma_{r_2}\setminus\Sigma_{r_1}$, be admissible. Then each reviewer is strictly better for some producer.
+Both conditions are needed: with guaranteed sets $\{x\}$ and $\{y\}$ for reviewers that in fact accept
+both faults, the escapes are equal for every producer; and if every admissible producer has fault law
+$(0.9,0.1)$ on $(x,y)$, the reviewer missing only $y$ is always better.
+\item \emph{Coalitions.} Pairwise single-reviewer escapes do not determine a coalition's escape: two
+reviewers each missing half of a producer's faults can have an intersection of mass $0$ or $1/2$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a) The floor is linear in the fault law. (b) A fault passes only if every reviewer accepts it.
+(c) Integrate the pointwise inequality for sufficiency; for necessity, take a point mass at a state
+that violates it. The reviewer case has $h_j=\ind_{\Sigma_{r_j}}$ and equal costs. Omitting the fault-free
+state is an error: with $p_e=0.01$, $S=2$, $(c_1,h_1)=(1,0)$ and $(c_2,h_2)=(0,\ind)$, the fault states
+alone favour design~1, while the per-unit totals are $1$ and $0.02$. (d) Take an admissible producer concentrated on $\Sigma_{r_2}\setminus\Sigma_{r_1}$: with complete sets,
+$r_1$ rejects its faults and $r_2$ accepts them; symmetrically for the other difference. (e) Take faults uniform on
+$\{1,2,3,4\}$, $\Sigma_{r_1}=\{1,2\}$, and $\Sigma_{r_2}=\{3,4\}$ or $\{1,2\}$.
+\end{proof}
+Producer floors are governed by bounds that survive every mixture. Reviewer rankings are not
+invariant to the producer's error law, except under blind-set inclusion. A scheduler therefore needs
+review data indexed by producer and by reviewer set, not a single quality score per reviewer and not
+only pairwise data. Parts (b) and (e) are the gated form of design-diversity models of software
+reliability: the probability that diverse versions fail together is the demand-profile mass of the
+intersection of their failure sets, and single-version failure probabilities do not determine
+it~\cite{eckhardt85,littlewood89,lps01}. Part (c) is statewise dominance: an option has lower
+expected loss under every admissible law if and only if its loss is pointwise lower. A reviewer from
+the producer's own family inherits the producer's blind set (Part~II). Errors of language models are
+substantially correlated in practice, partly through shared architectures and providers, and for
+larger models also across providers~\cite{kim25}. Part (c) also shows that a gate can be preferable because it blocks the most damaging
+faults, even if it misses more faults by count.
+
+\section{Severity from structure}\label{sec:severity}
+\begin{definition}[Structural severity]\label{def:severity}
+Let the work form a directed acyclic dependency graph. Gates may sit on edges. A fault that escapes
+at node $v$ reaches node $w$ with probability $\rho(v\to w)$, with $\rho(v\to v)=1$. Reaching $w$ costs
+$c(w)\ge0$ unless the damage is undone; let $\iota(w)\in[0,1]$ be the probability that damage at $w$ is
+not undone, given that $w$ is reached, and assume this event is independent of how $w$ was reached. The
+severity of $v$ is the expected damage of one escape at $v$,
+\[
+S(v)=\sum_{w}\rho(v\to w)\,c(w)\,\iota(w).
+\]
+It is an expectation, not a bound on realized damage: if an escape reaches a node of cost $100$ with
+probability $0.01$, then $S=1$ while the realized damage can be $100$.
+\end{definition}
+The reach set $\{w:\rho(v\to w)>0\}$ is the blast radius of $v$; $S$ weights it by cost and
+irreversibility. With $c\iota\equiv1$, $S(v)$ is the expected spread of an influence-propagation
+model~\cite{kempe03}; weighting reach by consequence follows the quantitative definition of risk as
+probability and consequence~\cite{kaplan81}.
+
+\begin{proposition}[Properties of structural severity]\label{prop:severity}
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item \emph{Factorization and its limits.} In general, the expected damage of producer $e$ at $v$ is
+$R_e(v)=\int h(v,z)\,\nu_e(dz)$, where $\nu_e$ is the escaped-fault subprobability measure and
+$h(v,z)$ the downstream damage of a fault of type $z$. It factorizes as $\nu_e(\text{all})\,S(v)$ with
+an executor-independent $S(v)$ exactly when the conditional expected damage of an escape is the same
+for every executor, for example when propagation, interception, and repair do not depend on the
+fault type. Without that condition, the \emph{damage envelope} $S_{\max}(v)=\sup_zh(v,z)$ gives
+$R_e(v)\le\nu_e(\text{all})\,S_{\max}(v)$ for every executor and every mixture.
+\item \emph{Ancestry bound.} If edges transmit faults independently and $\rho(v\to w)$ is the
+probability that a transmitting path exists, then $S(v)\ge\rho(v\to w)S(w)$ for every descendant $w$.
+If transmission is certain along every path, $S(v)\ge S(w)$. An exact gate between $v$ and $w$ makes
+$\rho(v\to w)$ small, so faults from $v$ can be far less severe than faults born at $w$.
+\item \emph{Additivity is an upper bound in expectation.} With several escapes, the sum of severities
+bounds the expected damage from above when damage is the cost of the union of reached nodes, with
+equality when the reached sets are disjoint almost surely.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a) The factorization is the definition of a conditional expectation that does not depend on $e$.
+The envelope bound integrates $h\le S_{\max}$.
+(b) For each node $x$, the events ``$v$ reaches $w$'' and ``$w$ reaches $x$'' are increasing in the
+independent edge variables. Harris's inequality gives $\Prb(\text{both})\ge\rho(v\to w)\rho(w\to x)$
+\cite{harris,fkg}, and ``$v$ reaches $x$'' contains their intersection. Multiply by $c(x)\iota(x)\ge0$
+and sum over $x$. Certain transmission gives $\rho(v\to w)=1$.
+(c) Pathwise, the cost of a union is at most the sum of costs, with equality for disjoint sets; take
+expectations.
+\end{proof}
+Under the condition of part (a), risk factorizes into an executor-dependent escape law and a
+structure-dependent severity, which a scheduler can compute once from the dependency graph and
+reuse across executors. Otherwise the envelope gives an executor-invariant upper bound. Escape laws,
+floors, and ceilings must still be estimated per executor.
+
+\section{Relation to the earlier papers}\label{sec:relation}
+\begin{proposition}[Reduction to the mechanization criterion]\label{prop:reduction}
+Let $\varphi(k)=k$, let severity be a constant $S>0$, and let the expected per-unit escapes of the open
+and closed paths be $o$ and $d$. Then closure has lower expected loss plus cost exactly when
+$Sn(o-d)>C_{\mathrm{cl}}-C_{\mathrm{op}}$. With equal costs this is Part~IV's criterion $d<o$; with the
+expected loss included in the per-call saving, it is Part~IV's break-even.
+\end{proposition}
+\begin{proof}
+By linearity, expected losses are $Sno$ and $Snd$, without any independence assumption. Rearrange.
+\end{proof}
+Substituting bounds for $o$ and $d$ gives a sufficient criterion, not Part~IV's exact one. Severity
+therefore changes the decision only through the cost trade-off, the confidence tail, the gaps between
+bounds, and nonlinear loss. Theorem~\ref{thm:dominance} with the any-escape indicator recovers
+Part~V's conditional floor. The invariance here is of the same kind as Part~V's: conditional risks,
+not arrival laws, carry the argument.
+
+\section{What must be measured}\label{sec:measure}
+The theorems need four kinds of quantity, and bounds suffice for their decisions.
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item \emph{Executor floors and ceilings.} A floor lies in the blind set of the producing family's
+gates, so those gates cannot measure it. An exogenous exact audit reveals escapes. A binomial
+confidence bound from $n_a$ audited outputs, for example Clopper--Pearson~\cite{clopper}, estimates a
+stationary escape parameter under its sampling model; it does not certify a uniform conditional
+bound under arbitrary dependence or workload shift. Adaptive auditing and repeated looks need
+time-uniform confidence sequences~\cite{howard}.
+\item \emph{Certified mechanism levels.} With $m$ independent representative validation samples and
+zero failures, the one-sided upper bound is $U=1-\eta^{1/m}$~\cite{p5}. This is a statistical bound,
+not proof of zero fault mass, and selection among builds needs simultaneous inference. Evidence that
+cannot separate twins cannot, with high probability, bring a fault-mass bound below $\tau_\pi$ or an
+escape bound below $\tau$. A fault-mass certificate certifies closed-path escape when raw faults and
+escapes are justifiably related: with independent target inputs, a gate that only suppresses outputs,
+and no fallback, $J_i\le F_i$ for the raw-fault indicator $F_i$, so $\Prb(J_i=1\mid\mathcal F_{i-1})\le\pi(M)$
+and a valid bound on $\pi(M)$ bounds escape with the same confidence. With a fallback or other
+interaction, validation of the whole closed path, or a known structural bound, is needed.
+\item \emph{Severity.} The dependency graph, costs, and irreversibility give $S(v)$ or its envelope.
+\item \emph{Review coverage.} Escape must be measured per producer and per reviewer set
+(Proposition~\ref{prop:review}).
+\end{enumerate}
+
+\section{Executable checks}\label{sec:checks}
+A companion script (\texttt{simulate\_risk\_mechanization.py}) checks the finite claims: Bernstein convexity and its second-derivative identity,
+binomial dominance by exact enumeration of history-dependent processes, mixture closure, convex order
+of binomial mixtures, the mean-only bounds, the two-arm thresholds, the twin-certification and regret
+bounds, the budget supermartingale, the reviewer and coalition examples, and the severity ancestry
+bound by enumeration. Negative controls reinstate false claims and must be rejected.
+
+\begin{center}\small
+\begin{tabular}{p{0.66\textwidth}r}
+\toprule Quantity & Value\\\midrule
+Example~\ref{ex:spread}: fresh errors, $\E\varphi$ & 0.1179\\
+Example~\ref{ex:spread}: mechanism mixture, $\E\varphi$ & 0.3327\\
+Example~\ref{ex:spread}: linear loss, both & 1.0000\\
+Example~\ref{ex:spread}: variance, fresh / mixture & 0.900 / 1.476\\
+Theorem~\ref{thm:regret}: $\alpha=2$, $\beta=3$, $S=1$, $\varepsilon=0$: minimax regret & 1.2000\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Related work and limitations}\label{sec:related}
+Risk-based integrity requirements, in which consequence and likelihood set a required failure
+measure, are standard in functional safety~\cite{iec61508}. Our budget is that idea in the
+gated-computation setting. Choosing a level of automation from the reliability of the automation and
+the cost of outcomes is an established design question~\cite{parasuraman00}, keeping an untrusted model
+behind trusted monitoring is studied as AI control~\cite{greenblatt23}, and expected-loss deferral
+thresholds go back to the reject option in classification~\cite{chow70}.
+
+On the decision side, the worst case over compatible models is the maximum risk of Wald's minimax
+criterion~\cite{wald45} over a set of models, as in multiple-prior decision theory and partial identification~\cite{gilboa89,manski00}.
+The twin regret is Le~Cam's two-point bound~\cite{lecam73} combined with minimax-regret
+allocation~\cite{manski05,manski09}. The limits of statistical validation for very high
+dependability~\cite{littlewood93,butler93} are the practical content of the second arm. Reviewer
+conjunction follows the models of coincident failure in diverse software~\cite{eckhardt85,littlewood89,lps01},
+and the errors of language models are empirically correlated~\cite{kim25}. Structural severity is a
+weighted reach, as in influence spread~\cite{kempe03}, with risk as probability and
+consequence~\cite{kaplan81}.
+
+On the probability side, domination by independent variables under conditional bounds is
+classical~\cite{doerr}. Stochastic and convex orders and their preservation by Bernstein-type operators
+are standard~\cite{shaked,adell}, convex order of mixed binomial counts is known~\cite{lefevre17},
+heterogeneous independent counts are convex-below the binomial~\cite{hoeffding56}, and the sharp convex
+bounds from the mean are the Edmundson--Madansky bound and its discrete
+counterpart~\cite{madansky59,denuit97};
+Bernstein convexity is classical~\cite{lorentz}; positive association goes back to
+Harris~\cite{harris,fkg}; infinitely exchangeable sequences are mixtures of independent ones, and the
+first $k$ terms of an exchangeable binary sequence of length $n$ are within total variation of order
+$k/n$ of such a mixture, while a whole finite exchangeable vector can be far from every
+mixture~\cite{diaconis};
+Ville's inequality, supermartingale Chernoff bounds, and confidence sequences underlie the
+budget~\cite{ville,howard20,howard}.
+
+What we add is the following. Theorem~\ref{thm:admissible} states when closure is mandatory, when it
+is forbidden, and when no option fits; we are not aware of a prior statement of this two-arm
+structure. The classical bounds are read as conditions that hold uniformly over the executor's error
+law, dependence, routing, and mixtures. Structural severity and its properties are stated for gated
+work, and Proposition~\ref{prop:reduction} reduces the results to Part~IV's criterion.
+
+The results compare options through bounds. They do not estimate floors, ceilings, or severity for
+any real executor, and they do not optimize an adaptive policy. The convex-order results are within
+conditionally independent processes. Severity factorizes only under the stated condition. The
+mechanize and gate options interact with maintenance and drift, treated in Parts~IV and~V and not
+here. This is a preprint. It has not been peer reviewed. The prior-art search was targeted, not
+systematic.
+
+\section{Conclusion}
+Severity sets a budget, and the budget, compared with bounds that hold for every compatible error law,
+decides. Closure is mandatory when it is admissible and every other available option is not; with the
+budget below every executor floor, an open path with inherited gates is excluded, and only a closure
+that fits the budget or a gate outside the family remains. Closure is forbidden when an evidence-compatible closed model violates the budget, and when
+indistinguishable worlds prefer opposite actions, every evidence-based rule pays a worst-case regret
+proportional to severity. When no option fits, the step needs distinguishing evidence, an exogenous
+gate, or a redesign. These conditions use only floors, ceilings, certified levels, and compatible twins,
+so they hold uniformly over error laws, routing, and mixtures of executors within the stated bounds.
+Persistence matters beyond the mean through convex order, review value is producer-relative unless
+blind sets are nested, and a martingale budget turns local certificates into a scheduler's lifetime
+guarantee in expectation, and in tail when damage bounds are pathwise.
+
+\section*{Code and data availability}
+The standard-library Python script \texttt{simulate\_risk\_mechanization.py} reproduces the finite checks and the
+values of Section~\ref{sec:checks}. It is at \url{https://github.com/ivmat/gated-computation-sim}.
+This paper is archived on Zenodo, DOI~\href{https://doi.org/10.5281/zenodo.23324667}{10.5281/zenodo.23324667}.
+
+\begin{thebibliography}{99}
+\bibitem{p1} I. Matija\v{s}evi\'c. A Fault-Tolerance Threshold for Gated Agentic Computation.
+2026. \url{https://doi.org/10.5281/zenodo.20820968}.
+\bibitem{p2} I. Matija\v{s}evi\'c. Generated Gates Inherit Their Generator's Blind Spots.
+2026. \url{https://doi.org/10.5281/zenodo.20837102}.
+\bibitem{p3} I. Matija\v{s}evi\'c. Escape, Cost, and Correlation at the Verification Floor of
+Gated Agentic Computation. 2026. \url{https://doi.org/10.5281/zenodo.21456783}.
+\bibitem{p4} I. Matija\v{s}evi\'c. Progressive Semantic Mechanization. 2026.
+\url{https://doi.org/10.5281/zenodo.23119225}.
+\bibitem{p5} I. Matija\v{s}evi\'c. Beyond Constant Fault Rates: Reliability Bounds for Gated Computation and Semantic Mechanization. 
+Preprint, 2026. \url{https://doi.org/10.5281/zenodo.23293740}.
+\bibitem{lorentz} G. G. Lorentz. \emph{Bernstein Polynomials}. University of Toronto Press, 1953.
+\bibitem{adell} J. A. Adell and A. P\'erez-Palomares. Stochastic orders in preservation properties by
+Bernstein-type operators. \emph{Advances in Applied Probability} 31(2):492--509, 1999.
+\bibitem{harris} T. E. Harris. A lower bound for the critical probability in a certain percolation
+process. \emph{Proceedings of the Cambridge Philosophical Society} 56:13--20, 1960.
+\bibitem{fkg} C. M. Fortuin, P. W. Kasteleyn, and J. Ginibre. Correlation inequalities on some
+partially ordered sets. \emph{Communications in Mathematical Physics} 22:89--103, 1971.
+\bibitem{shaked} M. Shaked and J. G. Shanthikumar. \emph{Stochastic Orders}. Springer, 2007.
+\bibitem{diaconis} P. Diaconis and D. Freedman. Finite exchangeable sequences.
+\emph{Annals of Probability} 8(4):745--764, 1980.
+\bibitem{clopper} C. J. Clopper and E. S. Pearson. The use of confidence or fiducial limits
+illustrated in the case of the binomial. \emph{Biometrika} 26(4):404--413, 1934.
+\bibitem{ville} J. Ville. \emph{\'Etude critique de la notion de collectif}. Gauthier-Villars, 1939.
+\bibitem{howard} S. R. Howard, A. Ramdas, J. McAuliffe, and J. Sekhon. Time-uniform, nonparametric,
+nonasymptotic confidence sequences. \emph{Annals of Statistics} 49(2):1055--1080, 2021.
+\bibitem{iec61508} IEC 61508. Functional safety of electrical/electronic/programmable electronic
+safety-related systems. International Electrotechnical Commission, 2010.
+\bibitem{doerr} B. Doerr. Probabilistic tools for the analysis of randomized optimization heuristics.
+In B. Doerr and F. Neumann (eds.), \emph{Theory of Evolutionary Computation}, Springer, 2020,
+pp.~1--87. \url{https://doi.org/10.1007/978-3-030-29414-4_1}.
+\bibitem{wald45} A. Wald. Statistical decision functions which minimize the maximum risk.
+\emph{Annals of Mathematics} 46(2), 1945. \url{https://doi.org/10.2307/1969022}.
+\bibitem{gilboa89} I. Gilboa and D. Schmeidler. Maxmin expected utility with non-unique prior.
+\emph{Journal of Mathematical Economics} 18(2):141--153, 1989.
+\bibitem{manski00} C. F. Manski. Identification problems and decisions under ambiguity: empirical
+analysis of treatment response and normative analysis of treatment choice. \emph{Journal of
+Econometrics} 95(2):415--442, 2000.
+\bibitem{lecam73} L. Le~Cam. Convergence of estimates under dimensionality restrictions. \emph{Annals
+of Statistics} 1(1), 1973. \url{https://doi.org/10.1214/aos/1193342380}.
+\bibitem{manski05} C. F. Manski. Fractional treatment rules for social diversification of indivisible
+private risks. NBER Working Paper 11675, 2005.
+\bibitem{manski09} C. F. Manski. The 2009 Lawrence R. Klein lecture: diversified treatment under
+ambiguity. \emph{International Economic Review} 50(4):1013--1041, 2009.
+\bibitem{littlewood93} B. Littlewood and L. Strigini. Validation of ultrahigh dependability for
+software-based systems. \emph{Communications of the ACM} 36(11):69--80, 1993.
+\bibitem{butler93} R. W. Butler and G. B. Finelli. The infeasibility of quantifying the reliability of
+life-critical real-time software. \emph{IEEE Transactions on Software Engineering} 19(1):3--12, 1993.
+\bibitem{madansky59} A. Madansky. Bounds on the expectation of a convex function of a multivariate
+random variable. \emph{Annals of Mathematical Statistics} 30(3):743--746, 1959.
+\bibitem{denuit97} M. Denuit and C. Lef\`evre. Some new classes of stochastic order relations among
+arithmetic random variables, with applications in actuarial sciences. \emph{Insurance: Mathematics and
+Economics} 20(3):197--213, 1997.
+\bibitem{lefevre17} C. Lef\`evre, S. Loisel, and S. Utev. On finite exchangeable sequences and their
+dependence. \emph{Journal of Multivariate Analysis} 162:93--109, 2017.
+\bibitem{hoeffding56} W. Hoeffding. On the distribution of the number of successes in independent
+trials. \emph{Annals of Mathematical Statistics} 27(3):713--721, 1956.
+\bibitem{howard20} S. R. Howard, A. Ramdas, J. McAuliffe, and J. Sekhon. Time-uniform Chernoff bounds
+via nonnegative supermartingales. \emph{Probability Surveys} 17:257--317, 2020.
+\bibitem{eckhardt85} D. E. Eckhardt and L. D. Lee. A theoretical basis for the analysis of multiversion
+software subject to coincident errors. \emph{IEEE Transactions on Software Engineering}
+SE-11(12):1511--1517, 1985.
+\bibitem{littlewood89} B. Littlewood and D. R. Miller. Conceptual modeling of coincident failures in
+multiversion software. \emph{IEEE Transactions on Software Engineering} 15(12):1596--1614, 1989.
+\bibitem{lps01} B. Littlewood, P. Popov, and L. Strigini. Modeling software design diversity: a
+review. \emph{ACM Computing Surveys} 33(2):177--208, 2001.
+\bibitem{kim25} E. Kim, A. Garg, K. Peng, and N. Garg. Correlated errors in large language models.
+2025. \url{https://arxiv.org/abs/2506.07962}.
+\bibitem{kempe03} D. Kempe, J. Kleinberg, and \'E. Tardos. Maximizing the spread of influence through a
+social network. In \emph{Proceedings of KDD}, pp.~137--146, 2003.
+\bibitem{kaplan81} S. Kaplan and B. J. Garrick. On the quantitative definition of risk. \emph{Risk
+Analysis} 1(1):11--27, 1981.
+\bibitem{parasuraman00} R. Parasuraman, T. B. Sheridan, and C. D. Wickens. A model for types and levels
+of human interaction with automation. \emph{IEEE Transactions on Systems, Man, and Cybernetics,
+Part~A} 30(3):286--297, 2000.
+\bibitem{greenblatt23} R. Greenblatt, B. Shlegeris, K. Sachan, and F. Roger. AI control: improving
+safety despite intentional subversion. 2023. \url{https://arxiv.org/abs/2312.06942}.
+\bibitem{chow70} C. K. Chow. On optimum recognition error and reject tradeoff. \emph{IEEE Transactions
+on Information Theory} 16(1):41--46, 1970.
+\end{thebibliography}
+\end{document}
