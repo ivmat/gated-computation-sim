@@ -1,12 +1,12 @@
 # Gated Agentic Computation — verification-floor papers
 
-Six linked papers on the reliability *floor* of gated (verified) agentic systems, with
+Seven linked papers on the reliability *floor* of gated (verified) agentic systems, with
 self-contained simulations and finite-model checks that reproduce every numerical claim.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
-## The six papers
+## The seven papers
 
 **1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
 Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
@@ -87,6 +87,24 @@ paper 4. The decision-theoretic and probabilistic tools are classical; the contr
 their application to the mechanization decision. These are mathematical models, not
 measurements.
 
+**7 — Allocation and Coordination under Scarce Resources** *(Admissible Routing, Prices,
+Review Sets, and Containment for Gated Work)* · **published**, DOI [10.5281/zenodo.23449199](https://doi.org/10.5281/zenodo.23449199) ·
+[`paper_allocation.pdf`](paper_allocation.pdf) · [`paper_allocation.tex`](paper_allocation.tex)
+· reproduce with [`simulate_allocation.py`](simulate_allocation.py). The earlier papers decide
+which executor, gate stack or mechanism is admissible for one step. This paper asks how scarce
+capacity — a principal's attention, verification memory, external review, rate-limited seats,
+calendar time — is shared when many classes of work compete for it. It allocates only among
+options whose safety premises stay valid under the allocation chosen. In a fluid linear model
+the feasible and optimal allocations do not depend on the executor's error law when bounds
+decide admissibility. Nonnegative resource prices certify feasibility exactly, and a new
+option strictly lowers the optimum exactly when no old optimal dual prices it out. Choosing
+optional reviews is a knapsack. Review value is submodular under a fixed fault law; worst-case
+review value need not be, and a reviewer can have zero guaranteed value alone and positive
+guaranteed value in a coalition. Interface contracts
+bound severity: parallel escape routes add, and serial stages multiply only through
+conditional ceilings. Many results are classical; the paper states when they apply to gated
+work. These are mathematical models, not measurements.
+
 **How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
 spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
 and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
@@ -94,13 +112,14 @@ propagates across output size and shared provenance, and how to grade assurance 
 executor for deterministic mechanisms, and what evidence that closure needs at the floor;
 (5) separates the fault-process assumptions behind (1)–(4) and shows which results survive
 without them; (6) adds severity to the mechanization decision of (4) and states when
-mechanization is mandatory or forbidden.
+mechanization is mandatory or forbidden; (7) shares scarce resources (attention, review,
+compute, time) among the options that (1)–(6) admit.
 
 **Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
 models, reproduced here by the included simulations and checks; none has been validated on a deployed agent
 system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
 deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
-is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Papers 5–6 are likewise
+is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Papers 5–7 are likewise
 mathematical models, not measurements; their scripts check finite instances and
 counterexamples and do not replace the proofs.
 
@@ -308,10 +327,20 @@ Cite whichever paper you use, via its Zenodo DOI:
   url          = {https://doi.org/10.5281/zenodo.23324667},
   note         = {Preprint; archived on Zenodo.}
 }
+
+@misc{matijasevic2026allocation,
+  author       = {Ivo Matija\v{s}evi\'c},
+  title        = {Allocation and Coordination under Scarce Resources: Admissible Routing,
+                  Prices, Review Sets, and Containment for Gated Work},
+  year         = {2026},
+  doi          = {10.5281/zenodo.23449199},
+  url          = {https://doi.org/10.5281/zenodo.23449199},
+  note         = {Preprint; archived on Zenodo.}
+}
 ```
 
 > Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2),
-> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), `10.5281/zenodo.23293740` (paper 5), and `10.5281/zenodo.23324667` (paper 6). Each GitHub Release that Zenodo archives gets its own version
+> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), `10.5281/zenodo.23293740` (paper 5), `10.5281/zenodo.23324667` (paper 6), and `10.5281/zenodo.23449199` (paper 7). Each GitHub Release that Zenodo archives gets its own version
 > DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
 > for early "cite my work" use.
 

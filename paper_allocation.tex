@@ -1,0 +1,898 @@
+\documentclass[11pt]{article}
+\emergencystretch=2em
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,amsmath,amssymb,amsthm,booktabs,array,enumitem}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\Prb}{\mathbb P}
+\newcommand{\E}{\mathbb E}
+\newcommand{\ind}{\mathbf 1}
+\newcommand{\pr}{\mathrm{pr}}
+\newcommand{\conv}{\mathrm{conv}}
+\title{Allocation and Coordination under Scarce Resources:\\Admissible Routing, Prices, Review Sets,\\and Containment for Gated Work}
+\author{Ivo Matija\v{s}evi\'c}
+\date{October 2026}
+\newcommand\blfootnote[1]{\begingroup\renewcommand\thefootnote{}\footnote{#1}\addtocounter{footnote}{-1}\endgroup}
+\begin{document}
+\maketitle
+\blfootnote{\textcopyright~2026 Ivo Matija\v{s}evi\'c.\ This work is licensed under a Creative Commons
+Attribution 4.0 International (CC BY 4.0) license, \url{https://creativecommons.org/licenses/by/4.0/}.\ Preprint, DOI \href{https://doi.org/10.5281/zenodo.23449199}{10.5281/zenodo.23449199}.}
+\begin{abstract}
+Earlier papers in this series decide which executor, gate stack, or mechanism is admissible for one
+step of work. They do not decide how scarce capacity is shared when many classes of work compete for
+it: a principal's attention, verification memory, external review lineages, rate-limited seats, and
+calendar time. This paper studies that allocation problem. We allocate only among options whose
+safety premises remain valid under the allocation actually chosen. We keep three distinctions: fluid
+feasibility versus executable schedules, marginal prices versus finite policy changes, and measured
+review value versus worst-case review value. In a fluid linear model, the feasible and optimal
+allocations do not depend on the executor's error law when bounds decide admissibility and the
+resource use, costs, demands, and capacities are law-independent or replaced by common uniform bounds.
+Feasibility has an exact certificate by nonnegative resource prices; subset cuts are exact for
+single-resource pools but insufficient for general resource bundles. Shadow prices value the principal's minutes, but a new option strictly lowers the optimum
+exactly when no old optimal dual prices it out, so a negative reduced cost at one dual is not enough.
+Choosing optional principal reviews is a knapsack. Review value under a fixed fault law is submodular;
+worst-case review value need not be, and a reviewer can have zero guaranteed value alone and positive
+guaranteed value in a coalition. Verifying an implementation does not identify the intended
+specification. Interface contracts bound severity: parallel escape routes add, and serial stages
+multiply only through conditional ceilings. With optional participation, achievable throughput does not
+fall as workers are added. Substituting a mechanization for scarce work needs feasibility in every
+resource and every period. Queueing models, a scheduling formulation of verification compute, and
+MaxWeight stability complete the picture, each under its stated assumptions. Many results are
+classical; we state the conditions under which they apply to gated work. These are mathematical
+models, not measurements.
+\end{abstract}
+
+\section{Introduction}
+Part~I of this series shows that a gate family with a common blind set leaves every executor with a
+verification floor~\cite{p1}. Part~II shows that gates generated within one family inherit its blind
+set~\cite{p2}. Part~III treats escape, cost, and correlated escape~\cite{p3}. Part~IV studies the move
+of work from executor calls to deterministic mechanisms~\cite{p4}. Part~V removes the
+constant-fault-rate assumption~\cite{p5}. Part~VI adds
+severity~\cite{p6}. It defines when an option is admissible for a step: its worst-case expected loss,
+over the models compatible with the evidence, fits a severity-derived budget. That decision uses only
+floors, ceilings, and certified levels, so it holds for every error law within those bounds.
+
+These papers decide one step at a time. A working system runs many classes of work at once, and they
+compete for capacity. Some resources are scarce: the principal's attention, the memory of a
+verification machine, the capacity of an external review lineage, rate-limited seats, and calendar
+time. This paper asks which worker or mechanism should receive which unit when such resources bind,
+and how the organization of the work (decomposition, interfaces, parallelism) changes risk and
+capacity.
+
+The answer rests on one rule and three distinctions. The rule: allocate only among options whose
+admissibility holds under the allocation actually chosen, including its concurrency and review
+arrangement. The distinctions: fluid feasibility versus executable schedules; marginal prices versus
+finite policy changes; and measured review value versus worst-case review value.
+
+\paragraph{Contributions.}
+\begin{enumerate}[leftmargin=*,itemsep=2pt]
+\item A fluid allocation model over admissible options, with the qualifications that admissibility
+needs (Definition~\ref{def:model}), and its invariance to the executor's error law
+(Theorem~\ref{thm:invariance}).
+\item Capacity and feasibility: the bottleneck bound, Hall's condition for single-resource pools, and
+an exact price certificate for resource bundles (Proposition~\ref{prop:bottleneck},
+Theorems~\ref{thm:hall} and~\ref{thm:bundle}).
+\item Shadow prices with the exact condition under which a new option helps, and a counterexample to
+the unrestricted reduced-cost test (Theorem~\ref{thm:prices}, Example~\ref{ex:degenerate}); few split
+classes at a fluid optimum (Proposition~\ref{prop:split}).
+\item The principal's attention: a knapsack with the conditions it needs
+(Proposition~\ref{prop:knapsack}); submodular fixed-law review value and non-submodular robust review
+value (Theorem~\ref{thm:submodular}); the principal as producer (Corollary~\ref{cor:blind}); and the
+gap between verification and intent (Proposition~\ref{prop:intent}).
+\item Containment: modularity and serial containment bounds on severity
+(Theorems~\ref{thm:modularity} and~\ref{thm:serial}); parallelism on coupled work
+(Proposition~\ref{prop:usl}); review lineages as capacity (Corollary~\ref{cor:lineages}).
+\item Substitution and scheduling: per-resource, per-period substitution feasibility
+(Proposition~\ref{prop:lifecycle}); queueing at a scarce gate (Proposition~\ref{prop:queue}); a
+scheduling formulation of verification compute (Proposition~\ref{prop:scheduling}); and MaxWeight
+stability over admissible configurations (Theorem~\ref{thm:maxweight}).
+\end{enumerate}
+
+\paragraph{Scope and status of the results.}
+A result whose heading carries a citation is a known result. We state it in this paper's notation,
+with the conditions that our use needs. Every other result is proven here in the stated model; that
+label does not claim originality. No result in this paper is a conjecture. The contribution is the
+set of conditions under which the classical tools apply to gated work, and the counterexamples that
+mark where they fail.
+
+\section{Model}\label{sec:model}
+\paragraph{Background from the series.}
+A unit of work is produced by an executor and passes a stack of gates. An \emph{escape} is a faulty
+unit that passes every gate. An executor's conditional escape probability, given the full history,
+has a \emph{floor} and a \emph{ceiling}. A process whose conditional escape lies between the bounds
+$\ell$ and $u$ at every history belongs to the class $\mathcal P(\ell,u)$; mixtures of executors and
+adaptive routing among them stay in the class~\cite{p6}. A gate accepts every fault in its blind set.
+A blind set is \emph{complete} if it is exactly the set of accepted faults. A conjunctive review stack
+accepts a fault only if every member accepts it, so with complete blind sets a producer with badness
+$p_e$ and fault law $\mu_e$ escapes the reviewers $r_1,\dots,r_k$ with probability
+$p_e\mu_e(\bigcap_j\Sigma_{r_j})$~\cite{p2,p6}. A step has a severity, and an option is
+\emph{admissible} for the step when its severity-weighted worst-case expected loss, over the models
+compatible with the evidence, fits a tolerated loss. Admissibility has a robust reading, for a
+deployed build, and an ex-ante reading, for a build-and-evidence experiment with a statistical
+certificate~\cite{p6}. On a directed acyclic dependency graph, the \emph{structural severity} of an
+escape at node $v$ is $S(v)=\sum_w\rho(v\to w)\,c(w)\,\iota(w)$, where $\rho(v\to w)$ is the
+probability that the fault reaches $w$, $c(w)$ the cost of reaching $w$, and $\iota(w)$ the
+probability that this damage is not undone~\cite{p6}.
+
+\paragraph{The allocation model.}
+\begin{definition}[Allocation model]\label{def:model}
+Unit classes $k$ have demand $\lambda_k\ge0$ per period. $\mathcal A_k$ is the finite set of options
+admissible for $k$ under an explicitly chosen reading of admissibility~\cite{p6}. Option $a$ for class
+$k$ consumes $D_{r,ak}\ge0$ of resource $r$ per unit and costs $c_{ak}$. Resource $r$ has capacity
+$\kappa_r$ per period. The \emph{fluid model} is
+\begin{equation}\label{eq:fluid}\tag{F}
+x_{ak}\ge0,\qquad \sum_{a\in\mathcal A_k}x_{ak}=\lambda_k,\qquad \sum_{k,a}D_{r,ak}x_{ak}\le\kappa_r .
+\end{equation}
+Four qualifications belong to the definition.
+\begin{enumerate}[label=(\arabic*),itemsep=2pt]
+\item Admissibility must hold on the routed tasks and histories, including the chosen concurrency and
+review arrangement. Benchmark averages do not establish it.
+\item An ex-ante statistical certificate keeps that label; it does not become robust admissibility.
+\item Attention time and CPU time enter as workload rates. Memory, simultaneous seats, precedence, and
+deadlines need scheduling constraints beyond~\eqref{eq:fluid} (Proposition~\ref{prop:scheduling}).
+\item Executor error laws may stay unknown within the bounds of~\cite{p6}. Arrival and service laws
+need separate assumptions wherever a queueing result uses them.
+\end{enumerate}
+\end{definition}
+We write $D_{ak}$ for the vector $(D_{r,ak})_r$ and $\kappa$ for $(\kappa_r)_r$.
+
+\section{The allocation backbone}\label{sec:backbone}
+\begin{theorem}[Admissible allocation is invariant to the executor's error law]\label{thm:invariance}
+Suppose that bounds of the kind in~\cite{p6} decide every option's admissibility. Suppose also that
+the coefficients $D$, $c$, $\lambda$, $\kappa$ do not depend on the error law, or are replaced by
+bounds that hold for every law in the class. Then the feasible set and the optimal allocations
+of~\eqref{eq:fluid} are the same for every executor error law, dependence structure, and routing
+mixture that satisfies those bounds.
+\end{theorem}
+\begin{proof}
+The program's data are $\lambda$, $\kappa$, $D$, $c$, and the sets $\mathcal A_k$. The bounds fix
+each $\mathcal A_k$, by the admissibility theorem and the mixture lemma of~\cite{p6}. Equal data give
+equal feasible and optimal sets.
+\end{proof}
+\begin{remark}
+Retries consume attempts, so $D$ can depend on the error law. Then the coefficients need interval
+data and the worst case. Admissibility must hold under the chosen concurrency
+(Definition~\ref{def:model}(1)). Replacing law-dependent coefficients by bounds that hold for every
+law is the worst-case reformulation of inexact linear programs~\cite{soyster73}; robust linear
+programming generalizes it~\cite{bental99}.
+\end{remark}
+
+\begin{proposition}[Bottleneck bound; operational laws~\cite{buzen76,denning}]\label{prop:bottleneck}
+If completed class-$k$ units require long-run average demand $D_{r,k}>0$ of resource $r$, then the
+class-$k$ throughput satisfies $X_k\le\min_{r:D_{r,k}>0}\kappa_r/D_{r,k}$. Other classes' use of $r$
+tightens the bound. If a fraction $f>0$ of units needs principal review with mean time $s$ given
+review, then $Xfs\le\kappa_{\pr}$.
+\end{proposition}
+\begin{proof}
+Over a horizon $T$, required work cannot exceed capacity, apart from boundary work of order $o(T)$.
+Divide by $T$.
+\end{proof}
+\begin{remark}\label{rem:bottleneck}
+With $\kappa_{\pr}=120$ principal minutes per period, $f=0.1$, and $s=5$ minutes, the ceiling is
+$X\le240$ units per period; halving $f$ at the same $s$ doubles it to $480$. Admissible mechanization
+does not imply that $f$ falls. It can keep every principal approval, add validation, or raise
+exceptions. A lower $f$ with a longer $s$ can raise $fs$.
+\end{remark}
+
+\begin{theorem}[Feasibility of admissible routing for single-resource pools; Hall~\cite{hall},
+Gale~\cite{gale57}, Ford and Fulkerson~\cite{fordfulkerson}]\label{thm:hall}
+Suppose each option is a pool with capacity $b_a$, each unit uses one unit of its chosen pool, and no
+other shared constraint exists. Write $\mathcal A(T)=\bigcup_{k\in T}\mathcal A_k$. A feasible routing
+exists if and only if
+\[
+\sum_{k\in T}\lambda_k\le\sum_{a\in\mathcal A(T)}b_a\qquad\text{for every set }T\text{ of classes}.
+\]
+Integral data admit an integral routing. A minimum cut in the source--class--pool--sink network names
+a violating set.
+\end{theorem}
+\begin{proof}
+Use max-flow min-cut. A finite cut is fixed by the set $T$ of classes on the source side, and its
+capacity is $\sum_{k\notin T}\lambda_k+\sum_{a\in\mathcal A(T)}b_a$. The routing exists exactly when
+the maximum flow equals $\sum_k\lambda_k$. Integrality of the maximum flow gives the integral routing.
+\end{proof}
+The condition is the bipartite case of Gale's supply--demand feasibility theorem~\cite{gale57}, which
+extends Hall's theorem.
+\begin{example}[Shared gate]\label{ex:sharedgate}
+The theorem is false when options share a resource. Take one class with demand $2$ and two options,
+each a pool of capacity $1$, that both consume one principal gate of capacity $1$. The pool condition
+holds ($2\le1+1$), but the gate can carry only one unit. Theorem~\ref{thm:bundle} covers this case.
+\end{example}
+
+\begin{theorem}[Exact feasibility certificate for resource bundles; Farkas~\cite{farkas}, LP
+duality~\cite{bertsimas}]\label{thm:bundle}
+Let every $\mathcal A_k$ be finite and nonempty. Then~\eqref{eq:fluid} is feasible if and only if, for
+every price vector $p\ge0$,
+\[
+\sum_k\lambda_k\min_{a\in\mathcal A_k}p^\top D_{ak}\ \le\ p^\top\kappa .
+\]
+Infeasibility therefore has a certificate of nonnegative resource weights, not necessarily a subset
+cut.
+\end{theorem}
+\begin{proof}
+Necessity: weight the capacity rows by $p$ and use $\sum_ax_{ak}=\lambda_k$. Sufficiency: the dual of
+the feasibility LP is
+\[
+\max\big\{y^\top\lambda-p^\top\kappa:\ y_k\le p^\top D_{ak}\ \forall a\in\mathcal A_k,\ p\ge0\big\}.
+\]
+The primal is infeasible if and only if the dual is unbounded, if and only if some $(y,p)$ has positive
+value, if and only if the displayed inequality fails for some $p\ge0$.
+\end{proof}
+\begin{example}[Coordinatewise tests are not enough]\label{ex:coordinatewise}
+One unit has options with demand vectors $(2,0)$ and $(0,2)$, and the capacities are $(0.6,0.6)$.
+For each resource separately, some option uses none of it, so both coordinatewise tests pass. The price
+$p=(1,1)$ gives $\min_a p^\top D_a=2>1.2=p^\top\kappa$ and certifies infeasibility. A certified
+additive damage allowance can enter the model as one more resource row.
+\end{example}
+Suppose the resource rows are the edges of a capacitated network, each demand vector $D_{ak}$ is the
+edge-incidence vector of a path, and each class's options are all paths between its source and its
+sink. Then $\min_a p^\top D_{ak}$ is a shortest-path length under the edge lengths $p$, and
+Theorem~\ref{thm:bundle} becomes the multicommodity feasibility theorem of Onaga and Kakusho and of
+Iri~\cite{onaga71,iri71}. With only some paths admissible, the minimum is over the admissible paths.
+
+\begin{theorem}[Shadow prices of scarce resources; LP duality and
+sensitivity~\cite{boyd}]\label{thm:prices}
+Let $V(\lambda,\kappa)=\min\{c^\top x:\ \eqref{eq:fluid}\}$, with dual
+\[
+\max\big\{y^\top\lambda-p^\top\kappa:\ y_k\le c_{ak}+p^\top D_{ak},\ p\ge0\big\}.
+\]
+\begin{enumerate}[label=(\roman*),itemsep=2pt]
+\item At an optimal dual $(y,p)$, $V(\lambda,\kappa+\Delta)\ge V(\lambda,\kappa)-p^\top\Delta$. Where
+$V$ is differentiable, $\partial V/\partial\kappa_r=-p_r$. At a kink, keep the set of optimal duals.
+\item If the old problem is feasible, adding options (columns) strictly lowers the optimum if and only
+if \emph{no} optimal dual of the old problem satisfies all the new columns' dual constraints. Without
+feasibility the condition can hold vacuously. With a unique optimal dual, a negative reduced cost
+$c+p^\top D-y_k<0$ is sufficient.
+\item Changes to demand, coefficients, admissible sets, or available options are discrete and in
+general need reoptimization. The prices give only local or bounding information about them.
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+Part (i) is weak and strong duality. Part (ii): the new optimum equals the old one if and only if some
+old optimal dual remains feasible for the enlarged dual. Part (iii) states the scope of (i) and (ii):
+both are local or bounding statements.
+\end{proof}
+\begin{example}[The unrestricted reduced-cost test fails]\label{ex:degenerate}
+Take the old problem $x=1$, $x\le1$, with cost $0$. Every $y=p\ge0$ is dual-optimal. A new option with
+zero cost and zero resource use has reduced cost $0+0-1=-1$ at $y=p=1$, yet the optimum stays $0$.
+\end{example}
+The old problem is primal degenerate, so its optimal dual is not unique. That the prices of a single
+dual solution can then mislead is known~\cite{aucamp82,akgul84,gal86,jansen97}, and directional
+marginal values are extrema over the set of optimal duals~\cite{mills56,williams63}. Part~(ii) states
+this fact for added columns.
+The price $p_{\pr}$ values a principal minute at the current load and admissibility. A candidate
+mechanization can then be compared across all scarce resources in one currency, with the limits of
+parts (ii) and (iii).
+
+\begin{proposition}[Few coupling constraints imply few split classes; basic feasible
+solutions~\cite{bertsimas}, Lenstra, Shmoys, and Tardos~\cite{lst90}]\label{prop:split}
+A feasible bounded instance of~\eqref{eq:fluid} with $K$ classes of positive demand and $m$ resource
+rows has an optimal solution with at most $K+m$ positive coordinates. Hence at most $m$ classes are
+split across options. At a vertex with $b$ binding independent resource rows, at most $b$ classes are
+split.
+\end{proposition}
+\begin{proof}
+A linear objective attains its optimum at a vertex. A vertex has at most as many positive coordinates
+as independent active equality rows. Each class with positive demand needs at least one positive
+coordinate, so at most $m$ (or $b$) classes have two or more.
+\end{proof}
+A fluid optimum therefore assigns most classes to one option. Randomized routing is needed for at
+most as many classes as there are binding scarce resources. The same vertex count bounds the
+fractional jobs in the linear relaxation of scheduling on unrelated parallel machines~\cite{lst90}, and
+it gives at most three split categories in a recent model of AI review before human
+approval~\cite{linzhang26}.
+
+\section{The principal's attention and review sets}\label{sec:principal}
+\begin{proposition}[Principal-attention allocation is a knapsack; Dantzig~\cite{dantzig},
+Kellerer, Pferschy, and Pisinger~\cite{kellerer}]\label{prop:knapsack}
+Suppose optional reviews have fixed avoided losses $v_i\ge0$ and times $t_i>0$, effects are additive
+across units, and there are no setup or interaction effects. Then choosing reviews within principal
+time $H$ is a knapsack problem.
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item The ratio order $v_i/t_i$ solves the fractional problem.
+\item For the integer problem, first discard reviews with $t_i>H$. Then the better of the ratio prefix
+of the remaining reviews and the best remaining single review is a $1/2$-approximation (the standard
+modified greedy).
+\item Without the discard step the guarantee fails. With $H=3$, one review $(t,v)=(4,100)$, and three
+reviews $(1,1)$, an undiscarded ratio prefix is empty, and the best feasible single review gives $1$
+against an optimum of $3$.
+\item With complete blind sets, constant severity, and review that only suppresses faults,
+$v_i=S_ip_i\mu_i(\Sigma_i\setminus\Sigma_{\pr})$. Here $p_i\mu_i$ is the unit's escape law through its
+existing stack, $\Sigma_i$ is the blind set of that stack, $\Sigma_{\pr}$ is the principal's blind set,
+and $S_i$ is the unit's severity.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Parts (a) and (b) are the classical results~\cite{dantzig,kellerer}. Part (c): the review $(4,100)$
+has the largest ratio and does not fit, so the prefix stops before it. Part~(c) shows why the
+discard step, often stated as the assumption that every item fits, is needed. Part (d): the principal's review
+removes the escaped faults outside $\Sigma_{\pr}$, each at damage $S_i$.
+\end{proof}
+\begin{remark}[Conditions]
+Reviews required for admissibility are not optional and are scheduled first. Fault-dependent damage
+needs integration, not a common severity. Lower bounds $\underline v_i$ give a conservative objective,
+but a $1/2$-approximation to that objective is not a $1/2$-approximation to the actual benefit.
+Overlapping coverage breaks additivity (Theorem~\ref{thm:submodular}).
+\end{remark}
+
+\begin{theorem}[Fixed-law review value is submodular; robust review value need not
+be; Nemhauser, Wolsey, and Fisher~\cite{nemhauser}, Krause et al.~\cite{krause08}]\label{thm:submodular}
+Fix a fault measure $\nu$, a damage $h\ge0$, and reviewer rejection sets $C_r$, where review only
+suppresses faults. Then
+\[
+F_\nu(A)=\int h\,\ind\Big\{z\in\bigcup_{r\in A}C_r\Big\}\,d\nu(z)
+\]
+is monotone submodular, so greedy selection of $k$ reviewers of equal cost achieves a fraction $1-1/e$
+of the optimum~\cite{nemhauser}. The robust value $F_{\mathrm{rob}}(A)=\inf_{\nu\in\mathcal U}F_\nu(A)$,
+over a set $\mathcal U$ of fault measures, need not be submodular.
+\end{theorem}
+\begin{proof}
+Fixed law: the marginal value of $r$ given a coalition is the damage-weighted mass that $r$ catches and
+the coalition does not. This mass shrinks as the coalition grows. The $1-1/e$ guarantee is the theorem
+of Nemhauser, Wolsey, and Fisher~\cite{nemhauser}. Robust counterexample: take faults $x,y$, unit
+damage, $C_1=\{x\}$, $C_2=\{y\}$, and $\mathcal U=\{\delta_x,\delta_y\}$. Then
+$F_{\mathrm{rob}}(\varnothing)=F_{\mathrm{rob}}(\{1\})=F_{\mathrm{rob}}(\{2\})=0$ and
+$F_{\mathrm{rob}}(\{1,2\})=1$, so
+$F_{\mathrm{rob}}(\{1\})+F_{\mathrm{rob}}(\{2\})<F_{\mathrm{rob}}(\{1,2\})+F_{\mathrm{rob}}(\varnothing)$.
+\end{proof}
+The fixed-law value is a weighted coverage function, and the $1-1/e$ guarantee is tight for
+coverage~\cite{feige98}. The robust half is known: a pointwise minimum of monotone submodular
+functions is in general not submodular, and robust selection is hard to approximate~\cite{krause08};
+see also~\cite{orlin18}. Our counterexample has the same two-point form as theirs.
+A reviewer can thus have zero guaranteed value alone and positive guaranteed value in a coalition.
+Certified reviewer \emph{sets} should be allocated; reviewers should not be ranked by singleton lower
+bounds.
+
+\begin{corollary}[The principal as producer inherits common blind sets]\label{cor:blind}
+Suppose the principal produces bad outputs with probability $p_{\pr}$ and conditional fault law
+$\mu_{\pr}$, and every reviewer in an allowed coalition accepts a common set $B$. Then the
+first-attempt escape floor of the principal's work is at least $p_{\pr}\mu_{\pr}(B)$. Self-review by
+the principal, or more members that keep $B$, cannot lower it, provided the principal's own review
+also accepts $B$. Production by the principal alone does not establish that premise.
+\end{corollary}
+\begin{proof}
+Every fault in $B$ passes every member. Apply the conjunctive-review result of~\cite{p6} with the
+principal as producer.
+\end{proof}
+
+\begin{proposition}[Implementation verification does not identify intent; Le~Cam's two-point
+bound~\cite{lecam73}]\label{prop:intent}
+Suppose two intended specifications induce the same available transcript but require opposite binary
+actions, with loss $S$ for the wrong action. Then every transcript-based rule has worst-case expected
+loss at least $S/2$. This holds even if the rule proves that its implementation satisfies the recorded
+specification exactly.
+\end{proposition}
+\begin{proof}
+A rule sees the same transcript under both specifications, so it chooses action~1 with the same
+probability $q$. Its losses are $Sq$ and $S(1-q)$, and $\max\{Sq,S(1-q)\}\ge S/2$.
+\end{proof}
+This is the exact-twin case of the twin regret of~\cite{p6}, with equal gaps, and so an instance of
+Le~Cam's two-point bound~\cite{lecam73}. The two specifications are observationally equivalent in
+the sense of Koopmans~\cite{koopmans49}.
+The split between building the right product and building the product right is Boehm's distinction
+between validation and verification~\cite{boehm84}.
+Establishing the operative specification (authority) and showing that an action meets it
+(verification) are different objects. Before any theorem about the principal's errors, one must
+define whether the principal's declaration \emph{is} the specification or reports a latent intent
+imperfectly.
+
+\section{Containment and organization}\label{sec:containment}
+In this section, condition on an escape at node $v$. Let $S(v)$ be its expected damage, and
+$S_{\mathrm{in}}(v)$ the expected damage inside $v$'s module.
+
+\begin{theorem}[Modularity bounds severity]\label{thm:modularity}
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item \emph{General form.} Let $C$ be a set of interfaces that separates $v$'s module from the outside,
+and let $E_e$ be the event that the fault's cascade ever crosses interface $e$. Suppose
+$\Prb(E_e\mid\text{escape at }v,\text{routed history},\text{fault type})\le\varepsilon_e$ uniformly over
+compatible models. Suppose also that outside damage is $0$ without a crossing and at most
+$C_{\mathrm{out}}$ pathwise otherwise. Then
+\[
+S(v)\le S_{\mathrm{in}}(v)+C_{\mathrm{out}}\min\Big(1,\sum_{e\in C}\varepsilon_e\Big).
+\]
+No independence is needed.
+\item \emph{Model form.} In the independent-edge model of~\cite{p6} on a directed acyclic graph, let $M$
+be $v$'s module. Suppose every path from $v$ to a node outside $M$ uses an edge of $E_{\mathrm{cut}}$,
+and each such edge transmits with probability at most $\varepsilon_e$. Write
+$S_M(v)=\sum_{w\in M}\rho(v\to w)c(w)\iota(w)$ and $C_{\mathrm{out}}=\sum_{w\notin M}c(w)\iota(w)$. Then
+\[
+S(v)\le S_M(v)+C_{\mathrm{out}}\sum_{e\in E_{\mathrm{cut}}}\varepsilon_e\,\rho(v\to\mathrm{tail}(e)).
+\]
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+(a) Outside damage is at most $C_{\mathrm{out}}\ind_{\bigcup_eE_e}$. Take expectations and use the
+union bound and $\Prb\le1$. (b) Reaching $w\notin M$ requires reaching $\mathrm{tail}(e)$ for some
+$e\in E_{\mathrm{cut}}$ and $e$ transmitting. In a directed acyclic graph with independent edges these
+two events are independent, because reaching $\mathrm{tail}(e)$ does not use $e$. Apply the union
+bound, multiply by $c(w)\iota(w)$, and sum over $w\notin M$.
+\end{proof}
+\begin{remark}[Conditions]
+A pass rate on a reference distribution is not a conditional crossing bound for a fault routed to the
+interface. A per-attempt bound is not an ``ever crosses'' bound under retries. Contracts must
+intercept the relevant semantic faults, be enforced, and have no bypass. Smaller severity weakly
+enlarges the budget of~\cite{p6}; it does not guarantee a cheaper admissible option, or that the
+interface overhead pays.
+\end{remark}
+Part~(a) is the union-bound form of the cut bounds of reliability theory~\cite{esary63}, without
+their independence assumption. The ceilings $\varepsilon_e$ play the role of the error permeabilities
+of software modules~\cite{hiller01,hiller04}, and the module bounded by $C$ is a fault-containment
+region~\cite{lala94}.
+
+\begin{theorem}[Serial containment multiplies conditional leakage ceilings]\label{thm:serial}
+Suppose every route from an escaped fault to outside damage must survive ordered stages $1,\dots,L$.
+Let $B_0$ be the escape and $B_j\subseteq B_{j-1}$ the event of surviving through stage $j$, and
+suppose $\Prb(B_j\mid B_{j-1},\text{history entering }j)\le\varepsilon_j$ uniformly. Then
+$\Prb(B_L)\le\prod_j\varepsilon_j$, and, with $C_{\mathrm{out}}$ as in
+Theorem~\ref{thm:modularity}(a),
+\[
+S(v)\le S_{\mathrm{in}}(v)+C_{\mathrm{out}}\prod_{j=1}^L\varepsilon_j .
+\]
+\end{theorem}
+\begin{proof}
+$\Prb(B_j)\le\varepsilon_j\Prb(B_{j-1})$; iterate. Outside damage is at most
+$C_{\mathrm{out}}\ind_{B_L}$; take expectations.
+\end{proof}
+Parallel escape routes add (Theorem~\ref{thm:modularity}, union bound). Serial stages multiply
+(Theorem~\ref{thm:serial}, conditional bounds). Marginal ceilings do not multiply: two stages with
+marginal failure probability $\varepsilon$ but identical failure events give joint failure
+$\varepsilon$, not $\varepsilon^2$. Renaming reviewers as stages buys no conditional guarantee.
+For independent layers, the product is the layer-multiplication rule of layer-of-protection
+analysis~\cite{lopa}; Theorem~\ref{thm:serial} replaces independence by uniform conditional ceilings.
+The failure of marginal multiplication is the coincident-failure effect of diverse
+software~\cite{eckhardt85,littlewood89}.
+
+\begin{proposition}[Parallelism on coupled work; universal scalability law~\cite{gunther}]\label{prop:usl}
+\begin{enumerate}[label=(\alph*),itemsep=2pt]
+\item If participating workers are optional, so that extra workers may stay idle, the best achievable
+throughput is nondecreasing in the number of available workers.
+\item Suppose throughput follows $X(n)=X(1)\,n/[1+\alpha(n-1)+\beta n(n-1)]$ with $0\le\alpha<1$ and
+$\beta>0$, and $X(1)>0$. Its continuous maximum is at $n^\ast=\max\big(1,\sqrt{(1-\alpha)/\beta}\big)$. The law
+is not globally concave; its tail is convex.
+\item With $\beta=0$ and $X(1)>0$ there is no finite maximizer. For $0<\alpha<1$, throughput increases to the limit
+$X(1)/\alpha$; for $\alpha=0$, it grows linearly without bound.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+(a) Idling the extra workers reproduces any smaller configuration. (b) The sign of the derivative is
+the sign of $1-\alpha-\beta n^2$. $X$ is rational, so its Laurent expansion at infinity converges and may
+be differentiated term by term: $X(n)=X(1)/(\beta n)-X(1)(\alpha-\beta)/(\beta^2n^2)+O(n^{-3})$, hence
+$X''(n)=2X(1)/(\beta n^3)+O(n^{-4})>0$ for all sufficiently large $n$. (c)
+With $\beta=0$, $X(n)=X(1)n/[1-\alpha+\alpha n]$, which increases in $n$ and tends to $X(1)/\alpha$ for
+$\alpha>0$ and equals $X(1)n$ for $\alpha=0$.
+\end{proof}
+Part (a) is proven here. The law in (b) and (c) is Gunther's model~\cite{gunther}, and Gunther also
+gives its maximizer and its reduction to Amdahl's law at $\beta=0$~\cite{gunther08}; Amdahl stated
+that ceiling in words~\cite{amdahl67}. For example, $\alpha=0.1$ and $\beta=0.01$ give $n^\ast=\sqrt{90}\approx9.49$, and the
+integer worker counts $9$ and $10$ tie, both giving $X(n)/X(1)=25/7$. A falling throughput curve describes a policy that makes
+extra workers participate. It is not a limit on what is achievable. Pairwise coordination cost does
+not by itself fix the law.
+
+\begin{corollary}[Review lineages as capacity]\label{cor:lineages}
+Treat each certified review bundle as an option with a resource-demand vector. Its throughput obeys
+Proposition~\ref{prop:bottleneck} and Theorem~\ref{thm:bundle}, and Theorem~\ref{thm:hall} when the
+pools are interchangeable single resources. Distinct lineages do not by themselves give independence or
+complementary blind sets. What matters is the certified acceptance intersection for the producer and
+the routed workload~\cite{p6}.
+\end{corollary}
+\begin{proof}
+A bundle with a demand vector is an option of Definition~\ref{def:model}; apply the cited results. The
+escape of a conjunctive stack depends on the intersection of its members' acceptance sets, not on
+their lineage labels~\cite{p6}.
+\end{proof}
+
+\section{Substitution, scheduling, and stability}\label{sec:scheduling}
+\begin{proposition}[Lifecycle substitution needs vector, time-indexed feasibility]\label{prop:lifecycle}
+Over a horizon, let $s_r$ be the current slack of resource $r$, with the rest of the allocation fixed.
+Replace $n$ units by a mechanization with fixed demand $F_r$ (build, validation) and recurring demand
+$d^{\mathrm{cl}}_r$ in place of $d^{\mathrm{op}}_r$. The replacement is feasible if and only if
+\[
+F_r+n\big(d^{\mathrm{cl}}_r-d^{\mathrm{op}}_r\big)\le s_r\qquad\text{for every }r,
+\]
+and in every period when demands are time-indexed.
+\end{proposition}
+\begin{proof}
+Substitute the changed demand into each capacity row.
+\end{proof}
+Multi-period capacity planning keeps a capacity row for each resource and each
+period~\cite{luss82}.
+\begin{example}[Lifecycle totals mislead]\label{ex:lifecycle}
+Let the principal's capacity be $10$ in each of two periods, the old demand $(10,10)$, and the new
+demand $(15,0)$. Total demand falls from $20$ to $15$, but period one is infeasible. A slack resource
+can also become the new bottleneck. Reallocation elsewhere can compensate. Fixed costs and integer
+commitments lie outside the marginal test of Theorem~\ref{thm:prices}.
+\end{example}
+
+\begin{proposition}[Queueing at a scarce gate; Harchol-Balter~\cite{harchol}, Kingman~\cite{kingman61,kingman62},
+Cox and Smith~\cite{coxsmith}]\label{prop:queue}
+Each item holds under its stated model.
+\begin{enumerate}[label=(\arabic*),itemsep=2pt]
+\item \emph{M/M/1, first come first served.} With Poisson arrivals at rate $\lambda$, exponential
+service at rate $\mu>\lambda$, and one server, $\E W=1/(\mu-\lambda)$ and $\E W_q=\rho/(\mu-\lambda)$,
+with $\rho=\lambda/\mu$.
+\item \emph{Kingman (GI/GI/1).} $\E W_q\approx\frac{\rho}{1-\rho}\cdot\frac{c_a^2+c_s^2}{2}\,\E S$, where
+$c_a$ and $c_s$ are the coefficients of variation of interarrival and service times. This is a
+heavy-traffic approximation, not a universal bound.
+\item \emph{The $c\mu$ rule.} With Poisson class arrivals, exponential class service, one
+preemptive-resume server, no switching cost, and constant linear holding costs $c_k$, serving the
+largest $c_k\mu_k$ first is optimal.
+\item \emph{Batching.} With setup time $h$, batch size $b$, and per-unit service time $s$, saturated
+capacity is $b/(h+bs)$. Under Poisson arrivals, forming a batch adds mean per-unit delay
+$(b-1)/(2\lambda)$.
+\end{enumerate}
+\end{proposition}
+\begin{proof}
+Items (1)--(3) are classical~\cite{harchol,kingman61,kingman62,coxsmith,buyukkoc85}. Item (4): a saturated cycle
+processes $b$ units in time $h+bs$. In a batch, the $i$-th arrival waits for $b-i$ further arrivals,
+each after a mean interarrival time $1/\lambda$; the average of $(b-i)/\lambda$ over $i=1,\dots,b$ is
+$(b-1)/(2\lambda)$. Batch-service queues go back to Bailey and Neuts~\cite{bailey54,neuts67}; item~(4)
+gives only the elementary capacity and formation-delay terms.
+\end{proof}
+\begin{remark}[Caveats]
+Severity is not automatically a holding-cost rate. Work awaiting safe release incurs delay cost, while
+work already exposed accumulates damage. The invariance of~\cite{p6} to error laws gives no invariance
+to arrival or service laws.
+\end{remark}
+
+\begin{proposition}[Verification compute is resource-constrained scheduling; Pritsker, Watters, and
+Wolfe~\cite{pritsker69}]\label{prop:scheduling}
+Suppose durations, machine eligibility, memory needs, releases, and deadlines are known. Then
+allocating proof jobs is a cumulative-resource scheduling problem. Let $z_{jmt}\in\{0,1\}$ indicate that
+job $j$ starts on machine $m$ at slot $t$, let $p_{jm}$ be its duration on $m$, $m_j$ its memory
+need, and $M_m$ the memory of machine $m$. Memory requires
+\[
+\sum_{j,t:\ t\le\tau<t+p_{jm}}m_jz_{jmt}\le M_m\qquad\text{for every }m\text{ and }\tau,
+\]
+together with assignment, precedence, and deadline constraints. A cloud option adds placements and
+costs. The LP relaxation gives lower bounds and prices in the sense of Theorem~\ref{thm:prices}.
+\end{proposition}
+\begin{proof}
+A job started at slot $t$ on machine $m$ occupies $m_j$ units of memory in the slots
+$t,\dots,t+p_{jm}-1$, so the displayed sum is the memory in use at slot $\tau$. Relaxing integrality
+enlarges the feasible set, so the relaxation's optimal cost is a lower bound, and its dual solutions are
+prices.
+\end{proof}
+\begin{example}[Memory-time totals are only a relaxation]\label{ex:memory}
+Three one-slot jobs each need $6$ units of memory on a $10$-unit machine. No two of them can overlap,
+since $2\cdot6=12>10$. Yet a rate of $1/2$ for each job passes the aggregate test
+$3\cdot\tfrac12\cdot6=9\le10$, although a total rate of $3/2>1$ requires overlap in some slot.
+\end{example}
+The time-indexed formulation is that of Pritsker, Watters, and Wolfe~\cite{pritsker69}. Memory is a
+cumulative resource~\cite{aggoun93}, and the aggregate test is an energy-type relaxation of the kind
+studied in cumulative scheduling~\cite{baptiste01}.
+\begin{remark}[Caveats]
+Covered severity is not additive when proof scopes overlap. A solver run is an admissible verification
+option only under its soundness, artifact-binding, and enforcement premises. A rule that all solver runs
+go to the cloud is a policy constraint, not an optimality result.
+\end{remark}
+
+\begin{theorem}[MaxWeight scheduling of feasible configurations is throughput-optimal; Tassiulas and
+Ephremides~\cite{tassiulas}]\label{thm:maxweight}
+Consider slotted queues $Q_k(t+1)=[Q_k(t)-s_k(t)]_++A_k(t)$. Let $\mathcal M$ be a finite set of service
+vectors that are simultaneously feasible, resource compatibility included. Let the arrivals be
+i.i.d.\ with mean $\lambda$ and finite second moments, independent of a finite initial backlog with
+$\E\|Q(0)\|_2^2<\infty$. If some $\bar s\in\conv\mathcal M$ has $\bar s\ge\lambda+\epsilon\ind$ with
+$\epsilon>0$, then MaxWeight, $s(t)\in\arg\max_{s\in\mathcal M}Q(t)^\top s$, is strongly stable, with
+\[
+\limsup_{T\to\infty}\frac1T\sum_{t<T}\E\|Q(t)\|_1\le\frac{B}{2\epsilon},\qquad
+B=\E\|A\|_2^2+\max_{s\in\mathcal M}\|s\|_2^2 .
+\]
+\end{theorem}
+\begin{proof}[Proof sketch]
+Use quadratic Lyapunov drift. One slot gives
+$\E[\|Q(t+1)\|_2^2-\|Q(t)\|_2^2\mid Q(t)]\le B+2Q(t)^\top(\lambda-s(t))$. MaxWeight maximizes
+$Q^\top s$ over $\mathcal M$, hence over $\conv\mathcal M$, so $Q^\top s(t)\ge Q^\top\bar s\ge
+Q^\top\lambda+\epsilon\|Q\|_1$. The drift is therefore at most $B-2\epsilon\|Q(t)\|_1$. Take
+expectations, telescope over $t<T$, use $\E\|Q(0)\|_2^2<\infty$, and divide by $2\epsilon T$.
+The explicit bound is the standard Lyapunov-drift form~\cite{georgiadis06,neely10}.
+\end{proof}
+Build $\mathcal M$ from options whose safety bounds hold under each mode's concurrency. Rework that
+depends on errors belongs in the arrival and service model. Stability does not enforce the lifetime
+consequence budget of~\cite{p6}. Throughput sustained indefinitely at positive risk and a finite
+lifetime budget can be incompatible.
+
+\section{Consequences for scheduler design}\label{sec:design}
+The results suggest the following guidance. It is design guidance, not law. Each item is only as strong
+as the result it cites, and holds only under that result's conditions.
+\begin{enumerate}[leftmargin=*,itemsep=3pt]
+\item \emph{Filter first, then allocate.} Admit an option to $\mathcal A_k$ only if its admissibility
+holds under the allocation that will run it: the routed tasks, the concurrency, and the review
+arrangement (Definition~\ref{def:model}). Then the allocation does not need the executors' error laws
+(Theorem~\ref{thm:invariance}). If retries make demand depend on the error law, plan against interval
+data and the worst case.
+\item \emph{Check feasibility jointly.} Test feasibility with a price certificate over all resources
+(Theorem~\ref{thm:bundle}). Resource-by-resource tests can pass an infeasible plan
+(Example~\ref{ex:coordinatewise}). Subset cuts are exact for single-resource pools but insufficient for general resource bundles
+(Theorem~\ref{thm:hall}, Example~\ref{ex:sharedgate}).
+\item \emph{Use prices locally; reoptimize for discrete changes.} Dual prices value scarce resources,
+including principal minutes, in one currency. To decide whether a new option helps, check all old
+optimal duals, or reoptimize (Theorem~\ref{thm:prices}, Example~\ref{ex:degenerate}).
+\item \emph{Expect few split classes.} A fluid optimum splits at most as many classes as there are
+binding resources (Proposition~\ref{prop:split}). Randomized routing can be confined to those classes.
+\item \emph{Schedule required principal reviews first.} Then fill the remaining principal time with
+optional reviews by the ratio rule, after discarding reviews that do not fit, and compare with the best
+single review (Proposition~\ref{prop:knapsack}). A guarantee on lower-bound values is not a guarantee on
+actual benefit.
+\item \emph{Allocate certified reviewer sets.} Do not rank reviewers by singleton lower bounds; a
+reviewer with no guaranteed value alone can complete a coalition (Theorem~\ref{thm:submodular}).
+Lineage labels do not certify complementary blind sets (Corollary~\ref{cor:lineages}).
+\item \emph{Keep authority and verification apart.} A proof that work meets the recorded
+specification does not show that the specification is the intended one
+(Proposition~\ref{prop:intent}). Work the principal produces keeps the common blind set of its
+reviewers (Corollary~\ref{cor:blind}).
+\item \emph{Design containment with conditional bounds.} Parallel interfaces add their crossing
+ceilings; serial stages multiply only conditional ceilings (Theorems~\ref{thm:modularity}
+and~\ref{thm:serial}). A benchmark pass rate is not a crossing bound for routed faults.
+\item \emph{Let workers idle.} With optional participation, adding workers cannot lower the best
+achievable throughput (Proposition~\ref{prop:usl}). A falling curve indicates a participation policy
+to change.
+\item \emph{Test substitutions per resource and per period.} A mechanization that lowers total demand
+can still overload one period or one resource (Proposition~\ref{prop:lifecycle},
+Example~\ref{ex:lifecycle}).
+\item \emph{State queueing assumptions.} Queueing formulas need arrival and service assumptions that
+the error-law invariance does not supply. Do not use severity as a holding-cost rate without a reason
+(Proposition~\ref{prop:queue}).
+\item \emph{Schedule memory, not memory-time.} Verification jobs with memory footprints need
+cumulative scheduling constraints; aggregate memory-time is a relaxation
+(Proposition~\ref{prop:scheduling}, Example~\ref{ex:memory}).
+\item \emph{Stabilize over admissible configurations, and budget separately.} MaxWeight over
+configurations built from admissible options keeps queues stable when demand lies strictly inside the
+capacity region. It does not enforce a lifetime risk budget (Theorem~\ref{thm:maxweight}).
+\end{enumerate}
+
+\section{Related work}\label{sec:related}
+Allocating inspection effort is an old problem. Lindsay and Bishop place screening inspections on a
+serial production line by dynamic programming~\cite{lindsay64}, and surveys cover the
+field~\cite{raz86,mandroli06}. Testing effort has been allocated across software modules under a
+reliability-growth law~\cite{ohtera90}. These models assume a known fault law; our admissible sets use
+only bounds. Chance-constrained programming requires a constraint to hold with a stated probability
+under the decision taken~\cite{charnes59}. Our admissibility is a worst-case premise, and it must hold
+under the chosen concurrency and review arrangement.
+
+For AI systems, learning to defer routes cases from a model to a human~\cite{madras18,mozannar20}.
+Some of this work adds an explicit limit on human workload~\cite{okati21,alves24} or congestion at the
+human queue~\cite{lykouris24}. Lin and Zhang model agent-generated code changes that may pass an AI
+reviewer before a human maintainer approves them, as a queueing network with three resource
+pools~\cite{linzhang26}. They plan with a fluid linear program, use its dual prices, show that the
+review policy changes at staffing breakpoints and cannot be produced by one fixed ranking, count at
+most three split categories at an extreme point, as in Proposition~\ref{prop:split}, and prove a policy
+asymptotically optimal. Their model is the closest to Sections~\ref{sec:backbone}
+and~\ref{sec:scheduling}. It takes the false-acceptance and false-rejection rates as parameters. We first filter
+options by admissibility from bounds; when the remaining program data are law-independent or replaced
+by common uniform bounds, the allocation then does not depend on the error law
+(Theorem~\ref{thm:invariance}). We also add the review-set and containment results. AI control spends a
+limited human audit budget against a possibly adversarial model~\cite{greenblatt23,griffin24}, and
+language-model routers trade cost against quality for each query~\cite{chen23,ong24}. Drift-plus-penalty
+methods extend MaxWeight with time-average constraints~\cite{neely10}; they are a possible route to
+the lifetime budget that Theorem~\ref{thm:maxweight} does not enforce.
+
+Requiring feasibility under the decision actually chosen is itself standard: stochastic and robust
+optimization with decision-dependent uncertainty evaluate constraints against the uncertainty that the
+chosen decision induces~\cite{goel06,nohadani18}. What we add is narrow: the application of that
+requirement to gated work, where the uncertain premise is admissibility under the chosen concurrency
+and review arrangement; the conditions under which the classical tools cited above then apply; and
+counterexamples where they fail.
+
+\section{Limitations}\label{sec:limits}
+The proofs are by hand; no proof assistant checked them. The finite checks of
+Section~\ref{sec:repro} test instances and counterexamples; they do not replace the proofs. The fluid
+model is a model: executable schedules need the constraints of Proposition~\ref{prop:scheduling}
+and Theorem~\ref{thm:maxweight}. Real workloads are not shown to satisfy any queueing or arrival
+assumption used here. Admissibility enters as an input per class under a stated reading; it must hold
+under the chosen concurrency and routing, and this paper does not measure it. The results do not
+estimate any capacity, price, coverage, or severity for a real system.
+
+Two directions are not addressed here. The first is measurement design: how to allocate a limited audit budget
+to estimate the bounds that the scheduler relies on. Information lower bounds for adaptive sampling are
+a starting point~\cite{kaufmann}. The second is feedback: a policy decision changes constraints, and
+the allocation changes demand in turn. Contraction arguments give a unique equilibrium and a Lipschitz
+sensitivity when they apply~\cite{banach}, but LP-based allocations can jump at ties, so continuity
+must be established, not assumed. The principal as an executor is treated here only through
+Corollary~\ref{cor:blind} and Proposition~\ref{prop:intent}; a model of intent elicitation is needed
+before more can be said. This is a preprint. It has not been peer reviewed. The prior-art search was targeted, not
+systematic.
+
+\section{Reproducibility}\label{sec:repro}
+The script \texttt{simulate\_allocation.py} reproduces every numerical claim and counterexample in
+this paper with exact rational arithmetic and the Python standard library. It prints PASS or FAIL for
+each claim and exits with a nonzero status on any failure. It also checks random instances: Hall's
+condition against maximum flow, the price certificate against direct feasibility, strong duality and
+the reduced-cost test on a small LP, the fractional and integer knapsack guarantees, submodularity and
+the greedy guarantee for fixed-law review value, the modularity bound by exact enumeration on a small
+graph, and the MaxWeight drift inequality. Four negative controls assert false claims (the shared
+gate, the integer ratio rule, the degenerate dual, and serial stages from marginals) and must be
+rejected.
+
+\begin{center}\small
+\begin{tabular}{p{0.66\textwidth}r}
+\toprule Quantity & Value\\\midrule
+Remark~\ref{rem:bottleneck}: principal-review ceiling, $f=0.1$ / $f=0.05$ & 240 / 480\\
+Example~\ref{ex:coordinatewise}: $\min_a p^\top D_a$ versus $p^\top\kappa$ at $p=(1,1)$ & 2 versus 1.2\\
+Example~\ref{ex:degenerate}: reduced cost at $y=p=1$; old and new optimum & $-1$; 0 and 0\\
+Proposition~\ref{prop:knapsack}(c): undiscarded greedy / optimum & 1 / 3\\
+Theorem~\ref{thm:submodular}: robust values of $\varnothing,\{1\},\{2\},\{1,2\}$ & 0, 0, 0, 1\\
+Proposition~\ref{prop:usl}: $n^\ast$ for $\alpha=0.1$, $\beta=0.01$ & $\sqrt{90}\approx9.49$\\
+Example~\ref{ex:lifecycle}: total demand old / new; period-one demand & 20 / 15; 15 $>$ 10\\
+Example~\ref{ex:memory}: aggregate memory-time / capacity & 9 / 10\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{Code and data availability}
+The standard-library Python script \texttt{simulate\_allocation.py} reproduces every numerical claim of
+Section~\ref{sec:repro}. It is at \url{https://github.com/ivmat/gated-computation-sim}.
+This paper is archived on Zenodo, DOI~\href{https://doi.org/10.5281/zenodo.23449199}{10.5281/zenodo.23449199}.
+
+\begin{thebibliography}{99}
+\bibitem{p1} I. Matija\v{s}evi\'c. A Fault-Tolerance Threshold for Gated Agentic Computation.
+2026. \url{https://doi.org/10.5281/zenodo.20820968}.
+\bibitem{p2} I. Matija\v{s}evi\'c. Generated Gates Inherit Their Generator's Blind Spots.
+2026. \url{https://doi.org/10.5281/zenodo.20837102}.
+\bibitem{p3} I. Matija\v{s}evi\'c. Escape, Cost, and Correlation at the Verification Floor of
+Gated Agentic Computation. 2026. \url{https://doi.org/10.5281/zenodo.21456783}.
+\bibitem{p4} I. Matija\v{s}evi\'c. Progressive Semantic Mechanization. 2026.
+\url{https://doi.org/10.5281/zenodo.23119225}.
+\bibitem{p5} I. Matija\v{s}evi\'c. Beyond Constant Fault Rates: Reliability Bounds for Gated Computation and Semantic Mechanization. 
+Preprint, 2026. \url{https://doi.org/10.5281/zenodo.23293740}.
+\bibitem{p6} I. Matija\v{s}evi\'c. Risk-Gated Mechanization: Severity, Verifiability, and Decisions Invariant to the Executor's Error Law. 
+Preprint, 2026. \url{https://doi.org/10.5281/zenodo.23324667}.
+\bibitem{aggoun93} A. Aggoun and N. Beldiceanu. Extending CHIP in order to solve complex scheduling
+and placement problems. \emph{Mathematical and Computer Modelling} 17(7):57--73, 1993.
+\bibitem{akgul84} M. Akg\"ul. A note on shadow prices in linear programming. \emph{Journal of the
+Operational Research Society} 35(5):425--431, 1984.
+\bibitem{alves24} J. V. Alves, D. Leit\~ao, S. Jesus, M. O. P. Sampaio, J. Li\'ebana, P. Saleiro,
+M. A. T. Figueiredo, and P. Bizarro. Cost-sensitive learning to defer to multiple experts with workload
+constraints. 2024. \url{https://arxiv.org/abs/2403.06906}.
+\bibitem{amdahl67} G. M. Amdahl. Validity of the single processor approach to achieving large scale
+computing capabilities. \emph{AFIPS Spring Joint Computer Conference}, pp.~483--485, 1967.
+\bibitem{aucamp82} D. C. Aucamp and D. I. Steinberg. The computation of shadow prices in linear
+programming. \emph{Journal of the Operational Research Society} 33(6):557--565, 1982.
+\bibitem{bailey54} N. T. J. Bailey. On queueing processes with bulk service. \emph{Journal of the
+Royal Statistical Society, Series B} 16(1):80--87, 1954.
+\bibitem{banach} S. Banach. Sur les op\'erations dans les ensembles abstraits et leur application aux
+\'equations int\'egrales. \emph{Fundamenta Mathematicae} 3:133--181, 1922.
+\bibitem{baptiste01} P. Baptiste, C. Le~Pape, and W. Nuijten. \emph{Constraint-Based Scheduling}.
+Kluwer, 2001.
+\bibitem{bental99} A. Ben-Tal and A. Nemirovski. Robust solutions of uncertain linear programs.
+\emph{Operations Research Letters} 25(1):1--13, 1999.
+\bibitem{bertsimas} D. Bertsimas and J. N. Tsitsiklis. \emph{Introduction to Linear Optimization}.
+Athena Scientific, 1997.
+\bibitem{boehm84} B. W. Boehm. Verifying and validating software requirements and design
+specifications. \emph{IEEE Software} 1(1):75--88, 1984.
+\bibitem{boyd} S. Boyd and L. Vandenberghe. \emph{Convex Optimization}. Cambridge University Press,
+2004.
+\bibitem{buyukkoc85} C. Buyukkoc, P. Varaiya, and J. Walrand. The $c\mu$ rule revisited. \emph{Advances
+in Applied Probability} 17(1):237--238, 1985.
+\bibitem{buzen76} J. P. Buzen. Fundamental operational laws of computer system performance.
+\emph{Acta Informatica} 7(2):167--182, 1976.
+\bibitem{charnes59} A. Charnes and W. W. Cooper. Chance-constrained programming. \emph{Management
+Science} 6(1):73--79, 1959.
+\bibitem{chen23} L. Chen, M. Zaharia, and J. Zou. FrugalGPT: how to use large language models while
+reducing cost and improving performance. 2023. \url{https://arxiv.org/abs/2305.05176}.
+\bibitem{coxsmith} D. R. Cox and W. L. Smith. \emph{Queues}. Methuen, 1961.
+\bibitem{dantzig} G. B. Dantzig. Discrete-variable extremum problems. \emph{Operations Research}
+5(2):266--288, 1957.
+\bibitem{denning} P. J. Denning and J. P. Buzen. The operational analysis of queueing network models.
+\emph{ACM Computing Surveys} 10(3):225--261, 1978.
+\bibitem{eckhardt85} D. E. Eckhardt and L. D. Lee. A theoretical basis for the analysis of multiversion
+software subject to coincident errors. \emph{IEEE Transactions on Software Engineering}
+SE-11(12):1511--1517, 1985.
+\bibitem{esary63} J. D. Esary and F. Proschan. Coherent structures of non-identical components.
+\emph{Technometrics} 5(2):191--209, 1963.
+\bibitem{farkas} J. Farkas. Theorie der einfachen Ungleichungen. \emph{Journal f\"ur die reine und
+angewandte Mathematik} 124:1--27, 1902.
+\bibitem{feige98} U. Feige. A threshold of $\ln n$ for approximating set cover. \emph{Journal of the
+ACM} 45(4):634--652, 1998.
+\bibitem{fordfulkerson} L. R. Ford and D. R. Fulkerson. Maximal flow through a network.
+\emph{Canadian Journal of Mathematics} 8:399--404, 1956.
+\bibitem{goel06} V. Goel and I. E. Grossmann. A class of stochastic programs with decision dependent
+uncertainty. \emph{Mathematical Programming} 108:355--394, 2006.
+\bibitem{gal86} T. Gal. Shadow prices and sensitivity analysis in linear programming under degeneracy.
+\emph{OR Spektrum} 8(2):59--71, 1986.
+\bibitem{gale57} D. Gale. A theorem on flows in networks. \emph{Pacific Journal of Mathematics}
+7(2):1073--1082, 1957.
+\bibitem{georgiadis06} L. Georgiadis, M. J. Neely, and L. Tassiulas. Resource allocation and
+cross-layer control in wireless networks. \emph{Foundations and Trends in Networking} 1(1):1--144,
+2006.
+\bibitem{griffin24} C. Griffin, L. Thomson, B. Shlegeris, and A. Abate. Games for AI control: models of
+safety evaluations of AI deployment protocols. 2024. \url{https://arxiv.org/abs/2409.07985}.
+\bibitem{greenblatt23} R. Greenblatt, B. Shlegeris, K. Sachan, and F. Roger. AI control: improving
+safety despite intentional subversion. 2023. \url{https://arxiv.org/abs/2312.06942}.
+\bibitem{gunther} N. J. Gunther. \emph{Guerrilla Capacity Planning}. Springer, 2007.
+\bibitem{gunther08} N. J. Gunther. A general theory of computational scalability based on rational
+functions. 2008. \url{https://arxiv.org/abs/0808.1431}.
+\bibitem{hall} P. Hall. On representatives of subsets. \emph{Journal of the London Mathematical
+Society} 10:26--30, 1935.
+\bibitem{harchol} M. Harchol-Balter. \emph{Performance Modeling and Design of Computer Systems:
+Queueing Theory in Action}. Cambridge University Press, 2013.
+\bibitem{hiller01} M. Hiller, A. Jhumka, and N. Suri. An approach for analysing the propagation of
+data errors in software. \emph{Proceedings of the International Conference on Dependable Systems and
+Networks}, pp.~161--170, 2001.
+\bibitem{hiller04} M. Hiller, A. Jhumka, and N. Suri. EPIC: profiling the propagation and effect of
+data errors in software. \emph{IEEE Transactions on Computers} 53(5):512--530, 2004.
+\bibitem{iri71} M. Iri. On an extension of the maximum-flow minimum-cut theorem to multicommodity
+flows. \emph{Journal of the Operations Research Society of Japan} 13(3):129--135, 1971.
+\bibitem{jansen97} B. Jansen, J. J. de~Jong, C. Roos, and T. Terlaky. Sensitivity analysis in linear
+programming: just be careful! \emph{European Journal of Operational Research} 101(1):15--28, 1997.
+\bibitem{kaufmann} E. Kaufmann, O. Capp\'e, and A. Garivier. On the complexity of best-arm
+identification in multi-armed bandit models. \emph{Journal of Machine Learning Research} 17:1--42,
+2016.
+\bibitem{kellerer} H. Kellerer, U. Pferschy, and D. Pisinger. \emph{Knapsack Problems}. Springer,
+2004.
+\bibitem{kingman61} J. F. C. Kingman. The single server queue in heavy traffic. \emph{Mathematical
+Proceedings of the Cambridge Philosophical Society} 57(4):902--904, 1961.
+\bibitem{kingman62} J. F. C. Kingman. On queues in heavy traffic. \emph{Journal of the Royal
+Statistical Society, Series B} 24(2):383--392, 1962.
+\bibitem{koopmans49} T. C. Koopmans. Identification problems in economic model construction.
+\emph{Econometrica} 17(2):125--144, 1949.
+\bibitem{krause08} A. Krause, H. B. McMahan, C. Guestrin, and A. Gupta. Robust submodular observation
+selection. \emph{Journal of Machine Learning Research} 9:2761--2801, 2008.
+\bibitem{lala94} J. H. Lala and R. E. Harper. Architectural principles for safety-critical real-time
+applications. \emph{Proceedings of the IEEE} 82(1):25--40, 1994.
+\bibitem{lecam73} L. Le~Cam. Convergence of estimates under dimensionality restrictions. \emph{Annals
+of Statistics} 1(1):38--53, 1973.
+\bibitem{lindsay64} G. F. Lindsay and A. B. Bishop. Allocation of screening inspection effort---a
+dynamic-programming approach. \emph{Management Science} 10(2):342--352, 1964.
+\bibitem{linzhang26} R. Lin and J. Zhang. When should AI review precede human approval of
+agent-generated code? 2026, version~2; version~1 was titled ``When to screen, when to bypass:
+LLM-judges in resource-scarce AI-human workflow''. \url{https://arxiv.org/abs/2603.13870}.
+\bibitem{littlewood89} B. Littlewood and D. R. Miller. Conceptual modeling of coincident failures in
+multiversion software. \emph{IEEE Transactions on Software Engineering} 15(12):1596--1614, 1989.
+\bibitem{lopa} Center for Chemical Process Safety. \emph{Layer of Protection Analysis: Simplified
+Process Risk Assessment}. American Institute of Chemical Engineers, 2001.
+\bibitem{lst90} J. K. Lenstra, D. B. Shmoys, and \'E. Tardos. Approximation algorithms for scheduling
+unrelated parallel machines. \emph{Mathematical Programming} 46:259--271, 1990.
+\bibitem{luss82} H. Luss. Operations research and capacity expansion problems: a survey.
+\emph{Operations Research} 30(5):907--947, 1982.
+\bibitem{lykouris24} T. Lykouris and W. Weng. Learning to defer in congested systems: the AI-human
+interplay. 2024. \url{https://arxiv.org/abs/2402.12237}.
+\bibitem{madras18} D. Madras, T. Pitassi, and R. Zemel. Predict responsibly: improving fairness and
+accuracy by learning to defer. 2017. \url{https://arxiv.org/abs/1711.06664}.
+\bibitem{mandroli06} S. S. Mandroli, A. K. Shrivastava, and Y. Ding. A survey of inspection strategy
+and sensor distribution studies in discrete-part manufacturing processes. \emph{IIE Transactions}
+38(4):309--328, 2006.
+\bibitem{mills56} H. D. Mills. Marginal values of matrix games and linear programs. In H. W. Kuhn and
+A. W. Tucker (eds.), \emph{Linear Inequalities and Related Systems}, Annals of Mathematics Studies 38,
+pp.~183--194. Princeton University Press, 1956.
+\bibitem{mozannar20} H. Mozannar and D. Sontag. Consistent estimators for learning to defer to an
+expert. 2020. \url{https://arxiv.org/abs/2006.01862}.
+\bibitem{neely10} M. J. Neely. \emph{Stochastic Network Optimization with Application to
+Communication and Queueing Systems}. Morgan \& Claypool, 2010.
+\bibitem{nohadani18} O. Nohadani and K. Sharma. Optimization under decision-dependent uncertainty.
+\emph{SIAM Journal on Optimization} 28(2):1773--1795, 2018.
+\bibitem{nemhauser} G. L. Nemhauser, L. A. Wolsey, and M. L. Fisher. An analysis of approximations for
+maximizing submodular set functions---I. \emph{Mathematical Programming} 14(1):265--294, 1978.
+\bibitem{neuts67} M. F. Neuts. A general class of bulk queues with Poisson input. \emph{Annals of
+Mathematical Statistics} 38(3):759--770, 1967.
+\bibitem{ohtera90} H. Ohtera and S. Yamada. Optimal allocation and control problems for
+software-testing resources. \emph{IEEE Transactions on Reliability} 39(2):171--176, 1990.
+\bibitem{okati21} N. Okati, A. De, and M. Gomez-Rodriguez. Differentiable learning under triage.
+2021. \url{https://arxiv.org/abs/2103.08902}.
+\bibitem{onaga71} K. Onaga and O. Kakusho. On feasibility conditions of multicommodity flows in
+networks. \emph{IEEE Transactions on Circuit Theory} 18(4):425--429, 1971.
+\bibitem{ong24} I. Ong, A. Almahairi, V. Wu, W.-L. Chiang, T. Wu, J. E. Gonzalez, M. W. Kadous, and
+I. Stoica. RouteLLM: learning to route LLMs with preference data. 2024.
+\url{https://arxiv.org/abs/2406.18665}.
+\bibitem{orlin18} J. B. Orlin, A. S. Schulz, and R. Udwani. Robust monotone submodular function
+maximization. \emph{Mathematical Programming} 172(1--2):505--537, 2018.
+\bibitem{pritsker69} A. A. B. Pritsker, L. J. Watters, and P. M. Wolfe. Multiproject scheduling with
+limited resources: a zero-one programming approach. \emph{Management Science} 16(1):93--108, 1969.
+\bibitem{raz86} T. Raz. A survey of models for allocating inspection effort in multistage production
+systems. \emph{Journal of Quality Technology} 18(4):239--247, 1986.
+\bibitem{soyster73} A. L. Soyster. Convex programming with set-inclusive constraints and applications
+to inexact linear programming. \emph{Operations Research} 21(5):1154--1157, 1973.
+\bibitem{tassiulas} L. Tassiulas and A. Ephremides. Stability properties of constrained queueing
+systems and scheduling policies for maximum throughput in multihop radio networks. \emph{IEEE
+Transactions on Automatic Control} 37(12):1936--1948, 1992.
+\bibitem{williams63} A. C. Williams. Marginal values in linear programming. \emph{Journal of the
+Society for Industrial and Applied Mathematics} 11(1):82--94, 1963.
+\end{thebibliography}
+\end{document}
