@@ -5,10 +5,8 @@
 #
 # Checks:
 #   (a) syntax floor    - `python3 -m py_compile` every tracked .py file
-#   (b) test suite       - not present in this repo (no tests/ dir, no pytest
-#                           config) as of when this gate was added. If a fast
-#                           (<~60s) pytest suite is added later, wire it in
-#                           here and run it before the other checks.
+#   (b) finite-model checks - papers 5–7, including their negative controls;
+#                           stdlib only. Papers 1, 3 and 4 run separately.
 #   (c) doc links         - every relative markdown link resolves to a real
 #                           file in the repo
 #   (d) secret scan       - flag key/token-shaped strings in tracked files
@@ -51,8 +49,47 @@ else
 fi
 
 # --- (b) test suite -------------------------------------------------------
-# Intentionally not run: no tests/ directory or pytest entrypoint exists in
-# this repo. See header comment.
+echo "-- finite-model checks (papers 5–7) --"
+for script in simulate_fault_process.py simulate_risk_mechanization.py simulate_allocation.py; do
+  if ! python3 -B "$script"; then
+    echo "NUMERICAL CHECK FAILED: $script"
+    fail=1
+  fi
+done
+
+# A negative control must emit only its rejection line and exit 1. A crash,
+# missing script or invalid argument is not evidence that the control worked.
+negative() {
+  script="$1"
+  control="$2"
+  if output=$(python3 -B "$script" --negative-control "$control" 2>&1); then
+    rc=0
+  else
+    rc=$?
+  fi
+  case "$output" in
+    *Traceback*) expected=0 ;;
+    "REJECTED false $control claim"*) expected=1 ;;
+    *) expected=0 ;;
+  esac
+  lines=$(printf '%s\n' "$output" | wc -l)
+  if [ "$rc" -eq 1 ] && [ "$expected" -eq 1 ] && [ "$lines" -eq 1 ]; then
+    echo "PASS negative control: $script $control"
+  else
+    echo "NEGATIVE CONTROL FAILED: $script $control (exit $rc)"
+    printf '%s\n' "$output"
+    fail=1
+  fi
+}
+for control in independence retry validation multiplier; do
+  negative simulate_fault_process.py "$control"
+done
+for control in linear-sees-spread universal-reviewer binomial-cx-minimal-always; do
+  negative simulate_risk_mechanization.py "$control"
+done
+for control in shared-gate greedy-optimal-integer degenerate-dual serial-from-marginals; do
+  negative simulate_allocation.py "$control"
+done
 
 # --- (c) markdown relative links resolve ----------------------------------
 echo "-- markdown link check --"

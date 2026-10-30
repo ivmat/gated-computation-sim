@@ -1,6 +1,8 @@
 #!/bin/sh
-# Pre-push gate: run gates/check.sh against the tip of every ref being
-# pushed, in a throwaway detached worktree, and refuse the push on failure.
+# Pre-push gate: run gates/check.sh once per distinct commit being pushed,
+# in a throwaway detached worktree, and refuse the push on failure.
+# Branches and annotated tags that name the same commit share one result
+# within this invocation only; a later push runs the checks again.
 #
 # Installed by gates/install_hooks.sh as .git/hooks/pre-push (this file is
 # also committed to the repo so it's auditable and can be reinstalled).
@@ -23,6 +25,8 @@ cd "$repo_root"
 
 hooks_dir=$(git rev-parse --git-path hooks)
 overall_fail=0
+checked_ok=""
+checked_bad=""
 
 check_sha() {
   sha="$1"
@@ -63,7 +67,23 @@ else
       # Deleted ref: nothing pushed, nothing to check.
       continue
     fi
-    check_sha "$local_sha" || overall_fail=1
+    if ! commit_sha=$(git rev-parse --verify --end-of-options "${local_sha}^{commit}" 2>/dev/null); then
+      echo "checks: FAILED to resolve pushed commit for $local_ref" >&2
+      overall_fail=1
+      continue
+    fi
+    case " $checked_ok " in
+      *" $commit_sha "*) echo "checks: GREEN (already checked) @ $commit_sha for $local_ref"; continue ;;
+    esac
+    case " $checked_bad " in
+      *" $commit_sha "*) echo "checks: FAILED (already checked) @ $commit_sha for $local_ref" >&2; overall_fail=1; continue ;;
+    esac
+    if check_sha "$commit_sha"; then
+      checked_ok="$checked_ok $commit_sha"
+    else
+      checked_bad="$checked_bad $commit_sha"
+      overall_fail=1
+    fi
   done <"$stdin_copy"
 
   if [ "$overall_fail" -eq 0 ] && [ -x "$hooks_dir/pre-push.pre-guard" ]; then

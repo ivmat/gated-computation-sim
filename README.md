@@ -1,348 +1,71 @@
 # Gated Agentic Computation — verification-floor papers
 
-Seven linked papers on the reliability *floor* of gated (verified) agentic systems, with
-self-contained simulations and finite-model checks that reproduce every numerical claim.
+Seven linked preprints on the reliability limits of gated computation, with
+simulations and finite-model checks.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20820968.svg)](https://doi.org/10.5281/zenodo.20820968)
 
+**Scope:** these are unreviewed mathematical models, not measurements of deployed
+agents. Simulations check finite instances and numerical results; they do not
+replace proofs. Paper 2's floor equality depends on an achievability assumption;
+rely on its lower-bound direction. Paper 4's parameters are chosen, not measured.
+
 ## The seven papers
 
-**1 — A Fault-Tolerance Threshold for Gated Agentic Computation** *(Reliable Long-Horizon Work from
-Unreliable Executors)* · **published**, DOI [10.5281/zenodo.20820968](https://doi.org/10.5281/zenodo.20820968)
-· [`paper.pdf`](paper.pdf) · [`paper.tex`](paper.tex) · reproduce with [`simulate.py`](simulate.py).
-The **statistical floor**: verifying checkpointed segments with majority-vote gate stacks gives
-`O(log T)`-overhead reliable work above a threshold, but a shared blind spot — a **stealth mass** `λ_st`
-of faults the whole gate family passes — caps the reliable horizon at `H_raw/λ_st` regardless of gate
-count. The binding constraint is verification **diversity**, not model capability. *(Documented in
-detail below.)*
+| Paper | Question | Read | Reproduce |
+|---|---|---|---|
+| 1. A Fault-Tolerance Threshold for Gated Agentic Computation | How far can verification extend reliable work? | [PDF](paper.pdf) · [source](paper.tex) | `python simulate.py` |
+| 2. Generated Gates Inherit Their Generator's Blind Spots | What limits verification within one model family? | [PDF](paper_gg.pdf) · [source](paper_gg.tex) | Simulation in the paper's appendix |
+| 3. Escape, Cost, and Correlation at the Verification Floor | What does the floor imply for size, cost and shared provenance? | [PDF](paper_floor.pdf) · [source](paper_floor.tex) | `python simulate_floor.py` |
+| 4. Progressive Semantic Mechanization | Which work can become a deterministic mechanism? | [PDF](paper_psm.pdf) · [source](paper_psm.tex) | `python simulate_psm.py` |
+| 5. Beyond Constant Fault Rates | Which conclusions survive changing fault processes? | [PDF](paper_fault_process.pdf) · [source](paper_fault_process.tex) | `python simulate_fault_process.py` |
+| 6. Risk-Gated Mechanization | How do severity and evidence constrain a decision? | [PDF](paper_risk_mechanization.pdf) · [source](paper_risk_mechanization.tex) | `python simulate_risk_mechanization.py` |
+| 7. Allocation and Coordination under Scarce Resources | How should admissible work share limited resources? | [PDF](paper_allocation.pdf) · [source](paper_allocation.tex) | `python simulate_allocation.py` |
 
-**2 — Generated Gates Inherit Their Generator's Blind Spots** *(A Diversity Floor for Self-Generated
-Verification)* · **published** (2026-06-25), DOI [10.5281/zenodo.20837102](https://doi.org/10.5281/zenodo.20837102)
-· [`paper_gg.pdf`](paper_gg.pdf) · [`paper_gg.tex`](paper_gg.tex) (simulation in its appendix). The
-**mechanism**: gates a model family generates *inherit that family's blind spots* (Σ_F), so a system
-generating its own verifiers has an escape floor `λ_F` that, under the paper's model, cannot be lowered
-from inside — it falls only when an *exogenous* model family or a *reality-grounded* gate (one deciding
-by ground truth) is imported.
-
-**3 — Escape, Cost, and Correlation at the Verification Floor of Gated Agentic Computation** ·
-**published**, DOI [10.5281/zenodo.21456783](https://doi.org/10.5281/zenodo.21456783) ·
-[`paper_floor.pdf`](paper_floor.pdf) · [`paper_floor.tex`](paper_floor.tex) · reproduce with
-[`simulate_floor.py`](simulate_floor.py). Takes the floor of (1) and (2) as given and
-draws three **consequences** — a size-axis escape identity, a gating-vs-scaling cost comparison
-(`O(log 1/δ)` vs `O((1/δ)^{1/p})`), and a correlated-escape bound under shared provenance — plus an
-**assurance framing** (an ordinal evidence ladder and a typed-evidence non-collapse rule). The
-mathematics is classical and attributed to its sources; the contribution is the synthesis.
-
-**4 — Progressive Semantic Mechanization** *(Compiling Intellectual Work into Deterministic
-Programs with Typed Semantic Holes)* · **published**, DOI [10.5281/zenodo.23119225](https://doi.org/10.5281/zenodo.23119225) ·
-[`paper_psm.pdf`](paper_psm.pdf) · [`paper_psm.tex`](paper_psm.tex) · reproduce with
-[`simulate_psm.py`](simulate_psm.py). Asks which work should remain an executor call. Work is
-a program with typed **semantic holes**, open or closed separately for decision, production and
-acceptance. Routing a share `c` of production to deterministic mechanisms gives the first-order
-ceiling `H_raw/((1-c)λ_st + c·λ_pc)`, which rises only where premature-closure escape `λ_pc` is
-below `λ_st`. Pointwise same-family promotion evidence cannot certify a fault mass below the
-*twin mass* except with the allowed error probability. Further results: a validation-inclusive
-break-even, a composition bound, and two scale comparisons. The promotion plan is a design that
-has not run, and the simulation's parameters are chosen.
-
-**5 — Beyond Constant Fault Rates** *(Reliability Bounds for Gated Computation and Semantic
-Mechanization)* · **published**, DOI [10.5281/zenodo.23293740](https://doi.org/10.5281/zenodo.23293740) ·
-[`paper_fault_process.pdf`](paper_fault_process.pdf) ·
-[`paper_fault_process.tex`](paper_fault_process.tex) · reproduce with
-[`simulate_fault_process.py`](simulate_fault_process.py), which reads
-[`fault_process_assessment.json`](fault_process_assessment.json). Papers 1–4 rest on different
-mixes of four assumptions: a constant fault rate, independent segments, fresh retries, and a
-fixed fault distribution. This paper separates them and asks which conclusions survive
-without them. A conditional survival identity replaces the independent-segment product.
-Logarithmic verification overhead survives under uniform conditional bounds on gate accuracy
-and progress, with no Poisson arrival model. A verification floor gives a finite horizon
-only when its exposure persists along correct prefixes. For the ideal gated survival curve,
-the `1/σ` ceiling multiplier of paper 1 is exact in the model where a
-latent rate is drawn once per run; it is an upper bound under an increasing failure rate and
-a lower bound under a decreasing one. Uneven difficulty, latent regimes, persistent retry
-defects and drifting inputs give counterexamples to
-predictions from one average rate. The paper classifies all 25 named results of papers 1–4
-as arrival-free, conditionally preserved, or formulas that need replacement outside a
-stationary model. The checks are finite-model checks, not measurements of deployed agents.
-
-**6 — Risk-Gated Mechanization** *(Severity, Verifiability, and Decisions Invariant to the
-Executor's Error Law)* · **published**, DOI [10.5281/zenodo.23324667](https://doi.org/10.5281/zenodo.23324667) ·
-[`paper_risk_mechanization.pdf`](paper_risk_mechanization.pdf) ·
-[`paper_risk_mechanization.tex`](paper_risk_mechanization.tex) · reproduce with
-[`simulate_risk_mechanization.py`](simulate_risk_mechanization.py). Adds severity to the
-question of paper 4: when should a step be replaced by a deterministic mechanism? The
-informal rule — mechanize a high-severity step whose correctness can be verified, and do not
-mechanize one whose correctness cannot — overreaches when read literally; the paper gives its
-exact conditions. Severity sets a risk budget. An option is admissible when its worst-case
-loss over all models compatible with the evidence fits the budget. Mechanization is mandatory
-when closure is admissible and no other option is, and forbidden when a compatible closed
-model, such as an indistinguishable unsafe twin, exceeds the budget. The deciding bounds hold
-for every error law, dependence structure and mixture of executors that satisfies them.
-Further results: worst-case regret that grows linearly in severity when indistinguishable
-worlds disagree, an anytime budget guarantee under adaptive routing, a convex-order comparison of
-persistent and fresh faults, and an exact dominance order for reviewers by blind-set
-containment. With linear loss and constant severity the results reduce to the criterion of
-paper 4. The decision-theoretic and probabilistic tools are classical; the contribution is
-their application to the mechanization decision. These are mathematical models, not
-measurements.
-
-**7 — Allocation and Coordination under Scarce Resources** *(Admissible Routing, Prices,
-Review Sets, and Containment for Gated Work)* · **published**, DOI [10.5281/zenodo.23449199](https://doi.org/10.5281/zenodo.23449199) ·
-[`paper_allocation.pdf`](paper_allocation.pdf) · [`paper_allocation.tex`](paper_allocation.tex)
-· reproduce with [`simulate_allocation.py`](simulate_allocation.py). The earlier papers decide
-which executor, gate stack or mechanism is admissible for one step. This paper asks how scarce
-capacity — a principal's attention, verification memory, external review, rate-limited seats,
-calendar time — is shared when many classes of work compete for it. It allocates only among
-options whose safety premises stay valid under the allocation chosen. In a fluid linear model
-the feasible and optimal allocations do not depend on the executor's error law when bounds
-decide admissibility. Nonnegative resource prices certify feasibility exactly, and a new
-option strictly lowers the optimum exactly when no old optimal dual prices it out. Choosing
-optional reviews is a knapsack. Review value is submodular under a fixed fault law; worst-case
-review value need not be, and a reviewer can have zero guaranteed value alone and positive
-guaranteed value in a coalition. Interface contracts
-bound severity: parallel escape routes add, and serial stages multiply only through
-conditional ceilings. Many results are classical; the paper states when they apply to gated
-work. These are mathematical models, not measurements.
-
-**How they fit.** (1) derives, under its model, a floor set by the verification stack's shared blind
-spot; (2) argues that, under the paper's model, it cannot be lowered from inside a single model family,
-and what lowers it (imported diversity, reality-grounding); (3) works out what the floor costs, how it
-propagates across output size and shared provenance, and how to grade assurance honestly against it; (4) asks which work can leave the
-executor for deterministic mechanisms, and what evidence that closure needs at the floor;
-(5) separates the fault-process assumptions behind (1)–(4) and shows which results survive
-without them; (6) adds severity to the mechanization decision of (4) and states when
-mechanization is mandatory or forbidden; (7) shares scarce resources (attention, review,
-compute, time) among the options that (1)–(6) admit.
-
-**Scope of the claims.** These are unreviewed preprints. Their results are statements about the stated
-models, reproduced here by the included simulations and checks; none has been validated on a deployed agent
-system. Paper 2's headline equality (floor = blind-set mass) relies on an achievability assumption that
-deserves independent review; its lower-bound direction — the floor is *at least* the blind-set mass —
-is the claim to rely on. Paper 4 estimates none of its modeled quantities from data. Papers 5–7 are likewise
-mathematical models, not measurements; their scripts check finite instances and
-counterexamples and do not replace the proofs.
-
----
-
-The remainder of this README documents **paper 1** in detail — the repository's primary reproduction
-target (`simulate.py`).
-
-## Abstract
-
-> Autonomous agents (whether language-model based, human, or hybrid) commit errors at an
-> approximately constant rate per unit of work, so the probability that a long task completes
-> without fault decays *exponentially* in its length. The task length at which an agent succeeds
-> half the time — its **horizon** — has become a leading proposed metric of agentic capability,
-> and empirically it has grown exponentially over recent years. We ask a different question: given
-> a *fixed* agent, how far can **verification** extend its reliable horizon? We model long-horizon
-> work as a sequence of checkpointed segments, each verified by a stack of imperfect gates combined
-> by majority vote, and prove a fault-tolerance threshold analogous to von Neumann's
-> reliable-computation-from-unreliable-components result and to the quantum threshold theorem.
-> **(i)** When gates are conditionally independent and better than chance, a stack of *O*(log *T*)
-> gates per checkpoint achieves any target reliability over horizon *T* at multiplicative overhead
-> *O*(log *T*). **(ii)** When gates share a blind spot — a stealth mass λ&#8202;<sub>st</sub> of
-> faults invisible to the *entire* gate family — the reliable horizon is capped at
-> *H*<sub>gated</sub> ≈ *H*<sub>raw</sub>&#8202;/&#8202;λ&#8202;<sub>st</sub> regardless of gate
-> count. **(iii)** The cost-optimal checkpoint interval is *s*\* ≈ √(*G*/λ), a direct analogue of
-> the classical Young–Daly checkpoint formula. The binding constraint on autonomous horizon is
-> therefore not raw model capability but the **diversity of the verification stack** — a quantity
-> partly estimable from a system's own telemetry and targeted audits. We further decompose the
-> stealth mass into a diversity-reducible part and a specification-bound irreducible floor.
-
-## Key takeaways
-
-- **Verification beats capability — up to a point.** Errors that compound can also be *intercepted*.
-  If work is split into verifiable segments and each is checked before the agent proceeds, detected
-  faults are repaired locally and never compound. Reliability is then governed by the quality of the
-  *checking*, not directly by the agent.
-
-- **Logarithmic overhead (the threshold, Thm. 1).** As long as each gate is better than chance
-  (false-accept and false-reject rates both `< ½`) and the gates are conditionally independent, only
-  **`m = O(log T)`** gates per checkpoint are needed to hit any reliability target over a horizon
-  `T`. Verification cost grows *logarithmically* in horizon — reliable work of unbounded length is
-  affordable. *(Simulated: the gate budget for fixed 90% end-to-end success grows linearly in
-  `log T`, from `m = 33` at `T = 10` to `m = 131` at `T = 10⁵`.)*
-
-- **The `1/λ_st` ceiling (the blind spot, Thm. 2).** If a fraction **`λ_st`** of bad segments are a
-  *shared blind spot* that the whole gate family passes, then **no amount of gates** helps past
-  `H_gated ≈ H_raw / λ_st`. Stacking more of the *same kind* of gate hits a wall; only
-  **diversity across independent gate families multiplies the ceiling down** (`λ_st⁽¹⁾·λ_st⁽²⁾`).
-  *(Simulated: with equal budget, three diverse families reach `51×` the raw horizon where one deep
-  same-family stack plateaus at `5.2×` — a `~10×` separation from gate composition alone.)*
-
-- **The floor that diversity can't fix.** The stealth mass splits as `λ_st = λ_red + λ_irr`:
-  the lineage-correlated part `λ_red` that diversity removes, and a **specification/intent floor**
-  `λ_irr` (faults that satisfy the checkable contract but violate intent) that traps *every* family.
-  Only reality-grounding — execution against the true environment — lowers `λ_irr`.
-
-- **Compute your checkpoint interval (Thm. 3).** The cost-optimal spacing is **`s* ≈ √(G/λ)`** — the
-  Young–Daly checkpoint formula with verification cost in place of crash-recovery cost. Checkpoint
-  more often when the agent is weak (high `λ`) or gates are cheap (low `G`).
-
-**Bottom line:** the binding constraint on autonomous horizon is the *diversity* of the verification
-stack, not raw model capability — and a large share of that is verification engineering available
-today.
-
-## Notation
-
-The paper defines every symbol inline; this is a quick reference for the ones used above.
-
-<details>
-<summary>Click to expand the symbol table</summary>
-
-| Symbol | Meaning |
-|---|---|
-| `T` | task length to complete, in human-equivalent time (the length verified over; the `T` in `O(log T)`) |
-| `λ` | fault arrival rate (Poisson, per unit work) |
-| `s` | segment length = checkpoint interval |
-| `n = T/s` | number of segments |
-| `p = 1 − e^(−λs)` | probability a segment is bad (≥ 1 fault) |
-| `m` | gates per checkpoint (combined by majority vote) |
-| `g` | per-gate evaluation time / cost |
-| `G = m·g` | per-checkpoint verification time |
-| `α`, `β` | per-gate false-accept / false-reject rate |
-| `ᾱ_m`, `β̄_m` | effective majority-vote rates for a stack of `m` gates |
-| `λ_st` | stealth mass — bad segments the whole gate family passes |
-| `λ_irr`, `λ_red` | irreducible (spec/intent) floor / reducible (lineage-correlated) part |
-| `ρ`, `k` | per-family reducible-stealth probability / number of independent families |
-| `P_adv` | per-round advance probability of the recomputation loop |
-| `ε_seg = p·ᾱ_m / P_adv` | per-segment slip probability |
-| `H_raw`, `H_gated` | the **horizon** metric — task length at which success = ½; ungated (`H_raw = ln 2 / λ`) vs gated |
-| `s* = √(G/λ)` | cost-optimal checkpoint interval |
-
-</details>
-
-## Reproduced results
-
-Running `python simulate.py` regenerates these (all numbers are seed-independent — see *How it
-works*):
-
-![Threshold (log overhead) and the 1/λ_st horizon ceiling](gated_computation_validation_FULL.png)
-
-*(a)* the gate budget for fixed reliability grows **linearly in `log T`** (logarithmic overhead);
-*(b)* the realized horizon multiplier rises toward — and stays under — the **`1/λ_st`** ceiling.
-
-| Result | Paper | Simulation reproduces |
-|---|---|---|
-| Per-segment slip (Lemma 1, `m=5`) | `ε_seg = 0.0446` | `0.0446` predicted vs `0.0428` Monte-Carlo |
-| Threshold gate budget `m` (`T = 10 … 10⁵`) | `33, 57, 81, 105, 131` | exact |
-| Horizon multiplier vs `λ_st` (`0.2 / 0.05 / 0.0125`) | `4.1× / 11.8× / 23×` under `5× / 20× / 80×` | exact |
-| Optimal interval (Thm. 3, `m=5`) | `s* = √(G/λ)`, FOC root `0.39` | numerical argmin `0.39` |
-| Three-arm diversity (equal 21-gate budget) | same-family `5.2×` vs diverse `51×` | exact |
-
-The per-gate-cost sweep (overhead vs horizon for several `g`) is written to
-[`gate_cost_overhead.png`](gate_cost_overhead.png) and matches Table 1 of the paper.
+Read [paper summaries, assumptions and connections](docs/paper-series.md) for the
+full series overview and each paper's DOI.
 
 ## Quick start
 
-```bash
-pip install -r requirements.txt   # numpy, matplotlib
+For paper 1, use Python 3.9 or later. Run from the repository root:
+
+```sh
+pip install -r requirements.txt
 python simulate.py
 ```
 
-This prints the validation table, the Fig. 1a/1b numbers, the optimal-interval and three-arm
-checks, and the gate-cost sweep, and writes two figures:
+This reproduces paper 1 and writes `gated_computation_validation_FULL.png` and
+`gate_cost_overhead.png`. The table above lists the other entry points. Papers 5–7
+use only the Python standard library. Paper 5 also reads
+[`fault_process_assessment.json`](fault_process_assessment.json) and the paper sources.
 
-- `gated_computation_validation_FULL.png` — Fig. 1: (a) threshold / log overhead, (b) `1/λ_st` ceiling
-- `gate_cost_overhead.png` — overhead vs horizon for several per-gate costs `g`
+Run `sh gates/check.sh` for Python syntax, Markdown file links, secret patterns,
+file sizes and the finite-model checks for papers 5–7, including their negative
+controls. Run papers 1, 3 and 4 separately with the commands above; they are outside
+this standard-library gate. Run `python3 -B gates/test_gates.py` to test the gate
+and pre-push hook behavior; those tests also require Git.
 
-Runs in a few seconds; requires Python 3.9+.
+The pre-push hook checks each distinct commit once per push. Branches and tags
+that name the same commit share that result. A later push runs the checks again.
 
-## How it works
+## Paper-one details
 
-Each segment's geometric recomputation loop collapses to its exact marginal slip probability
-`ε_seg = p·ᾱ_m / P_adv` (Lemma 1), and with independent segments end-to-end success is exactly
-`(1 − ε_seg)ⁿ`, where `ᾱ_m, β̄_m` are exact binomial majority-tails. The experiments evaluate these
-closed forms directly, so the reported numbers are **seed-independent**. `validate_against_original()`
-runs the literal slow discrete-event Monte-Carlo (success over `Binomial(n, ε_seg)` trials) and
-checks it matches the closed form within sampling noise before any figure is produced.
+<a id="abstract"></a>
+<a id="key-takeaways"></a>
+<a id="notation"></a>
+<a id="reproduced-results"></a>
+<a id="how-it-works"></a>
 
-The per-gate cost `g` (`G_PER_GATE`) is an **arbitrary illustrative constant**: it enters only
-through the ratio `g/s`, which sets the vertical scale of the overhead via
-`overhead = (1 + (g/s)·m) / P_adv` (the `1/P_adv` factor counts recomputation of rejected segments)
-and changes neither the gate counts nor any theorem.
+The extended explanation is in [Paper 1: model and reproduced results](docs/paper-one.md):
+[abstract](docs/paper-one.md#abstract), [takeaways](docs/paper-one.md#key-takeaways),
+[notation](docs/paper-one.md#notation), [results](docs/paper-one.md#reproduced-results)
+and [method](docs/paper-one.md#how-it-works).
 
 ## Citation
 
-Cite whichever paper you use, via its Zenodo DOI:
-
-```bibtex
-@misc{matijasevic2026gated,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {A Fault-Tolerance Threshold for Gated Agentic Computation:
-                  Reliable Long-Horizon Work from Unreliable Executors},
-  year         = {2026},
-  doi          = {10.5281/zenodo.20820968},
-  url          = {https://doi.org/10.5281/zenodo.20820968},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026gg,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Generated Gates Inherit Their Generator's Blind Spots:
-                  A Diversity Floor for Self-Generated Verification},
-  year         = {2026},
-  doi          = {10.5281/zenodo.20837102},
-  url          = {https://doi.org/10.5281/zenodo.20837102},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026floor,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Escape, Cost, and Correlation at the Verification Floor
-                  of Gated Agentic Computation},
-  year         = {2026},
-  doi          = {10.5281/zenodo.21456783},
-  url          = {https://doi.org/10.5281/zenodo.21456783},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026psm,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Progressive Semantic Mechanization: Compiling Intellectual Work into
-                  Deterministic Programs with Typed Semantic Holes},
-  year         = {2026},
-  doi          = {10.5281/zenodo.23119225},
-  url          = {https://doi.org/10.5281/zenodo.23119225},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026fault,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Beyond Constant Fault Rates: Reliability Bounds for Gated Computation
-                  and Semantic Mechanization},
-  year         = {2026},
-  doi          = {10.5281/zenodo.23293740},
-  url          = {https://doi.org/10.5281/zenodo.23293740},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026risk,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Risk-Gated Mechanization: Severity, Verifiability, and Decisions
-                  Invariant to the Executor's Error Law},
-  year         = {2026},
-  doi          = {10.5281/zenodo.23324667},
-  url          = {https://doi.org/10.5281/zenodo.23324667},
-  note         = {Preprint; archived on Zenodo.}
-}
-
-@misc{matijasevic2026allocation,
-  author       = {Ivo Matija\v{s}evi\'c},
-  title        = {Allocation and Coordination under Scarce Resources: Admissible Routing,
-                  Prices, Review Sets, and Containment for Gated Work},
-  year         = {2026},
-  doi          = {10.5281/zenodo.23449199},
-  url          = {https://doi.org/10.5281/zenodo.23449199},
-  note         = {Preprint; archived on Zenodo.}
-}
-```
-
-> Reserved DOIs: `10.5281/zenodo.20820968` (paper 1), `10.5281/zenodo.20837102` (paper 2),
-> `10.5281/zenodo.21456783` (paper 3), `10.5281/zenodo.23119225` (paper 4), `10.5281/zenodo.23293740` (paper 5), `10.5281/zenodo.23324667` (paper 6), and `10.5281/zenodo.23449199` (paper 7). Each GitHub Release that Zenodo archives gets its own version
-> DOI; if Zenodo assigns a *concept* DOI (one that always resolves to the latest version), prefer that
-> for early "cite my work" use.
+Use the DOI for the paper you use. [Citation entries](docs/citations.md) contains
+all seven BibTeX records. [`CITATION.cff`](CITATION.cff) describes paper 1.
 
 ## License
 
